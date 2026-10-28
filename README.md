@@ -58,7 +58,19 @@ Portal digital hiperlocal e revista interativa (**Flipbook de 10 páginas**) des
 - **Imprimir o Cartaz com QR Code para a Vitrine**: Role até o final da página na seção **Mídia Kit & Parcerias Locais** e clique em **`🖨️ Imprimir Cartaz QR Code de Vitrine`**. Cole no caixa ou na vitrine da sua loja para os clientes escanearem com a câmera do celular.
 - **Compartilhar nos Grupos de Condomínios e Ruas**: Clique no botão **`📤`** no topo ou em **`📲 Enviar no Grupo`** para disparar o link da edição quinzenal diretamente no WhatsApp.
 
-### 3. Como Executar Localmente ou Ativar o GitHub Pages
+### 3. ⚙️ Para o Editor / Administrador (Central de Gestão Editorial & CMS)
+Clique no botão **`⚙️ Gestão / CMS`** no cabeçalho (ou no ícone **`⚙️ Gestão`** na barra inferior do celular) para abrir o painel administrativo completo com **9 módulos de gestão**:
+1. **🗞️ Edição & Capa**: Altere o número da edição quinzenal, o texto do Alerta Vermelho de Utilidade Pública no topo e a foto/texto da Reportagem de Capa.
+2. **🏪 Guia do Comércio**: Adicione, destaque (`★ Patrocinado`) ou exclua padarias, farmácias, pet shops, chaveiros e profissionais liberais.
+3. **🚨 Utilidade Pública**: Publique ou remova avisos urgentes de falta de água, obras nas ruas, vacinação no posto de saúde e segurança.
+4. **🎙️ Gente & Publis**: Cadastre novas histórias de moradores tradicionais, talentos locais ou matérias patrocinadas (*Publieditoriais*).
+5. **🏷️ Cupons & Ofertas**: Crie novos cupons copiáveis com código promocional e redirecionamento automático para o WhatsApp da loja.
+6. **📅 Agenda & Lazer**: Cadastre eventos culturais, feiras livres, festas da paróquia e jogos amadores.
+7. **📌 Classificados**: Modere ou publique anúncios de aluguel/venda de imóveis, vagas de emprego e adoção pet.
+8. **📖 Páginas Flipbook**: Edite os títulos, subtítulos e chamadas de cada uma das **10 páginas enxutas** da revista folheável mobile.
+9. **💰 Receita & Backup**: Controle os contratos publicitários da quinzena (Planos R\$ 49, R\$ 120 e R\$ 220), veja o faturamento total em tempo real, faça **Backup/Importação JSON** ou clique em **`⬇️ Baixar data.js Atualizado`** para substituir no GitHub com 1 clique.
+
+### 4. Como Executar Localmente ou Ativar o GitHub Pages
 ```bash
 # 1. Clonar o repositório
 git clone https://github.com/EberSantana/TobiasMagazine.git

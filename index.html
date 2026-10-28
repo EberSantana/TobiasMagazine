@@ -28,7 +28,7 @@
   <header class="site-header">
     <div class="header-inner">
       <div class="header-meta">
-        <span>📍 <strong>Edição #14 • Quinzenal</strong> • Leitura Mobile-First (10 Páginas)</span>
+        <span id="headerEditionMeta">📍 <strong>Edição #14 • Quinzenal</strong> • Leitura Mobile-First (10 Páginas)</span>
         <span class="edition-pill">📲 Distribuição Gratuita via WhatsApp & QR Code</span>
       </div>
 
@@ -41,12 +41,15 @@
         </a>
 
         <div class="header-actions">
-          <div class="mode-switcher" role="tablist" aria-label="Modo de Leitura">
+          <div class="mode-switcher" role="tablist" aria-label="Modo de Leitura e Gestão">
             <button id="modePortalBtn" class="mode-btn active" onclick="window.TobiasApp.switchMode('portal')">
               📰 Portal Web
             </button>
             <button id="modeFlipBtn" class="mode-btn" onclick="window.TobiasApp.switchMode('flipbook')">
               📖 Folhear (10 Pág)
+            </button>
+            <button id="modeAdminBtn" class="mode-btn" onclick="window.TobiasApp.switchMode('admin')">
+              ⚙️ Gestão / CMS
             </button>
           </div>
 
@@ -196,7 +199,7 @@
         </div>
 
         <div class="category-pills" role="tablist">
-          <button class="cat-pill active" onclick="window.TobiasApp.filterCategory('todos', this)">Todos (8)</button>
+          <button id="catCountAll" class="cat-pill active" onclick="window.TobiasApp.filterCategory('todos', this)">Todos (8)</button>
           <button class="cat-pill" onclick="window.TobiasApp.filterCategory('alimentacao', this)">🥖 Padarias & Mercados</button>
           <button class="cat-pill" onclick="window.TobiasApp.filterCategory('saude', this)">💊 Farmácias & Saúde</button>
           <button class="cat-pill" onclick="window.TobiasApp.filterCategory('pets', this)">🐾 Pet Shops</button>
@@ -397,6 +400,80 @@
 
   </main>
 
+  <!-- ========================================================================
+       MODO 3: PAINEL DE GESTÃO DA APLICAÇÃO & CMS EDITORIAL (ADMIN)
+       ======================================================================== -->
+  <section class="admin-wrapper" aria-label="Painel de Gestão Editorial da Tobias Magazine">
+    <div class="admin-header-banner">
+      <div>
+        <span class="tag-badge" style="background:var(--brand-gold); color:#181614;">Painel Administrativo & CMS Hiperlocal</span>
+        <h2 style="font-family:var(--font-serif); font-size:clamp(1.4rem, 3vw, 2rem); margin-top:6px;">
+          ⚙️ Central de Gestão Editorial — Tobias Magazine
+        </h2>
+        <p style="font-size:0.88rem; opacity:0.88; margin-top:4px;">
+          Gerencie a capa, alertas urgentes, comércios do guia, cupons, agenda, classificados, as 10 páginas do Flipbook e os anunciantes da quinzena.
+        </p>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="window.TobiasApp.exportDataJsFile()">
+          ⬇️ Baixar data.js (Publicar no GitHub)
+        </button>
+        <button class="btn btn-glass" onclick="window.TobiasApp.switchMode('portal')">
+          👁️ Ver Portal ao Vivo
+        </button>
+      </div>
+    </div>
+
+    <!-- Indicadores (KPIs) da Edição -->
+    <div id="adminKpis" class="admin-kpis"></div>
+
+    <!-- Layout Principal do CMS: Menu Lateral + Área de Formulários e Listagem -->
+    <div class="admin-layout">
+      <aside class="admin-sidebar" role="tablist" aria-label="Módulos de Gestão">
+        <button class="admin-tab-btn active" data-tab="edition" onclick="window.TobiasApp.switchAdminTab('edition')">
+          <span>🗞️ 1. Edição & Capa</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="directory" onclick="window.TobiasApp.switchAdminTab('directory')">
+          <span>🏪 2. Guia do Comércio</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="utility" onclick="window.TobiasApp.switchAdminTab('utility')">
+          <span>🚨 3. Utilidade Pública</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="people" onclick="window.TobiasApp.switchAdminTab('people')">
+          <span>🎙️ 4. Gente & Publis</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="promotions" onclick="window.TobiasApp.switchAdminTab('promotions')">
+          <span>🏷️ 5. Cupons & Ofertas</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="events" onclick="window.TobiasApp.switchAdminTab('events')">
+          <span>📅 6. Agenda & Lazer</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="classifieds" onclick="window.TobiasApp.switchAdminTab('classifieds')">
+          <span>📌 7. Classificados</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="flipbook" onclick="window.TobiasApp.switchAdminTab('flipbook')">
+          <span>📖 8. Páginas Flipbook</span>
+          <span>→</span>
+        </button>
+        <button class="admin-tab-btn" data-tab="monetization" onclick="window.TobiasApp.switchAdminTab('monetization')">
+          <span>💰 9. Receita & Backup</span>
+          <span>→</span>
+        </button>
+      </aside>
+
+      <div id="adminContentPanel" class="admin-content-panel">
+        <!-- Renderizado dinamicamente via app.js -->
+      </div>
+    </div>
+  </section>
+
   <!-- RODAPÉ EDITORIAL -->
   <footer style="background:var(--bg-surface); border-top:2px solid var(--border-strong); padding:32px 16px; text-align:center; font-size:0.84rem; color:var(--text-secondary);">
     <div style="max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:10px; align-items:center;">
@@ -404,7 +481,7 @@
         TOBIAS <span style="color:var(--brand-primary); font-style:italic;">Magazine</span>
       </div>
       <p style="max-width:620px;">
-        Jornal e Revista Digital de Bairro • Estrutura Mobile-First (Portal Indexável + Flipbook de 10 Páginas). Feito para aproximar moradores, valorizar o comércio local e facilitar o dia a dia da vizinhança.
+        Jornal e Revista Digital de Bairro • Estrutura Mobile-First (Portal Indexável + Flipbook de 10 Páginas + Painel de Gestão CMS). Feito para aproximar moradores, valorizar o comércio local e facilitar o dia a dia da vizinhança.
       </p>
       <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">
         Periodicidade Quinzenal • Edição #14 • Código Aberto no GitHub Pages
@@ -435,9 +512,9 @@
       <span class="nav-icon">🏷️</span>
       <span>Cupons</span>
     </button>
-    <button class="bottom-nav-btn" onclick="window.TobiasApp.switchMode('portal'); location.hash='#classificados';">
-      <span class="nav-icon">📌</span>
-      <span>Anúncios</span>
+    <button class="bottom-nav-btn" onclick="window.TobiasApp.switchMode('admin');">
+      <span class="nav-icon">⚙️</span>
+      <span>Gestão</span>
     </button>
   </nav>
 

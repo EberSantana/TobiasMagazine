@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Tobias Magazine — Jornal & Revista Digital do Nosso Bairro</title>
+  <meta name="description" content="Tobias Magazine: Guia do Comércio e Serviços no WhatsApp, Utilidade Pública, Agenda da Praça, Histórias de Moradores, Cupons de Desconto e Classificados do Bairro." />
+  <meta name="theme-color" content="#d94e1f" />
+
+  <!-- Google Fonts Editoriais (Fraunces + Plus Jakarta Sans + JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,700&family=JetBrains+Mono:wght@600;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- 1. BARRA DE UTILIDADE PÚBLICA AO VIVO -->
+  <div class="utility-ticker" role="region" aria-label="Alerta de Utilidade Pública">
+    <div class="utility-ticker-content">
+      <span class="badge-live">⚡ Utilidade Pública</span>
+      <span id="urgentTickerText">Carregando avisos do bairro...</span>
+    </div>
+  </div>
+
+  <!-- 2. CABEÇALHO EDITORIAL (PORTAL + MODO FLIPBOOK) -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-meta">
+        <span>📍 <strong>Edição #14 • Quinzenal</strong> • Leitura Mobile-First (10 Páginas)</span>
+        <span class="edition-pill">📲 Distribuição Gratuita via WhatsApp & QR Code</span>
+      </div>
+
+      <div class="header-main">
+        <a href="#" class="brand-logo" onclick="window.TobiasApp.switchMode('portal')">
+          <div class="brand-title">
+            TOBIAS <span class="accent">Magazine</span>
+          </div>
+          <span class="brand-subtitle">A Revista & Jornal Digital da Nossa Vizinhança</span>
+        </a>
+
+        <div class="header-actions">
+          <div class="mode-switcher" role="tablist" aria-label="Modo de Leitura">
+            <button id="modePortalBtn" class="mode-btn active" onclick="window.TobiasApp.switchMode('portal')">
+              📰 Portal Web
+            </button>
+            <button id="modeFlipBtn" class="mode-btn" onclick="window.TobiasApp.switchMode('flipbook')">
+              📖 Folhear (10 Pág)
+            </button>
+          </div>
+
+          <button class="icon-btn" id="themeToggleBtn" onclick="window.TobiasApp.toggleTheme()" title="Alternar tema claro/escuro" aria-label="Alternar tema">
+            🌙
+          </button>
+
+          <button class="icon-btn" onclick="window.TobiasApp.shareWhatsAppEdition()" title="Compartilhar no WhatsApp do Condomínio" aria-label="Compartilhar no WhatsApp">
+            📤
+          </button>
+        </div>
+      </div>
+
+      <!-- Menu de Pautas Locais -->
+      <nav class="nav-scroller" aria-label="Seções da Revista">
+        <a href="#guia-comercio" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🏪 Guia do Comércio</a>
+        <a href="#utilidade-publica" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚨 Utilidade Pública</a>
+        <a href="#gente-do-bairro" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🎙️ Gente do Bairro</a>
+        <a href="#achados-promocoes" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🏷️ Achados & Cupons</a>
+        <a href="#agenda-eventos" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📅 Agenda & Lazer</a>
+        <a href="#classificados" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📌 Classificados</a>
+        <a href="#anuncie-midia" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚀 Anuncie / QR Code</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MODO 1: FLIPBOOK INTERATIVO DE 10 PÁGINAS (ESTILO FLIPSNACK / FLIP HTML5)
+       ======================================================================== -->
+  <section class="flipbook-wrapper" aria-label="Revista Folheável de 10 Páginas">
+    <div class="flipbook-topbar">
+      <div>
+        <strong style="font-family:var(--font-serif); font-size:1.1rem;">📖 Modo Flipbook Mobile (10 Páginas Enxutas)</strong>
+        <p style="font-size:0.78rem; color:var(--text-muted);">Ideal para leitura rápida no smartphone sem cansar a vista.</p>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span id="flipPageCounter" style="font-family:var(--font-mono); font-size:0.82rem; font-weight:800;">Página 1 de 10</span>
+        <button class="btn btn-outline" style="padding:6px 12px; font-size:0.78rem;" onclick="window.TobiasApp.switchMode('portal')">
+          Voltar ao Portal Completo
+        </button>
+      </div>
+      <div class="flipbook-progress-bar">
+        <div id="flipProgressFill" class="flipbook-progress-fill" style="width:10%;"></div>
+      </div>
+    </div>
+
+    <div id="magazineStage" class="magazine-stage">
+      <!-- Renderizado dinamicamente via app.js -->
+    </div>
+
+    <div class="flip-controls">
+      <button class="btn btn-outline" onclick="window.TobiasApp.prevPage()">← Página Anterior</button>
+      <div id="flipPageDots" class="page-dots"></div>
+      <button class="btn btn-primary" onclick="window.TobiasApp.nextPage()">Próxima Página →</button>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODO 2: PORTAL EDITORIAL COMPLETO (INDEXÁVEL NO GOOGLE / SEO LOCAL)
+       ======================================================================== -->
+  <main class="main-container portal-view">
+
+    <!-- BARRA DE STORIES RÁPIDOS DO BAIRRO -->
+    <section aria-label="Destaques em 1 Minuto">
+      <div id="storiesBar" class="stories-bar"></div>
+    </section>
+
+    <!-- CAPA DA QUINZENA + RESUMO RÁPIDO -->
+    <section class="hero-grid">
+      <div id="heroCoverBox" class="cover-feature">
+        <!-- Preenchido via app.js -->
+      </div>
+
+      <aside class="hero-side-card">
+        <div>
+          <span class="section-kicker">Giro Rápido • Edição #14</span>
+          <h2 style="font-family:var(--font-serif); font-size:1.35rem; font-weight:800; margin-bottom:14px;">
+            O Que Você Precisa Saber Hoje no Bairro
+          </h2>
+
+          <div class="pulse-list">
+            <div class="pulse-item">
+              <div class="pulse-icon">🚰</div>
+              <div>
+                <span class="pulse-meta">Quinta • 08h às 14h</span>
+                <div class="pulse-title">Manutenção preventiva de água na Rua das Acácias</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-icon">🏥</div>
+              <div>
+                <span class="pulse-meta">Posto de Saúde (UBS)</span>
+                <div class="pulse-title">Vacinação e retirada de exames estendida até as 19h</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-icon">⚽</div>
+              <div>
+                <span class="pulse-meta">Sábado • 15h30</span>
+                <div class="pulse-title">Final da Copa Amadora no Campo da Associação</div>
+              </div>
+            </div>
+
+            <div class="pulse-item">
+              <div class="pulse-icon">🏷️</div>
+              <div>
+                <span class="pulse-meta">Economia Local</span>
+                <div class="pulse-title">4 Cupons ativos na Padaria, Pet Shop, Pizzaria e Ótica</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-subtle); padding:14px; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div>
+            <strong style="font-size:0.85rem; display:block;">Receba no WhatsApp da sua rua!</strong>
+            <span style="font-size:0.76rem; color:var(--text-muted);">Edição quinzenal leve e gratuita</span>
+          </div>
+          <button class="btn btn-whatsapp" style="padding:8px 14px; font-size:0.8rem;" onclick="window.TobiasApp.shareWhatsAppEdition()">
+            📲 Enviar no Grupo
+          </button>
+        </div>
+      </aside>
+    </section>
+
+    <!-- ======================================================================
+         PAUTA 1: GUIA DO COMÉRCIO E SERVIÇOS (PADARIAS, FARMÁCIAS, PROFISSIONAIS)
+         ====================================================================== -->
+    <section id="guia-comercio" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">01 • Apoie Quem Está Perto</span>
+          <h2 class="section-title">Guia do Comércio & Profissionais do Bairro</h2>
+          <p class="section-subtitle">Padarias, farmácias 24h, mercados, pet shops, chaveiros, eletricistas, encanadores e manicures a 1 clique no WhatsApp.</p>
+        </div>
+        <button class="btn btn-outline" onclick="window.TobiasApp.openSubmitModal('biz')">
+          + Cadastrar Meu Negócio
+        </button>
+      </div>
+
+      <div class="filter-toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="search" id="directorySearchInput" placeholder="Buscar padaria, farmácia, eletricista, chaveiro, manicure..." aria-label="Buscar no guia do bairro" />
+        </div>
+
+        <div class="category-pills" role="tablist">
+          <button class="cat-pill active" onclick="window.TobiasApp.filterCategory('todos', this)">Todos (8)</button>
+          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('alimentacao', this)">🥖 Padarias & Mercados</button>
+          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('saude', this)">💊 Farmácias & Saúde</button>
+          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('pets', this)">🐾 Pet Shops</button>
+          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('reparos', this)">🔑 Chaveiro & Reparos</button>
+          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('profissionais', this)">⚡ Profissionais Liberais</button>
+        </div>
+      </div>
+
+      <div id="directoryGrid" class="cards-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         PAUTA 2: NOTÍCIAS E UTILIDADE PÚBLICA
+         ====================================================================== -->
+    <section id="utilidade-publica" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">02 • Serviço ao Morador</span>
+          <h2 class="section-title">Notícias & Utilidade Pública</h2>
+          <p class="section-subtitle">Obras nas ruas, avisos de água e luz, horários do posto de saúde, coleta seletiva e segurança comunitária.</p>
+        </div>
+      </div>
+
+      <div class="utility-grid">
+        <div id="utilityNewsList"></div>
+
+        <aside class="utility-board">
+          <h3>📋 Quadro Fixo de Horários & Telefones Úteis</h3>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">
+            Salve nos favoritos do celular para consultar sempre que precisar:
+          </p>
+          <table class="schedule-table">
+            <tbody id="essentialScheduleBody"></tbody>
+          </table>
+          <div style="margin-top:16px; padding:12px; background:var(--bg-subtle); border-radius:8px; font-size:0.8rem;">
+            <strong>📢 Viu um buraco na rua ou lâmpada queimada?</strong>
+            <p style="margin-top:4px; color:var(--text-secondary);">Envie foto e localização para a redação da Tobias Magazine cobrarmos juntos a prefeitura.</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         PAUTA 3: HISTÓRIAS DE MORADORES (GENTE DO BAIRRO & PUBLIEDITORIAL)
+         ====================================================================== -->
+    <section id="gente-do-bairro" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">03 • Memória, Talentos & Novos Negócios</span>
+          <h2 class="section-title">Gente do Bairro & Publieditoriais</h2>
+          <p class="section-subtitle">Entrevistas com figuras tradicionais, jovens talentos da comunidade e histórias patrocinadas de quem acabou de abrir as portas.</p>
+        </div>
+      </div>
+
+      <div id="peopleStoriesGrid" class="stories-editorial-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         PAUTA 4: ACHADOS E PROMOÇÕES (CUPONS DOS LOJISTAS)
+         ====================================================================== -->
+    <section id="achados-promocoes" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">04 • Descontos Exclusivos para Vizinhos</span>
+          <h2 class="section-title">Achados & Promoções da Quinzena</h2>
+          <p class="section-subtitle">Copie o código do cupom ou clique para pedir direto no WhatsApp da loja com desconto garantido.</p>
+        </div>
+      </div>
+
+      <div id="promotionsGrid" class="coupons-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         PAUTA 5: AGENDA DE EVENTOS E LAZER
+         ====================================================================== -->
+    <section id="agenda-eventos" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">05 • Cultura, Esporte & Convivência</span>
+          <h2 class="section-title">Agenda de Eventos & Lazer no Bairro</h2>
+          <p class="section-subtitle">Feiras livres, festas da paróquia, eventos na praça, jogos de times amadores e cinema ao ar livre.</p>
+        </div>
+      </div>
+
+      <div id="eventsGrid" class="events-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         PAUTA 6: CLASSIFICADOS LOCAIS
+         ====================================================================== -->
+    <section id="classificados" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">06 • Negócios Entre Vizinhos</span>
+          <h2 class="section-title">Classificados Locais & Adoção Pet</h2>
+          <p class="section-subtitle">Compra, venda, aluguel de imóveis direto com proprietário, vagas de emprego no bairro e adoção responsável.</p>
+        </div>
+        <button class="btn btn-primary" onclick="window.TobiasApp.openSubmitModal('classified')">
+          + Publicar Classificado Grátis
+        </button>
+      </div>
+
+      <div id="classifiedsGrid" class="classifieds-grid"></div>
+    </section>
+
+    <!-- ======================================================================
+         HUB DE DISTRIBUIÇÃO, MONETIZAÇÃO & CARTAZ QR CODE PARA VITRINES
+         ====================================================================== -->
+    <section id="anuncie-midia" class="section-block">
+      <div class="monetization-banner">
+        <div>
+          <span class="tag-badge" style="background:var(--brand-gold); color:#181614;">Mídia Kit & Parcerias Locais</span>
+          <h2 style="font-family:var(--font-serif); font-size:clamp(1.5rem, 3vw, 2.2rem); margin:10px 0;">
+            Coloque Sua Loja ou Serviço no Celular de Todo o Bairro
+          </h2>
+          <p style="font-size:0.94rem; opacity:0.92; margin-bottom:16px;">
+            A <strong>Tobias Magazine</strong> é distribuída quinzenalmente nos grupos de WhatsApp dos condomínios, impulsionada por geolocalização no Instagram/Facebook (raio de 2km) e lida via QR Code no balcão das lojas parceiras.
+          </p>
+
+          <div class="pricing-tiers">
+            <div class="tier-box">
+              <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">Plano Guia & Rodapé</strong>
+              <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ 49 <span style="font-size:0.75rem; font-weight:400;">/ quinzena</span></div>
+              <p style="font-size:0.78rem; opacity:0.85;">Card com botão direto para seu WhatsApp + Cupom na aba de Promoções.</p>
+            </div>
+
+            <div class="tier-box">
+              <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">Destaque Página Inteira</strong>
+              <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ 120 <span style="font-size:0.75rem; font-weight:400;">/ quinzena</span></div>
+              <p style="font-size:0.78rem; opacity:0.85;">Banner no Flipbook de 10 páginas + Selo Destaque no topo do Guia.</p>
+            </div>
+
+            <div class="tier-box">
+              <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">Publieditorial + Reels</strong>
+              <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ 220 <span style="font-size:0.75rem; font-weight:400;">/ edição</span></div>
+              <p style="font-size:0.78rem; opacity:0.85;">Matéria contando a história da sua loja + Story em vídeo + Cartaz QR Code.</p>
+            </div>
+          </div>
+
+          <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="https://wa.me/5579999990000?text=Ol%C3%A1!%20Quero%20anunciar%20meu%20neg%C3%B3cio%20na%20pr%C3%B3xima%20edi%C3%A7%C3%A3o%20da%20Tobias%20Magazine!"
+               target="_blank" rel="noopener" class="btn btn-whatsapp">
+              💬 Falar com Comercial no WhatsApp
+            </a>
+            <button class="btn btn-glass" onclick="window.print()">
+              🖨️ Imprimir Cartaz QR Code de Vitrine
+            </button>
+          </div>
+        </div>
+
+        <!-- Cartaz Pronto para Imprimir e Colar na Vitrine -->
+        <div class="qr-poster-card">
+          <span style="background:#181614; color:#fff; font-size:0.68rem; font-weight:800; padding:3px 10px; border-radius:99px; text-transform:uppercase;">
+            Cartaz de Vitrine • Loja Parceira
+          </span>
+          <h3 style="font-family:var(--font-serif); font-size:1.35rem; font-weight:900; margin-top:8px;">
+            LEIA GRÁTIS A REVISTA DO NOSSO BAIRRO!
+          </h3>
+          <p style="font-size:0.8rem; color:#524d47; margin-top:4px;">
+            Aponte a câmera do celular para o QR Code abaixo e acesse ofertas, guia de serviços e notícias:
+          </p>
+
+          <!-- QR Code SVG Vetorial Limpo -->
+          <div class="qr-svg-box" aria-label="QR Code da Tobias Magazine">
+            <svg viewBox="0 0 100 100" width="100%" height="100%" fill="#181614">
+              <rect x="5" y="5" width="26" height="26" fill="none" stroke="#181614" stroke-width="6"/>
+              <rect x="13" y="13" width="10" height="10"/>
+              <rect x="69" y="5" width="26" height="26" fill="none" stroke="#181614" stroke-width="6"/>
+              <rect x="77" y="13" width="10" height="10"/>
+              <rect x="5" y="69" width="26" height="26" fill="none" stroke="#181614" stroke-width="6"/>
+              <rect x="13" y="77" width="10" height="10"/>
+              <rect x="40" y="8" width="6" height="6"/>
+              <rect x="52" y="8" width="6" height="12"/>
+              <rect x="40" y="20" width="6" height="12"/>
+              <rect x="46" y="38" width="12" height="6"/>
+              <rect x="10" y="42" width="18" height="6"/>
+              <rect x="34" y="46" width="8" height="16"/>
+              <rect x="50" y="50" width="14" height="8"/>
+              <rect x="72" y="42" width="18" height="6"/>
+              <rect x="78" y="54" width="12" height="12"/>
+              <rect x="42" y="70" width="12" height="6"/>
+              <rect x="60" y="68" width="8" height="18"/>
+              <rect x="40" y="82" width="14" height="10"/>
+              <rect x="74" y="76" width="18" height="8"/>
+              <rect x="82" y="88" width="10" height="6"/>
+            </svg>
+          </div>
+
+          <div style="font-family:var(--font-serif); font-weight:900; font-size:1.05rem; color:var(--brand-primary);">
+            TOBIAS MAGAZINE
+          </div>
+          <span style="font-size:0.72rem; color:#7a736b; font-weight:700;">
+            Sem instalar aplicativo • Direto no Celular
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ EDITORIAL -->
+  <footer style="background:var(--bg-surface); border-top:2px solid var(--border-strong); padding:32px 16px; text-align:center; font-size:0.84rem; color:var(--text-secondary);">
+    <div style="max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:10px; align-items:center;">
+      <div style="font-family:var(--font-serif); font-size:1.4rem; font-weight:900; color:var(--text-main);">
+        TOBIAS <span style="color:var(--brand-primary); font-style:italic;">Magazine</span>
+      </div>
+      <p style="max-width:620px;">
+        Jornal e Revista Digital de Bairro • Estrutura Mobile-First (Portal Indexável + Flipbook de 10 Páginas). Feito para aproximar moradores, valorizar o comércio local e facilitar o dia a dia da vizinhança.
+      </p>
+      <div style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);">
+        Periodicidade Quinzenal • Edição #14 • Código Aberto no GitHub Pages
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL REUTILIZÁVEL (STORIES, MATÉRIA DE CAPA E CADASTRO) -->
+  <div id="genericModal" class="modal-backdrop" onclick="if(event.target===this) window.TobiasApp.closeModal()">
+    <div class="modal-box" id="genericModalContent"></div>
+  </div>
+
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR (EXCLUSIVA PARA CELULAR / MOBILE-FIRST) -->
+  <nav class="bottom-nav" aria-label="Navegação Rápida no Celular">
+    <button class="bottom-nav-btn active" onclick="window.TobiasApp.switchMode('portal'); window.scrollTo({top:0, behavior:'smooth'});">
+      <span class="nav-icon">🏠</span>
+      <span>Capa</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="window.TobiasApp.switchMode('portal'); location.hash='#guia-comercio';">
+      <span class="nav-icon">🏪</span>
+      <span>Comércio</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="window.TobiasApp.switchMode('flipbook');">
+      <span class="nav-icon">📖</span>
+      <span>Folhear 10p</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="window.TobiasApp.switchMode('portal'); location.hash='#achados-promocoes';">
+      <span class="nav-icon">🏷️</span>
+      <span>Cupons</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="window.TobiasApp.switchMode('portal'); location.hash='#classificados';">
+      <span class="nav-icon">📌</span>
+      <span>Anúncios</span>
+    </button>
+  </nav>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

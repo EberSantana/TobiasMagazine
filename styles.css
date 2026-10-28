@@ -1607,3 +1607,114 @@ body.admin-active .admin-wrapper {
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ==========================================================================
+   ACERVO DE EDIÇÕES (BANCA DIGITAL — 6 EDIÇÕES QUINZENAIS)
+   ========================================================================== */
+.editions-shelf-bar {
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 16px;
+}
+
+.editions-shelf-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.editions-shelf-inner::-webkit-scrollbar {
+  display: none;
+}
+
+.edition-switch-pill {
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 99px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.edition-switch-pill:hover {
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+.edition-switch-pill.active {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.editions-stand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 18px;
+}
+
+.edition-cover-card {
+  background: var(--bg-surface);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.edition-cover-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.edition-cover-card.active-edition {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(217, 78, 31, 0.18);
+}
+
+.edition-cover-thumb {
+  height: 195px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  color: #fff;
+}
+
+.edition-cover-thumb::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 13, 11, 0.92) 8%, rgba(15, 13, 11, 0.25) 60%, rgba(15, 13, 11, 0.45) 100%);
+}
+
+.edition-cover-thumb > * {
+  position: relative;
+  z-index: 1;
+}
+
+.edition-cover-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}

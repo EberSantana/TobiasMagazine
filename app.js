@@ -138,6 +138,10 @@
           if (!parsed.sponsors) parsed.sponsors = getDefaultSponsors();
           if (!parsed.roles) parsed.roles = getDefaultRoles();
           if (!parsed.users) parsed.users = getDefaultUsers();
+          if (!parsed.editionsCatalog || parsed.editionsCatalog.length < 6) {
+            parsed.editionsCatalog = JSON.parse(JSON.stringify(window.TOBIAS_DATA.editionsCatalog || []));
+          }
+          if (!parsed.activeEditionId) parsed.activeEditionId = "ed-14";
           return parsed;
         }
       }
@@ -148,6 +152,7 @@
     clone.sponsors = getDefaultSponsors();
     clone.roles = getDefaultRoles();
     clone.users = getDefaultUsers();
+    clone.activeEditionId = "ed-14";
     return clone;
   }
 
@@ -198,6 +203,7 @@
   }
 
   function renderAll() {
+    renderEditionsStand();
     renderTickerAndHero();
     renderStoriesBar();
     renderDirectory();
@@ -239,6 +245,76 @@
   }
 
   // --------------------------------------------------------------------------
+  // BANCA DIGITAL DE EDIÇÕES (6 EDIÇÕES QUINZENAIS #14 A #19)
+  // --------------------------------------------------------------------------
+  function renderEditionsStand() {
+    const catalog = STATE.editionsCatalog || [];
+    const activeId = STATE.activeEditionId || "ed-14";
+
+    // 1. Barra horizontal no topo
+    const topShelf = document.getElementById("editionsTopShelf");
+    if (topShelf) {
+      topShelf.innerHTML = catalog
+        .map(
+          (ed) => `
+        <button class="edition-switch-pill ${ed.id === activeId ? "active" : ""}"
+                onclick="window.TobiasApp.selectEdition('${ed.id}')">
+          🗞️ ${ed.shortLabel}
+        </button>
+      `
+        )
+        .join("");
+    }
+
+    // 2. Grade de Capas da Banca Digital
+    const standGrid = document.getElementById("editionsStandGrid");
+    if (standGrid) {
+      standGrid.innerHTML = catalog
+        .map((ed) => {
+          const isCurrent = ed.id === activeId;
+          return `
+          <article class="edition-cover-card ${isCurrent ? "active-edition" : ""}">
+            <div class="edition-cover-thumb" style="background-image:url('${ed.coverStory.image}')">
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                <span class="tag-badge" style="background:${isCurrent ? "var(--brand-primary)" : "rgba(0,0,0,0.65)"};">
+                  ${isCurrent ? "● Lendo Agora" : ed.badge}
+                </span>
+                <span style="font-family:var(--font-mono); font-size:0.7rem; background:rgba(0,0,0,0.6); padding:3px 8px; border-radius:99px;">
+                  ${ed.periodicity}
+                </span>
+              </div>
+              <div>
+                <div style="font-family:var(--font-mono); font-size:0.72rem; color:#fcd34d; font-weight:800;">
+                  ${ed.number}
+                </div>
+                <h3 style="font-family:var(--font-serif); font-size:1.08rem; font-weight:800; line-height:1.2; margin-top:2px;">
+                  ${ed.coverStory.title}
+                </h3>
+              </div>
+            </div>
+            <div class="edition-cover-body">
+              <p style="font-size:0.83rem; color:var(--text-secondary);">
+                ${ed.coverStory.lead}
+              </p>
+              <div style="display:flex; gap:8px; margin-top:auto; padding-top:8px; border-top:1px solid var(--border-color);">
+                <button class="btn ${isCurrent ? "btn-primary" : "btn-outline"}" style="flex:1; padding:8px 10px; font-size:0.78rem;"
+                        onclick="window.TobiasApp.selectEdition('${ed.id}', 'portal')">
+                  ${isCurrent ? "✓ Edição Ativa na Capa" : "📰 Carregar no Portal"}
+                </button>
+                <button class="btn btn-outline" style="padding:8px 10px; font-size:0.78rem;"
+                        onclick="window.TobiasApp.selectEdition('${ed.id}', 'flipbook')" title="Folhear as 10 páginas desta edição">
+                  📖 Folhear
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+        })
+        .join("");
+    }
+  }
+
+  // --------------------------------------------------------------------------
   // TICKER & HERO DE CAPA
   // --------------------------------------------------------------------------
   function renderTickerAndHero() {
@@ -248,6 +324,33 @@
     const editionMetaEl = document.getElementById("headerEditionMeta");
     if (editionMetaEl) {
       editionMetaEl.innerHTML = `📍 <strong>${STATE.edition.number} • ${STATE.edition.periodicity}</strong> • Leitura Mobile-First (${STATE.flipbookPages.length} Páginas)`;
+    }
+
+    const pulseKicker = document.getElementById("heroPulseKicker");
+    if (pulseKicker) {
+      pulseKicker.textContent = `Giro Rápido • ${STATE.edition.number}`;
+    }
+
+    const pulseListEl = document.getElementById("heroPulseList");
+    if (pulseListEl) {
+      const activeCatEd = (STATE.editionsCatalog || []).find((e) => e.id === STATE.activeEditionId);
+      const pulses =
+        (activeCatEd && activeCatEd.quickPulse) ||
+        (STATE.editionsCatalog && STATE.editionsCatalog[0] && STATE.editionsCatalog[0].quickPulse) ||
+        [];
+      pulseListEl.innerHTML = pulses
+        .map(
+          (p) => `
+        <div class="pulse-item">
+          <div class="pulse-icon">${p.icon}</div>
+          <div>
+            <span class="pulse-meta">${p.meta}</span>
+            <div class="pulse-title">${p.title}</div>
+          </div>
+        </div>
+      `
+        )
+        .join("");
     }
 
     const coverEl = document.getElementById("heroCoverBox");
@@ -1850,6 +1953,34 @@
       }
       currentAdminTab = tabName;
       renderAdminDashboard();
+    },
+
+    selectEdition(editionId, targetMode) {
+      const ed = (STATE.editionsCatalog || []).find((e) => e.id === editionId);
+      if (!ed) return;
+      STATE.activeEditionId = ed.id;
+      STATE.edition.number = ed.number;
+      STATE.edition.periodicity = ed.periodicity;
+      STATE.edition.urgentTicker = ed.urgentTicker;
+      STATE.edition.coverStory = JSON.parse(JSON.stringify(ed.coverStory));
+
+      // Sincroniza também a Capa e a Página 4 do Flipbook com a edição escolhida
+      if (STATE.flipbookPages && STATE.flipbookPages.length >= 4) {
+        STATE.flipbookPages[0].section = `CAPA • ${ed.number.toUpperCase()}`;
+        STATE.flipbookPages[0].subtitle = ed.coverStory.title;
+        STATE.flipbookPages[0].highlight = ed.coverStory.lead;
+        STATE.flipbookPages[3].title = ed.coverStory.title;
+        STATE.flipbookPages[3].subtitle = ed.coverStory.kicker;
+        STATE.flipbookPages[3].highlight = ed.coverStory.lead;
+      }
+
+      saveState();
+      if (targetMode === "flipbook") {
+        currentFlipPage = 1;
+        window.TobiasApp.switchMode("flipbook");
+      } else {
+        window.TobiasApp.switchMode("portal");
+      }
     },
 
     toggleRolePermission(roleId, permId) {

@@ -65,6 +65,7 @@
 
       <!-- Menu de Pautas Locais -->
       <nav class="nav-scroller" aria-label="Seções da Revista">
+        <a href="#acervo-edicoes" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📚 Acervo (6 Edições)</a>
         <a href="#guia-comercio" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🏪 Guia do Comércio</a>
         <a href="#utilidade-publica" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚨 Utilidade Pública</a>
         <a href="#gente-do-bairro" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🎙️ Gente do Bairro</a>
@@ -75,6 +76,16 @@
       </nav>
     </div>
   </header>
+
+  <!-- BARRA DE SELEÇÃO RÁPIDA DAS 6 EDIÇÕES QUINZENAIS (#14 A #19) -->
+  <div class="editions-shelf-bar" role="region" aria-label="Seletor de Edições Quinzenais">
+    <div class="editions-shelf-inner">
+      <span style="font-family:var(--font-mono); font-size:0.73rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; flex-shrink:0;">
+        📚 Banca Digital (6 Edições):
+      </span>
+      <div id="editionsTopShelf" style="display:flex; gap:8px;"></div>
+    </div>
+  </div>
 
   <!-- ========================================================================
        MODO 1: FLIPBOOK INTERATIVO DE 10 PÁGINAS (ESTILO FLIPSNACK / FLIP HTML5)
@@ -125,43 +136,13 @@
 
       <aside class="hero-side-card">
         <div>
-          <span class="section-kicker">Giro Rápido • Edição #14</span>
+          <span id="heroPulseKicker" class="section-kicker">Giro Rápido • Edição #14</span>
           <h2 style="font-family:var(--font-serif); font-size:1.35rem; font-weight:800; margin-bottom:14px;">
-            O Que Você Precisa Saber Hoje no Bairro
+            O Que Você Precisa Saber Nesta Edição
           </h2>
 
-          <div class="pulse-list">
-            <div class="pulse-item">
-              <div class="pulse-icon">🚰</div>
-              <div>
-                <span class="pulse-meta">Quinta • 08h às 14h</span>
-                <div class="pulse-title">Manutenção preventiva de água na Rua das Acácias</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-icon">🏥</div>
-              <div>
-                <span class="pulse-meta">Posto de Saúde (UBS)</span>
-                <div class="pulse-title">Vacinação e retirada de exames estendida até as 19h</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-icon">⚽</div>
-              <div>
-                <span class="pulse-meta">Sábado • 15h30</span>
-                <div class="pulse-title">Final da Copa Amadora no Campo da Associação</div>
-              </div>
-            </div>
-
-            <div class="pulse-item">
-              <div class="pulse-icon">🏷️</div>
-              <div>
-                <span class="pulse-meta">Economia Local</span>
-                <div class="pulse-title">4 Cupons ativos na Padaria, Pet Shop, Pizzaria e Ótica</div>
-              </div>
-            </div>
+          <div id="heroPulseList" class="pulse-list">
+            <!-- Preenchido dinamicamente conforme a edição selecionada (#14 a #19) -->
           </div>
         </div>
 
@@ -175,6 +156,21 @@
           </button>
         </div>
       </aside>
+    </section>
+
+    <!-- ======================================================================
+         BANCA DIGITAL: ACERVO DAS 6 EDIÇÕES QUINZENAIS (#14 A #19)
+         ====================================================================== -->
+    <section id="acervo-edicoes" class="section-block">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">00 • Banca Digital do Bairro</span>
+          <h2 class="section-title">Acervo de Edições Quinzenais (6 Edições Publicadas)</h2>
+          <p class="section-subtitle">Clique em qualquer edição abaixo para carregar sua Capa, Alerta Urgente, Giro Rápido e Folhear a Revista correspondente no celular.</p>
+        </div>
+      </div>
+
+      <div id="editionsStandGrid" class="editions-stand-grid"></div>
     </section>
 
     <!-- ======================================================================

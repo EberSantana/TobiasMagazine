@@ -34,8 +34,15 @@ Portal digital hiperlocal e revista interativa (**Flipbook de 10 páginas**) des
 
 ---
 
-## 📖 Duplo Formato: Portal SEO + Flipbook de 10 Páginas
+## 📖 Duplo Formato + Banca Digital com 6 Edições Quinzenais (#14 a #19)
 
+- **📚 Banca Digital de Edições (Seletor Rápido no Topo e Acervo Visual)**:
+  - **Edição #14**: *40 Anos de Pão Quente e Prosa: A História da Padaria Seu Tobias*
+  - **Edição #15**: *Praça Central Renovada: Iluminação 100% LED, Pista de Caminhada e Área Pet*
+  - **Edição #16**: *Especial Gastronomia Local: Do Acarajé da Dona Neide à Pizza Artesanal*
+  - **Edição #17**: *Guia da Saúde & Bem-Estar: Grupo “Manhã Feliz” Reúne 80 Moradores na Praça*
+  - **Edição #18**: *Especial Natal no Comércio: Campanha Vizinho Premiado e Horário Ampliado*
+  - **Edição #19**: *Edição de Aniversário: As 10 Grandes Vitórias do Bairro e Metas para o Ano II*
 - **Modo Portal Web (CMS / SEO Local)**: Estrutura semântica completa para que as matérias e comércios sejam encontrados no Google e compartilhados com facilidade.
 - **Modo Revista Folheável (Flipbook de 10 Páginas)**: Seguindo o padrão ideal de 8 a 12 páginas enxutas para não cansar a leitura no smartphone, o leitor pode folhear página a página com barra de progresso e atalhos para WhatsApp.
 - **Kit de Distribuição e Monetização Incluso**:

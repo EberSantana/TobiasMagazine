@@ -494,3 +494,160 @@ window.TOBIAS_DATA = {
     }
   ]
 };
+
+
+// ==========================================================================
+// ACERVO COMPLETO DE EDIÇÕES (BANCA DIGITAL — 6 EDIÇÕES QUINZENAIS #14 A #19)
+// ==========================================================================
+window.TOBIAS_DATA.editionsCatalog = [
+  {
+    id: "ed-14",
+    number: "Edição #14 • Ano I",
+    shortLabel: "Ed. #14 • 40 Anos Padaria",
+    periodicity: "1ª Quinzena • Outubro",
+    badge: "Edição Histórica",
+    urgentTicker: "ALERTA DE UTILIDADE PÚBLICA: Manutenção preventiva na rede de água da Rua Principal nesta quinta-feira (08h às 14h). Posto de Saúde com vacinação estendida até 19h.",
+    quickPulse: [
+      { icon: "🚰", meta: "Quinta • 08h às 14h", title: "Manutenção preventiva de água na Rua das Acácias" },
+      { icon: "🏥", meta: "Posto de Saúde (UBS)", title: "Vacinação e retirada de exames estendida até as 19h" },
+      { icon: "⚽", meta: "Sábado • 15h30", title: "Final da Copa Amadora no Campo da Associação" },
+      { icon: "🏷️", meta: "Economia Local", title: "4 Cupons ativos na Padaria, Pet Shop, Pizzaria e Ótica" }
+    ],
+    coverStory: {
+      kicker: "Reportagem de Capa • Gente do Bairro",
+      readingTime: "2 min de leitura",
+      title: "40 Anos de Pão Quente e Prosa: Como Seu Tobias Transformou a Esquina no Coração do Bairro",
+      lead: "Da primeira fornada a lenha em 1986 até os pedidos pelo WhatsApp hoje: conheça a história da padaria que viu três gerações de vizinhos crescerem.",
+      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1200&q=80",
+      fullText: `
+        <p>Quem passa pela Praça Central às 5h30 da manhã já conhece o perfume inconfundível. Há exatos 40 anos, Seu Antônio Tobias abria as portas da primeira padaria artesanal do bairro, quando muitas ruas ainda eram de terra batida.</p>
+        <p style="margin-top:12px;"><strong>"Aqui nunca foi só vender pão. A gente guardava a chave do vizinho, anotava recado no caderno de fiado e comemorava cada aprovação de vestibular dos meninos da rua"</strong>, conta Seu Tobias, hoje trabalhando ao lado da neta Mariana, responsável por modernizar o atendimento via WhatsApp.</p>
+      `
+    }
+  },
+  {
+    id: "ed-15",
+    number: "Edição #15 • Ano I",
+    shortLabel: "Ed. #15 • Nova Praça & LED",
+    periodicity: "2ª Quinzena • Outubro",
+    badge: "Obras & Lazer",
+    urgentTicker: "UTILIDADE PÚBLICA: Nova iluminação 100% LED concluída em 12 ruas do bairro! Quadra Poliesportiva e Parquinho Infantil serão reinaugurados neste sábado às 16h.",
+    quickPulse: [
+      { icon: "💡", meta: "Segurança Noturna", title: "140 novas luminárias de LED instaladas nas vias principais" },
+      { icon: "🛝", meta: "Sábado • 16h00", title: "Inauguração do Parquinho de Madeira Ecológica na Praça" },
+      { icon: "🐕", meta: "Domingo • 09h às 13h", title: "Mutirão de Vacinação Antirrábica Gratuita ao lado da Igreja" },
+      { icon: "🥖", meta: "Festival Gastronômico", title: "Rota do Pastel & Caldo de Cana com 8 barracas premiadas" }
+    ],
+    coverStory: {
+      kicker: "Capa • Conquista dos Moradores",
+      readingTime: "3 min de leitura",
+      title: "Praça Central Renovada: Iluminação em LED, Pista de Caminhada e Novo Espaço para as Famílias",
+      lead: "Após abaixo-assinado organizado pela Associação de Moradores, praça ganha academia ao ar livre, área pet cercada e Wi-Fi público gratuito.",
+      image: "https://images.unsplash.com/photo-1519331379826-f10be5486c6f?auto=format&fit=crop&w=1200&q=80",
+      fullText: `
+        <p>A antiga praça escura ficou no passado. Graças à mobilização comunitária e às reuniões mensais da Associação de Moradores, a Praça Central recebeu 32 refletores de LED, piso tátil, bancos novos e uma área exclusiva para cães.</p>
+        <p style="margin-top:12px;"><strong>"Antes as famílias voltavam para casa às 18h. Agora temos idosos caminhando às 21h, crianças de patins e as barracas de lanche vendendo o dobro"</strong>, comemora Dona Lurdes, presidente da comissão de obras do bairro.</p>
+      `
+    }
+  },
+  {
+    id: "ed-16",
+    number: "Edição #16 • Ano I",
+    shortLabel: "Ed. #16 • Gastronomia Local",
+    periodicity: "1ª Quinzena • Novembro",
+    badge: "Especial Sabores",
+    urgentTicker: "AGENDA DO BAIRRO: 1º Circuito Gastronômico de Rua acontece sexta e sábado na Avenida Principal! Trânsito desviado entre 18h e 23h.",
+    quickPulse: [
+      { icon: "🍕", meta: "Sexta e Sábado", title: "12 restaurantes e lanchonetes do bairro com pratos a R$ 19,90" },
+      { icon: "🎸", meta: "Palco da Praça • 20h", title: "Show acústico com bandas formadas por jovens do bairro" },
+      { icon: "♻️", meta: "Coleta Seletiva", title: "Novo ecoponto de óleo de cozinha usado no Mercadinho Bom Vizinho" },
+      { icon: "💼", meta: "Emprego Local", title: "Comércio do bairro abre 18 vagas temporárias para o fim de ano" }
+    ],
+    coverStory: {
+      kicker: "Especial Gastronomia • Orgulho da Terra",
+      readingTime: "2 min de leitura",
+      title: "Do Acarajé da Dona Neide à Pizza Artesanal: Os Sabores que Fazem Nosso Bairro Famoso na Cidade",
+      lead: "Mapeamos os 10 quitutes mais pedidos no delivery local e a história das famílias que transformaram receitas de vó em negócios de sucesso.",
+      image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
+      fullText: `
+        <p>Você não precisa atravessar a cidade para comer bem. Nosso bairro reúne desde o tradicional bolinho de feira frito na hora até hambúrguer artesanal na brasa e confeitaria fina para festas.</p>
+        <p style="margin-top:12px;">Nesta edição especial da <em>Tobias Magazine</em>, conversamos com Dona Neide (há 22 anos no mesmo ponto da avenida) e com os jovens chefs que criaram o <strong>1º Circuito Gastronômico do Bairro</strong>, movimentando a economia local e gerando empregos para os próprios vizinhos.</p>
+      `
+    }
+  },
+  {
+    id: "ed-17",
+    number: "Edição #17 • Ano I",
+    shortLabel: "Ed. #17 • Saúde & Bem-Estar",
+    periodicity: "2ª Quinzena • Novembro",
+    badge: "Guia da Saúde",
+    urgentTicker: "SAÚDE NA COMUNIDADE: Carreta da Saúde estaciona na Praça Central de terça a sexta (08h às 17h) com exames gratuitos de vista, mamografia e odontologia.",
+    quickPulse: [
+      { icon: "🩺", meta: "Terça a Sexta", title: "150 fichas diárias para check-up gratuito na Carreta da Saúde" },
+      { icon: "🏃", meta: "Terças e Quintas • 06h", title: "Grupo de Corrida e Funcional gratuito com Prof. Henrique na Praça" },
+      { icon: "🦟", meta: "Combate à Dengue", title: "Agentes de endemias visitam as quadras 04 a 12 nesta semana" },
+      { icon: "💊", meta: "Farmácia Popular", title: "Lista atualizada de medicamentos gratuitos com receita do SUS" }
+    ],
+    coverStory: {
+      kicker: "Qualidade de Vida • Terceira Idade Ativa",
+      readingTime: "3 min de leitura",
+      title: "Grupo “Manhã Feliz” Reúne 80 Moradores para Alongamento, Dança e Café Comunitário na Praça",
+      lead: "Criado por profissionais de educação física e enfermeiros moradores do bairro, projeto reduziu casos de hipertensão e solidão entre os idosos.",
+      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=1200&q=80",
+      fullText: `
+        <p>Toda terça e quinta-feira, pontualmente às 06h15 da manhã, a Praça Central se transforma em uma grande roda de energia positiva. O projeto voluntário <strong>Manhã Feliz</strong> começou com apenas 6 vizinhas e hoje atende mais de 80 moradores de todas as idades.</p>
+        <p style="margin-top:12px;"><strong>"Meu médico diminuiu metade dos meus remédios de pressão depois que comecei a caminhar e rir com as amigas aqui na praça"</strong>, relata Seu Oswaldo, de 74 anos.</p>
+      `
+    }
+  },
+  {
+    id: "ed-18",
+    number: "Edição #18 • Ano I",
+    shortLabel: "Ed. #18 • Natal no Comércio",
+    periodicity: "1ª Quinzena • Dezembro",
+    badge: "Especial Natal",
+    urgentTicker: "NATAL NO BAIRRO: Comércio local funciona em horário ampliado até as 21h a partir desta semana! Compre no bairro e concorra a 5 vales-compra de R$ 500.",
+    quickPulse: [
+      { icon: "🎄", meta: "Sábado • 18h30", title: "Chegada do Papai Noel e acendimento das luzes da Paróquia" },
+      { icon: "🎁", meta: "Campanha Compre Aqui", title: "A cada R$ 30 nas lojas parceiras, ganhe 1 cupom para o sorteio" },
+      { icon: "🍲", meta: "Natal Solidário", title: "Arrecadação de alimentos na Padaria Seu Tobias e Mercadinho" },
+      { icon: "🛡️", meta: "Operação Fim de Ano", title: "Reforço no patrulhamento comercial das 14h às 22h" }
+    ],
+    coverStory: {
+      kicker: "Economia Criativa • Natal Iluminado",
+      readingTime: "2 min de leitura",
+      title: "Por Que Comprar os Presentes de Natal no Nosso Bairro Faz Toda a Região Crescer?",
+      lead: "Mais de 40 lojas e artesãos locais prepararam kits de presentes a partir de R$ 25, entrega grátis no mesmo dia e sorteio de prêmios na praça.",
+      image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=1200&q=80",
+      fullText: `
+        <p>Sem enfrentar trânsito pesado ou filas de estacionamento de shopping: neste fim de ano, os comerciantes do nosso bairro se uniram na campanha <strong>Natal Vizinho Premiado</strong>.</p>
+        <p style="margin-top:12px;">Cada real gasto na padaria, na loja de roupas, no salão de beleza ou no pet shop da nossa rua permanece circulando na comunidade, mantendo empregos dos jovens do bairro e patrocinando a decoração natalina da nossa praça.</p>
+      `
+    }
+  },
+  {
+    id: "ed-19",
+    number: "Edição #19 • Ano II",
+    shortLabel: "Ed. #19 • Retrospectiva & Metas",
+    periodicity: "2ª Quinzena • Dezembro / Janeiro",
+    badge: "Edição de Aniversário",
+    urgentTicker: "ESPECIAL FIM DE ANO: Confira os horários especiais das padarias, mercados e farmácias no feriado e as 10 maiores conquistas do nosso bairro neste ano!",
+    quickPulse: [
+      { icon: "🏆", meta: "Retrospectiva Comunitária", title: "Recapeamento de 8 ruas, Praça em LED e Horta Comunitária" },
+      { icon: "📚", meta: "Volta às Aulas", title: "Feirão de Troca de Livros Didáticos e Uniformes no Salão Paroquial" },
+      { icon: "🌧️", meta: "Defesa Civil • Verão", title: "Limpeza preventiva de bueiros e poda de árvores concluída" },
+      { icon: "🚀", meta: "Ano II da Revista", title: "Tobias Magazine ultrapassa 12 mil leitores no WhatsApp do bairro" }
+    ],
+    coverStory: {
+      kicker: "Edição Especial • Balanço & Futuro",
+      readingTime: "3 min de leitura",
+      title: "As 10 Grandes Vitórias do Nosso Bairro e os Projetos que Vêm por Aí no Novo Ano",
+      lead: "União entre moradores, comerciantes e associação provou que um bairro organizado conquista segurança, lazer e valorização para todos.",
+      image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=80",
+      fullText: `
+        <p>Fechamos o ciclo com motivos de sobra para celebrar. Em apenas um ano de mobilização e comunicação direta pela <em>Tobias Magazine</em>, vimos nossa praça ganhar vida nova, mais de 90 pequenos negócios locais aumentarem suas vendas pelo WhatsApp e dezenas de animais resgatados encontrarem um lar nos nossos Classificados.</p>
+        <p style="margin-top:12px;">Para o próximo ano, a meta já está traçada: implantar a <strong>Biblioteca Comunitária Digital</strong>, ampliar a feira de orgânicos para duas vezes por semana e continuar contando a história de cada morador que faz o nosso bairro único.</p>
+      `
+    }
+  }
+];

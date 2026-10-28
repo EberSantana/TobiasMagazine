@@ -68,7 +68,7 @@
 
       <!-- Menu de Pautas Locais -->
       <nav class="nav-scroller h-scroll" aria-label="Seções da Revista">
-        <a href="#acervo-edicoes" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📚 Acervo (6 Edições)</a>
+        <a href="#acervo-edicoes" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📚 Acervo (<span data-edition-count>6</span> Edições)</a>
         <a href="#guia-comercio" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🏪 Guia do Comércio</a>
         <a href="#utilidade-publica" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚨 Utilidade Pública</a>
         <a href="#gente-do-bairro" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🎙️ Gente do Bairro</a>
@@ -82,11 +82,10 @@
 
   <!-- BARRA DE SELEÇÃO RÁPIDA DAS 6 EDIÇÕES QUINZENAIS (#14 A #19) -->
   <div class="editions-shelf-bar" role="region" aria-label="Seletor de Edições Quinzenais">
-    <div class="editions-shelf-inner h-scroll">
-      <span class="shelf-label" style="font-family:var(--font-sans); font-size:0.72rem; font-weight:800; letter-spacing:0.06em; color:var(--text-muted); text-transform:uppercase; flex-shrink:0; display:inline-flex; align-items:center; gap:6px;">
-        📚 Banca Digital (6 Edições):
-      </span>
-      <div id="editionsTopShelf" style="display:flex; gap:8px;"></div>
+    <div class="editions-shelf-inner">
+      <span class="shelf-label">📚 Banca Digital:</span>
+      <!-- Mostra só as edições que cabem inteiras + botão "Todas as edições (N)" (app.js → fitEditionsShelf) -->
+      <div id="editionsTopShelf" class="editions-top-shelf"></div>
     </div>
   </div>
 
@@ -168,7 +167,7 @@
       <div class="section-header">
         <div>
           <span class="section-kicker">00 • Banca Digital do Bairro</span>
-          <h2 class="section-title">Acervo de Edições Quinzenais (6 Edições Publicadas)</h2>
+          <h2 class="section-title">Acervo de Edições Quinzenais (<span data-edition-count>6</span> Edições Publicadas)</h2>
           <p class="section-subtitle">Clique em qualquer edição abaixo para carregar sua Capa, Alerta Urgente, Giro Rápido e Folhear a Revista correspondente no celular.</p>
         </div>
       </div>

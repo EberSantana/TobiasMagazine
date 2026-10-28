@@ -2086,9 +2086,85 @@ body.admin-active .admin-wrapper {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 10px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  gap: 12px;
+  min-width: 0;
+}
+
+.shelf-label {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* Só mostra edições inteiras: o que não cabe vai para "Todas as edições (N)" */
+.editions-top-shelf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.edition-switch-pill[hidden] {
+  display: none !important;
+}
+
+/* durante a medição todos ficam no tamanho natural */
+.editions-top-shelf.measuring .edition-switch-pill {
+  flex-shrink: 0 !important;
+}
+
+.edition-switch-pill {
+  max-width: 100%;
+}
+
+.edition-switch-pill .pill-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.edition-switch-pill.active {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.edition-switch-pill.shelf-more {
+  margin-left: auto;
+  text-decoration: none;
+  background: transparent;
+  border-color: transparent;
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+.shelf-more .more-short {
+  display: none;
+}
+@media (max-width: 520px) {
+  .shelf-more .more-long {
+    display: none;
+  }
+  .shelf-more .more-short {
+    display: inline;
+  }
+  .edition-switch-pill.shelf-more {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+.edition-switch-pill.shelf-more:hover {
+  background: var(--brand-primary-soft);
+  border-color: transparent;
 }
 .editions-shelf-inner::-webkit-scrollbar {
   display: none;

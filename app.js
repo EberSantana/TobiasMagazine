@@ -311,6 +311,55 @@
     setupHorizontalScrollers();
   });
 
+  // Banca de edições do topo: exibe apenas as edições que cabem inteiras na
+  // largura disponível e esconde o restante atrás do botão "Todas (N)".
+  // Funciona igual com 6 ou 60 edições — nenhum botão fica cortado.
+  function fitEditionsShelf() {
+    const shelf = document.getElementById("editionsTopShelf");
+    if (!shelf || !shelf.offsetParent) return;
+    const pills = Array.from(shelf.querySelectorAll(".edition-switch-pill:not(.shelf-more)"));
+    const more = shelf.querySelector(".shelf-more");
+    if (!more) return;
+    pills.forEach((p) => (p.hidden = false));
+    more.hidden = false;
+    shelf.classList.add("measuring");
+    const gap = parseFloat(getComputedStyle(shelf).columnGap) || 8;
+    const avail = shelf.clientWidth;
+    const moreW = more.offsetWidth + gap;
+    let used = 0;
+    let shown = 0;
+    pills.forEach((p, i) => {
+      const w = p.offsetWidth + gap;
+      const isLast = i === pills.length - 1;
+      const need = used + w + (isLast ? 0 : moreW);
+      // A edição ativa (primeira) sempre aparece; o texto dela encurta com "…" se preciso.
+      if (i === 0 || (shown === i && need <= avail)) {
+        used += w;
+        shown++;
+      } else {
+        p.hidden = true;
+      }
+    });
+    more.hidden = shown === pills.length;
+    shelf.classList.remove("measuring");
+  }
+
+  let shelfFitQueued = false;
+  function scheduleShelfFit() {
+    if (shelfFitQueued) return;
+    shelfFitQueued = true;
+    // espera os ícones SVG e as fontes ocuparem o espaço final antes de medir
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        shelfFitQueued = false;
+        fitEditionsShelf();
+      })
+    );
+  }
+
+  window.addEventListener("resize", scheduleShelfFit);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleShelfFit);
+
   // Menu e banca de edições: esmaece só a borda que tem conteúdo escondido
   // e permite rolar com a roda do mouse no computador.
   function setupHorizontalScrollers() {
@@ -366,19 +415,34 @@
     const catalog = STATE.editionsCatalog || [];
     const activeId = STATE.activeEditionId || "ed-14";
 
-    // 1. Barra horizontal no topo
+    // Contadores de edições espalhados pela página (menu, título do Acervo)
+    document.querySelectorAll("[data-edition-count]").forEach((el) => {
+      el.textContent = catalog.length;
+    });
+
+    // 1. Barra horizontal no topo — edição ativa primeiro, depois as mais recentes.
+    //    Só aparecem as que cabem inteiras; o resto fica no botão "Todas (N)".
     const topShelf = document.getElementById("editionsTopShelf");
     if (topShelf) {
-      topShelf.innerHTML = catalog
-        .map(
-          (ed) => `
+      const active = catalog.find((ed) => ed.id === activeId);
+      const others = catalog.filter((ed) => ed.id !== activeId).reverse();
+      const ordered = (active ? [active] : []).concat(others);
+      topShelf.innerHTML =
+        ordered
+          .map(
+            (ed) => `
         <button class="edition-switch-pill ${ed.id === activeId ? "active" : ""}"
-                onclick="window.TobiasApp.selectEdition('${ed.id}')">
-          🗞️ ${ed.shortLabel}
+                onclick="window.TobiasApp.selectEdition('${ed.id}')" title="${escapeAttr(ed.shortLabel)}">
+          🗞️ <span class="pill-text">${ed.shortLabel}</span>
         </button>
       `
-        )
-        .join("");
+          )
+          .join("") +
+        `<a href="#acervo-edicoes" class="edition-switch-pill shelf-more"
+            onclick="window.TobiasApp.switchMode('portal')">
+          <span class="more-long">Todas as edições</span><span class="more-short">Todas</span> (${catalog.length}) →
+        </a>`;
+      scheduleShelfFit();
     }
 
     // 2. Grade de Capas da Banca Digital
@@ -2353,6 +2417,7 @@
     toggleTheme,
 
     switchMode(mode) {
+      scheduleShelfFit();
       const btnPortal = document.getElementById("modePortalBtn");
       const btnFlip = document.getElementById("modeFlipBtn");
       const btnAdmin = document.getElementById("modeAdminBtn");

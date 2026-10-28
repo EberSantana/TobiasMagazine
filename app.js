@@ -286,6 +286,7 @@
   // Guia do Comércio: quantos cards aparecem antes do botão "Ver mais"
   const DIR_PAGE = 12;
   let directoryLimit = DIR_PAGE;
+  let categoriesExpanded = false;
   let searchQuery = "";
   let currentFlipPage = 1;
   let currentAdminTab = "edition";
@@ -787,30 +788,32 @@
       .sort((a, b) => b.n - a.n || a.i - b.i);
     if (currentCategory !== "todos" && !counts[currentCategory]) currentCategory = "todos";
 
-    const pill = (slug, icon, label, n) =>
-      `<button class="cat-pill ${currentCategory === slug ? "active" : ""}" data-slug="${slug}"
-               role="tab" aria-selected="${currentCategory === slug}"
-               onclick="window.TobiasApp.filterCategory('${slug}')">
-         ${icon ? icon + " " : ""}<span class="pill-label">${label}</span><span class="pill-count">${n}</span>
-       </button>`;
-    const menuItem = (c) =>
-      `<button class="cat-menu-item ${currentCategory === c.slug ? "active" : ""}" data-slug="${c.slug}" role="menuitem"
-               onclick="window.TobiasApp.filterCategory('${c.slug}')">
-         <span class="cat-menu-icon">${c.icon}</span><span class="cat-menu-label">${c.label}</span><span class="pill-count">${c.n}</span>
-       </button>`;
-
+    // Quadrados de categoria: ícone, nome e quantidade de locais
+    const total = STATE.directory.length;
+    const tile = (slug, icon, label, n) => {
+      const on = currentCategory === slug;
+      return `<button class="cat-tile ${on ? "active" : ""}" role="tab" aria-selected="${on}"
+                 onclick="window.TobiasApp.filterCategory('${slug}')">
+          <span class="cat-tile-icon">${icon}</span>
+          <span class="cat-tile-name">${label}</span>
+          <span class="cat-tile-count">${n} ${n === 1 ? "local" : "locais"}</span>
+          ${on ? '<span class="cat-tile-check" aria-hidden="true">✓</span>' : ""}
+        </button>`;
+    };
+    const extraCount = Math.max(0, cats.length + 1 - 5);
+    box.classList.toggle("expanded", categoriesExpanded);
     box.innerHTML =
-      pill("todos", "", "Todos", STATE.directory.length) +
-      cats.map((c) => pill(c.slug, c.icon, c.label, c.n)).join("") +
-      `<div class="cat-more" hidden>
-         <button class="cat-pill cat-more-btn" aria-haspopup="menu" aria-expanded="false"
-                 onclick="window.TobiasApp.toggleCategoryMenu(event)">
-           <span class="cat-more-text">Mais</span><span class="pill-count cat-more-n"></span>
-           <span class="cat-more-caret" aria-hidden="true">▾</span>
-         </button>
-         <div class="cat-menu" role="menu" hidden>${cats.map(menuItem).join("")}</div>
-       </div>`;
-    fitCategoryPills();
+      tile("todos", "🏪", "Todos", total) +
+      cats.map((c) => tile(c.slug, c.icon, c.label, c.n)).join("") +
+      // Só no celular: mostra 5 categorias + este quadrado para abrir as demais
+      (extraCount > 0
+        ? `<button class="cat-tile cat-tile-more" aria-expanded="${categoriesExpanded}"
+                   onclick="window.TobiasApp.toggleCategoryTiles()">
+             <span class="cat-tile-icon">${categoriesExpanded ? "←" : "→"}</span>
+             <span class="cat-tile-name">${categoriesExpanded ? "Mostrar menos" : "Ver todas"}</span>
+             <span class="cat-tile-count">${categoriesExpanded ? "Recolher" : "+" + extraCount + " categorias"}</span>
+           </button>`
+        : "");
   }
 
   // Computador: mede o espaço e manda para o menu "Mais" as categorias que não cabem.
@@ -2928,6 +2931,11 @@
       directoryLimit = DIR_PAGE;
       closeCategoryMenu();
       renderDirectory();
+    },
+
+    toggleCategoryTiles() {
+      categoriesExpanded = !categoriesExpanded;
+      renderCategoryPills();
     },
 
     toggleCategoryMenu(ev) {

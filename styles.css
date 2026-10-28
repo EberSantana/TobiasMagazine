@@ -133,6 +133,14 @@ img {
   display: block;
 }
 
+/* Botões e campos herdam a fonte do site (o navegador usa Arial por padrão) */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* ==========================================================================
    ALERTA DE UTILIDADE PÚBLICA (TICKER TOPO)
    ========================================================================== */
@@ -481,11 +489,12 @@ img {
   gap: 6px;
   cursor: pointer;
   flex-shrink: 0;
-  width: 78px;
+  width: 92px;
   text-align: center;
   background: none;
   border: none;
   color: var(--text-main);
+  font-family: var(--font-sans);
 }
 
 .story-ring {
@@ -2250,6 +2259,90 @@ body.admin-active .admin-wrapper {
 .edition-cover-thumb > * {
   position: relative;
   z-index: 1;
+}
+
+/* Etiquetas da capa: uma linha só, discretas, estilo revista */
+.ed-chips {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ed-number {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+}
+
+.ed-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: rgba(20, 16, 12, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.ed-chip--live {
+  background: var(--brand-primary);
+  border-color: transparent;
+}
+
+.ed-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.28);
+}
+
+.ed-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: 6px;
+}
+
+.ed-meta-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+.ed-title {
+  font-family: var(--font-serif);
+  font-size: 1.12rem;
+  line-height: 1.22;
+  color: #fff;
+}
+
+.edition-cover-thumb {
+  height: 210px !important;
+  padding: 16px !important;
 }
 
 .edition-cover-body {

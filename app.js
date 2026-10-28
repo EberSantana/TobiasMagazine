@@ -454,21 +454,15 @@
           return `
           <article class="edition-cover-card ${isCurrent ? "active-edition" : ""}">
             <div class="edition-cover-thumb" style="background-image:url('${ed.coverStory.image}')">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px;">
-                <span class="tag-badge" style="background:${isCurrent ? "var(--brand-primary)" : "rgba(0,0,0,0.65)"};">
-                  ${isCurrent ? "● Lendo Agora" : ed.badge}
-                </span>
-                <span style="font-family:var(--font-mono); font-size:0.7rem; background:rgba(0,0,0,0.6); padding:3px 8px; border-radius:99px;">
-                  ${ed.periodicity}
-                </span>
+              <div class="ed-chips">
+                ${isCurrent
+                  ? '<span class="ed-chip ed-chip--live"><i class="ed-live-dot"></i>Lendo agora</span>'
+                  : `<span class="ed-chip">${ed.badge}</span>`}
+                <span class="ed-number">${String(ed.number).split("•")[0].trim()}</span>
               </div>
               <div>
-                <div style="font-family:var(--font-mono); font-size:0.72rem; color:#fcd34d; font-weight:800;">
-                  ${ed.number}
-                </div>
-                <h3 style="font-family:var(--font-serif); font-size:1.08rem; font-weight:800; line-height:1.2; margin-top:2px;">
-                  ${ed.coverStory.title}
-                </h3>
+                <div class="ed-meta">${ed.periodicity}</div>
+                <h3 class="ed-title">${ed.coverStory.title}</h3>
               </div>
             </div>
             <div class="edition-cover-body">

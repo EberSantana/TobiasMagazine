@@ -67,7 +67,7 @@
       </div>
 
       <!-- Menu de Pautas Locais -->
-      <nav class="nav-scroller" aria-label="Seções da Revista">
+      <nav class="nav-scroller h-scroll" aria-label="Seções da Revista">
         <a href="#acervo-edicoes" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📚 Acervo (6 Edições)</a>
         <a href="#guia-comercio" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🏪 Guia do Comércio</a>
         <a href="#utilidade-publica" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚨 Utilidade Pública</a>
@@ -75,15 +75,15 @@
         <a href="#achados-promocoes" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🏷️ Achados & Cupons</a>
         <a href="#agenda-eventos" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📅 Agenda & Lazer</a>
         <a href="#classificados" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">📌 Classificados</a>
-        <a href="#anuncie-midia" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚀 Anuncie / QR Code</a>
+        <a href="#anuncie-midia" class="nav-chip" onclick="window.TobiasApp.switchMode('portal')">🚀 Anuncie</a>
       </nav>
     </div>
   </header>
 
   <!-- BARRA DE SELEÇÃO RÁPIDA DAS 6 EDIÇÕES QUINZENAIS (#14 A #19) -->
   <div class="editions-shelf-bar" role="region" aria-label="Seletor de Edições Quinzenais">
-    <div class="editions-shelf-inner">
-      <span style="font-family:var(--font-mono); font-size:0.73rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; flex-shrink:0;">
+    <div class="editions-shelf-inner h-scroll">
+      <span class="shelf-label" style="font-family:var(--font-sans); font-size:0.72rem; font-weight:800; letter-spacing:0.06em; color:var(--text-muted); text-transform:uppercase; flex-shrink:0; display:inline-flex; align-items:center; gap:6px;">
         📚 Banca Digital (6 Edições):
       </span>
       <div id="editionsTopShelf" style="display:flex; gap:8px;"></div>

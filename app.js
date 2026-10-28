@@ -308,7 +308,34 @@
     initTheme();
     renderAll();
     setupEventListeners();
+    setupHorizontalScrollers();
   });
+
+  // Menu e banca de edições: esmaece só a borda que tem conteúdo escondido
+  // e permite rolar com a roda do mouse no computador.
+  function setupHorizontalScrollers() {
+    const FADE = "36px";
+    document.querySelectorAll(".h-scroll").forEach((el) => {
+      const update = () => {
+        const max = el.scrollWidth - el.clientWidth;
+        el.style.setProperty("--fade-l", el.scrollLeft > 2 ? FADE : "0px");
+        el.style.setProperty("--fade-r", max - el.scrollLeft > 2 ? FADE : "0px");
+      };
+      el.addEventListener("scroll", update, { passive: true });
+      el.addEventListener(
+        "wheel",
+        (e) => {
+          if (el.scrollWidth <= el.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+          e.preventDefault();
+          el.scrollLeft += e.deltaY;
+        },
+        { passive: false }
+      );
+      window.addEventListener("resize", update);
+      new MutationObserver(update).observe(el, { childList: true, subtree: true });
+      update();
+    });
+  }
 
   // --------------------------------------------------------------------------
   // TEMA CLARO / ESCURO

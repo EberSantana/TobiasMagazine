@@ -347,7 +347,7 @@ img {
 .nav-scroller {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
   padding-top: 10px;
   margin-top: 10px;
@@ -358,14 +358,31 @@ img {
   display: none;
 }
 
+/* Barras com rolagem horizontal (menu e banca de edições):
+   esmaecem suavemente nas bordas em vez de "cortar" o último item.
+   --fade-l / --fade-r são ligadas pelo app.js só quando há conteúdo escondido. */
+.h-scroll {
+  --fade-l: 0px;
+  --fade-r: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent 100%);
+  scroll-behavior: smooth;
+  scroll-padding-inline: 24px;
+}
+.h-scroll::after {
+  content: "";
+  flex: 0 0 8px; /* respiro depois do último item */
+}
+
 .nav-chip {
   border: 1px solid transparent;
   background: transparent;
   color: var(--text-secondary);
   font-size: 0.86rem;
   font-weight: 600;
-  padding: 9px 14px;
+  padding: 9px 12px;
   border-radius: 10px;
+  flex-shrink: 0;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
@@ -925,6 +942,12 @@ img {
   }
   .section-block {
     margin-bottom: 48px;
+  }
+  .shelf-label {
+    display: none !important;
+  }
+  .editions-shelf-bar {
+    padding: 8px 14px;
   }
 }
 
@@ -2026,6 +2049,7 @@ body.admin-active .admin-wrapper {
 }
 
 .edition-switch-pill {
+  flex-shrink: 0;
   border: 1.5px solid var(--border-color);
   background: var(--bg-surface);
   color: var(--text-secondary);

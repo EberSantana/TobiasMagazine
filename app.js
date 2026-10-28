@@ -522,30 +522,51 @@
         const msg = storeTpl
           .replace(/\{LOJA\}/g, biz.name)
           .replace(/\{EDICAO\}/g, STATE.edition.number);
+        const mapsHref = buildMapsUrl(biz.mapsUrl, biz.name, biz.address);
+        // Profissionais que só atendem em domicílio não têm endereço para "Como chegar"
+        const hasPlace = !!biz.mapsUrl || !/^\s*atendimento (em|a) domic/i.test(biz.address || "");
+        // O fallback fica sempre por baixo; a foto (se houver) cobre o card e some se o link quebrar.
+        const photo =
+          `<div class="biz-photo-fallback">${biz.avatar || "🏪"}<small>Foto em breve</small></div>` +
+          (biz.photo
+            ? `<img src="${escapeAttr(biz.photo)}" alt="Fachada de ${escapeAttr(biz.name)}" loading="lazy" decoding="async"
+                    onerror="this.style.display='none'" />`
+            : "");
         return `
       <article class="biz-card ${biz.sponsored ? "sponsored" : ""}">
         ${biz.sponsored ? '<span class="sponsored-ribbon">★ Destaque do Bairro</span>' : ""}
-        <div>
-          <div class="biz-header">
-            <div class="biz-avatar">${biz.avatar || "🏪"}</div>
-            <div>
-              <span class="biz-category">${biz.category}</span>
-              <h3 class="biz-name">${biz.name}</h3>
-            </div>
-          </div>
-          <p class="biz-desc" style="margin-top:10px;">${biz.description}</p>
+        <div class="biz-photo">
+          ${photo}
+          <span class="status-dot">● ${biz.status}</span>
         </div>
-        <div>
-          <div class="biz-meta">
-            <span>📍 ${biz.address}</span>
-            <span>🕒 ${biz.hours}</span>
+        <div class="biz-body">
+          <div>
+            <div class="biz-header">
+              <div class="biz-avatar">${biz.avatar || "🏪"}</div>
+              <div>
+                <span class="biz-category">${biz.category}</span>
+                <h3 class="biz-name">${biz.name}</h3>
+              </div>
+            </div>
+            <p class="biz-desc" style="margin-top:10px;">${biz.description}</p>
           </div>
-          <div class="biz-footer" style="margin-top:12px;">
-            <span class="status-dot">● ${biz.status}</span>
-            <a class="btn btn-whatsapp" style="padding:7px 12px; font-size:0.8rem;"
+          <div class="biz-meta">
+            ${hasPlace
+              ? `<a href="${mapsHref}" target="_blank" rel="noopener" title="Abrir endereço no Google Maps">📍 <span>${biz.address}</span></a>`
+              : `<span>📍 <span>${biz.address}</span></span>`}
+            <span>🕒 <span>${biz.hours}</span></span>
+          </div>
+          <div class="biz-actions" style="${hasPlace ? "" : "grid-template-columns:1fr;"}">
+            ${hasPlace
+              ? `<a class="btn btn-outline" href="${mapsHref}" target="_blank" rel="noopener"
+               aria-label="Como chegar até ${escapeAttr(biz.name)} pelo Google Maps">
+              ${window.TMIcons ? TMIcons.svg("navigation") : "📍"} Como chegar
+            </a>`
+              : ""}
+            <a class="btn btn-whatsapp"
                href="https://wa.me/${biz.phone}?text=${encodeURIComponent(msg)}"
                target="_blank" rel="noopener">
-              💬 WhatsApp
+              ${window.TMIcons ? TMIcons.svg("whatsapp") : "💬"} WhatsApp
             </a>
           </div>
         </div>
@@ -553,6 +574,24 @@
     `;
       })
       .join("");
+  }
+
+  // Link do Google Maps: usa o link próprio do local (Perfil da Empresa no Google)
+  // quando informado; senão monta uma busca por nome + endereço + cidade/região.
+  function buildMapsUrl(customUrl, name, address) {
+    if (customUrl && /^https?:\/\//i.test(customUrl)) return escapeAttr(customUrl);
+    const region = (STATE.edition && STATE.edition.mapsRegion) || "";
+    const query = [name, address, region].filter(Boolean).join(", ");
+    return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
+  }
+
+  function escapeAttr(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   // --------------------------------------------------------------------------
@@ -685,8 +724,10 @@
           <span class="section-kicker">${ev.category}</span>
           <h3 style="font-family:var(--font-serif); font-size:1.08rem; font-weight:800; margin-bottom:4px;">${ev.title}</h3>
           <p style="font-size:0.84rem; color:var(--text-secondary); margin-bottom:6px;">${ev.description}</p>
-          <div style="font-size:0.76rem; color:var(--text-muted); font-weight:700;">
-            🕒 ${ev.time} • 📍 ${ev.location}
+          <div class="event-meta">
+            <span>🕒 ${ev.time}</span>
+            <a href="${buildMapsUrl(ev.mapsUrl, ev.location, "")}" target="_blank" rel="noopener"
+               title="Ver ${escapeAttr(ev.location)} no Google Maps">📍 ${ev.location}</a>
           </div>
         </div>
       </article>
@@ -1563,8 +1604,12 @@
           <input name="periodicity" value="${ed.periodicity}" required />
         </div>
         <div class="cms-field full">
-          <label>⚡ Ticker de Utilidade Pública (Barra Vermelha no Topo)</label>
+          <label>⚡ Ticker de Utilidade Pública (Barra no Topo)</label>
           <input name="urgentTicker" value="${ed.urgentTicker}" required />
+        </div>
+        <div class="cms-field full">
+          <label>📍 Cidade / Região para o Google Maps</label>
+          <input name="mapsRegion" value="${escapeAttr(ed.mapsRegion || "")}" placeholder="Ex: Tobias Barreto - SE" />
         </div>
         <div class="cms-field">
           <label>Chapéu / Kicker da Capa</label>
@@ -1602,6 +1647,7 @@
       STATE.edition.number = fd.get("number");
       STATE.edition.periodicity = fd.get("periodicity");
       STATE.edition.urgentTicker = fd.get("urgentTicker");
+      STATE.edition.mapsRegion = (fd.get("mapsRegion") || "").trim();
       STATE.edition.coverStory.kicker = fd.get("kicker");
       STATE.edition.coverStory.readingTime = fd.get("readingTime");
       STATE.edition.coverStory.title = fd.get("title");
@@ -1658,6 +1704,14 @@
         <div class="cms-field">
           <label>Status Rápido</label>
           <input name="status" placeholder="Entrega Grátis no Bairro" required />
+        </div>
+        <div class="cms-field">
+          <label>Foto da Fachada (URL da imagem)</label>
+          <input name="photo" type="url" placeholder="https://... (horizontal, até ~150 KB)" />
+        </div>
+        <div class="cms-field">
+          <label>Link do Google Maps (opcional)</label>
+          <input name="mapsUrl" type="url" placeholder="https://maps.app.goo.gl/... (Perfil da Empresa)" />
         </div>
         <div class="cms-field">
           <label>Patrocinador Destaque?</label>
@@ -1720,7 +1774,9 @@
         address: fd.get("address"),
         hours: fd.get("hours"),
         phone: fd.get("phone").replace(/\D/g, ""),
-        status: fd.get("status")
+        status: fd.get("status"),
+        photo: (fd.get("photo") || "").trim(),
+        mapsUrl: (fd.get("mapsUrl") || "").trim()
       });
       logAction(
         "🏪 Guia do Comércio",
@@ -2550,10 +2606,10 @@
       if (navigator.clipboard) {
         navigator.clipboard.writeText(code);
       }
-      const original = btnEl.textContent;
+      const original = btnEl.innerHTML;
       btnEl.textContent = "✓ Copiado!";
       setTimeout(() => {
-        btnEl.textContent = original;
+        btnEl.innerHTML = original;
       }, 1800);
     },
 

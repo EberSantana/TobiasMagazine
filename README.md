@@ -255,6 +255,27 @@ O arquivo [`index.html`](index.html) implementa o cabeçalho editorial, o palco 
 
 ---
 
+## 🎨 Identidade Visual 2.0 (Paleta Terracota + Ícones SVG)
+
+- **Paleta Terracota Editorial**: primária `#C2410C`, escura `#1C1917`, destaque `#FB923C`, suave `#FBE9DC`, fundo `#FAF7F2`. Todas as cores ficam em variáveis no topo do `styles.css` (tema claro e escuro).
+- **Tipografia**: Plus Jakarta Sans para títulos e texto; JetBrains Mono só para códigos de cupom.
+- **Ícones**: o arquivo `icons.js` converte automaticamente os emojis do conteúdo (data.js, CMS e templates) em ícones SVG de traço fino. O conteúdo continua salvo como emoji, então backups antigos seguem compatíveis. Para usar um ícone direto em código: `TMIcons.svg("map-pin")`.
+
+## 📍 Foto do Estabelecimento & "Como chegar" (Google Maps)
+
+Cada negócio do Guia aceita dois campos opcionais (no `data.js` ou no CMS → Guia do Comércio):
+
+| Campo | Exemplo | Efeito |
+|---|---|---|
+| `photo` | `https://.../fachada.webp` | Foto horizontal no topo do card (carrega sob demanda). Sem foto, aparece o ícone da categoria. |
+| `mapsUrl` | `https://maps.app.goo.gl/...` | Link do Perfil da Empresa no Google. Se vazio, o botão **Como chegar** busca por *nome + endereço + cidade*. |
+
+A cidade/região usada na busca do Maps fica em `edition.mapsRegion` (CMS → Edição & Capa → "Cidade / Região para o Google Maps"). Os eventos da Agenda também têm o local clicável para o Maps.
+
+**Dica:** use fotos em WebP de até ~150 KB e peça autorização do lojista para publicar a imagem.
+
+---
+
 ## 📄 Licença e Créditos
 
 Desenvolvido com foco em **Jornalismo Hiperlocal, Utilidade Pública e Fortalecimento do Comércio de Bairro**. Código aberto e pronto para publicação gratuita via **GitHub Pages**.

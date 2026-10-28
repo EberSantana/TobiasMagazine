@@ -8,6 +8,8 @@ window.TOBIAS_DATA = {
     periodicity: "Quinzenal (1ª Quinzena do Mês)",
     pagesCount: 10,
     neighborhood: "Bairro & Região",
+    // Cidade/estado acrescentados às buscas do Google Maps ("Como chegar"). Editável no CMS.
+    mapsRegion: "",
     tagline: "O jornal e revista digital da nossa vizinhança — pensado para ler no celular",
     urgentTicker: "ALERTA DE UTILIDADE PÚBLICA: Manutenção preventiva na rede de água da Rua Principal nesta quinta-feira (08h às 14h). Posto de Saúde com vacinação estendida até 19h.",
     coverStory: {
@@ -100,6 +102,9 @@ window.TOBIAS_DATA = {
       sponsored: true,
       description: "Pães artesanais de fermentação natural, bolos caseiros, café colonial e entrega rápida nos condomínios.",
       address: "Praça Central, 142 (Esquina com Rua das Flores)",
+      // Opcionais: foto da fachada e link próprio do Google Maps (Perfil da Empresa)
+      photo: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=70",
+      mapsUrl: "",
       hours: "Seg a Dom • 05h30 às 21h00",
       phone: "5579999990001",
       status: "Aberto Agora • Fornada às 17h"

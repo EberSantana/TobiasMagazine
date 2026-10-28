@@ -766,36 +766,131 @@
         : "");
   }
 
-  // Filtros do Guia: gerados a partir das categorias realmente cadastradas
+  // Filtros do Guia: gerados a partir das categorias realmente cadastradas.
+  // Computador: uma linha só; o que não cabe vai para o menu "Mais".
+  // Celular: fila deslizante. Categorias com mais cadastros aparecem primeiro.
   function renderCategoryPills() {
     const box = document.getElementById("categoryPills");
     if (!box) return;
     const counts = {};
     STATE.directory.forEach((b) => (counts[b.catSlug] = (counts[b.catSlug] || 0) + 1));
     const known = CATEGORY_META.filter((c) => counts[c.slug]);
-    // categorias criadas fora do catálogo (ex.: pelo data.js) também aparecem
     const extra = Object.keys(counts)
       .filter((s) => !CATEGORY_META.some((c) => c.slug === s))
       .map((s) => {
         const any = STATE.directory.find((b) => b.catSlug === s);
         return { slug: s, label: (any && any.category) || s, icon: (any && any.avatar) || "🏪" };
       });
+    const cats = known
+      .concat(extra)
+      .map((c, i) => ({ ...c, n: counts[c.slug], i }))
+      .sort((a, b) => b.n - a.n || a.i - b.i);
     if (currentCategory !== "todos" && !counts[currentCategory]) currentCategory = "todos";
-    const pill = (slug, text, n) =>
-      `<button class="cat-pill ${currentCategory === slug ? "active" : ""}" role="tab"
-               aria-selected="${currentCategory === slug}"
-               onclick="window.TobiasApp.filterCategory('${slug}', this)">
-         ${text} <span class="pill-count">${n}</span>
+
+    const pill = (slug, icon, label, n) =>
+      `<button class="cat-pill ${currentCategory === slug ? "active" : ""}" data-slug="${slug}"
+               role="tab" aria-selected="${currentCategory === slug}"
+               onclick="window.TobiasApp.filterCategory('${slug}')">
+         ${icon ? icon + " " : ""}<span class="pill-label">${label}</span><span class="pill-count">${n}</span>
        </button>`;
+    const menuItem = (c) =>
+      `<button class="cat-menu-item ${currentCategory === c.slug ? "active" : ""}" data-slug="${c.slug}" role="menuitem"
+               onclick="window.TobiasApp.filterCategory('${c.slug}')">
+         <span class="cat-menu-icon">${c.icon}</span><span class="cat-menu-label">${c.label}</span><span class="pill-count">${c.n}</span>
+       </button>`;
+
     box.innerHTML =
-      pill("todos", "Todos", STATE.directory.length) +
-      known.concat(extra).map((c) => pill(c.slug, `${c.icon} ${c.label}`, counts[c.slug])).join("");
-    // No celular (barra deslizante), mantém o filtro escolhido à vista
-    const active = box.querySelector(".cat-pill.active");
-    if (active && box.scrollWidth > box.clientWidth) {
-      box.scrollLeft = Math.max(0, active.offsetLeft - box.offsetLeft - 44);
+      pill("todos", "", "Todos", STATE.directory.length) +
+      cats.map((c) => pill(c.slug, c.icon, c.label, c.n)).join("") +
+      `<div class="cat-more" hidden>
+         <button class="cat-pill cat-more-btn" aria-haspopup="menu" aria-expanded="false"
+                 onclick="window.TobiasApp.toggleCategoryMenu(event)">
+           <span class="cat-more-text">Mais</span><span class="pill-count cat-more-n"></span>
+           <span class="cat-more-caret" aria-hidden="true">▾</span>
+         </button>
+         <div class="cat-menu" role="menu" hidden>${cats.map(menuItem).join("")}</div>
+       </div>`;
+    fitCategoryPills();
+  }
+
+  // Computador: mede o espaço e manda para o menu "Mais" as categorias que não cabem.
+  function fitCategoryPills() {
+    const box = document.getElementById("categoryPills");
+    if (!box) return;
+    const pills = Array.from(box.querySelectorAll(":scope > .cat-pill[data-slug]"));
+    const moreWrap = box.querySelector(".cat-more");
+    if (!moreWrap) return;
+    const moreBtn = moreWrap.querySelector(".cat-more-btn");
+    const items = Array.from(moreWrap.querySelectorAll(".cat-menu-item"));
+    pills.forEach((p) => (p.hidden = false));
+    moreWrap.hidden = true;
+
+    const mobile = window.matchMedia("(max-width: 720px)").matches;
+    if (mobile || !box.offsetParent) {
+      const active = box.querySelector(".cat-pill.active");
+      if (active && box.scrollWidth > box.clientWidth) {
+        box.scrollLeft = Math.max(0, active.offsetLeft - box.offsetLeft - 44);
+      }
+      return;
+    }
+
+    const gap = parseFloat(getComputedStyle(box).columnGap) || 8;
+    const avail = box.clientWidth;
+    // mede o botão "Mais" já com o maior texto que ele pode exibir
+    const curMeta = CATEGORY_META.find((c) => c.slug === currentCategory);
+    moreBtn.querySelector(".cat-more-text").textContent = curMeta ? curMeta.label : "Mais";
+    moreBtn.querySelector(".cat-more-n").textContent = "99";
+    moreWrap.hidden = false;
+    const moreW = moreBtn.offsetWidth + gap;
+    moreWrap.hidden = true;
+    let used = 0;
+    const hiddenSlugs = [];
+    pills.forEach((p, i) => {
+      const w = p.offsetWidth + gap;
+      const isLast = i === pills.length - 1;
+      if (hiddenSlugs.length === 0 && used + w + (isLast ? 0 : moreW) <= avail) {
+        used += w;
+      } else {
+        p.hidden = true;
+        hiddenSlugs.push(p.dataset.slug);
+      }
+    });
+    if (!hiddenSlugs.length) return;
+    moreWrap.hidden = false;
+    items.forEach((it) => (it.hidden = !hiddenSlugs.includes(it.dataset.slug)));
+    const chosen = hiddenSlugs.includes(currentCategory) ? CATEGORY_META.find((c) => c.slug === currentCategory) : null;
+    moreBtn.classList.toggle("active", !!chosen);
+    moreBtn.querySelector(".cat-more-text").textContent = chosen ? chosen.label : "Mais";
+    moreBtn.querySelector(".cat-more-n").textContent = chosen ? counts(currentCategory) : hiddenSlugs.length;
+    function counts(slug) {
+      return STATE.directory.filter((b) => b.catSlug === slug).length;
     }
   }
+
+  function closeCategoryMenu() {
+    const menu = document.querySelector("#categoryPills .cat-menu");
+    const btn = document.querySelector("#categoryPills .cat-more-btn");
+    if (menu) menu.hidden = true;
+    if (btn) btn.setAttribute("aria-expanded", "false");
+  }
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest || !e.target.closest(".cat-more")) closeCategoryMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeCategoryMenu();
+  });
+  let pillsFitQueued = false;
+  window.addEventListener("resize", () => {
+    if (pillsFitQueued) return;
+    pillsFitQueued = true;
+    requestAnimationFrame(() => {
+      pillsFitQueued = false;
+      closeCategoryMenu();
+      fitCategoryPills();
+    });
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitCategoryPills());
 
   // Link do Google Maps: usa o link próprio do local (Perfil da Empresa no Google)
   // quando informado; senão monta uma busca por nome + endereço + cidade/região.
@@ -2831,7 +2926,22 @@
     filterCategory(catSlug) {
       currentCategory = catSlug;
       directoryLimit = DIR_PAGE;
+      closeCategoryMenu();
       renderDirectory();
+    },
+
+    toggleCategoryMenu(ev) {
+      if (ev) ev.stopPropagation();
+      const menu = document.querySelector("#categoryPills .cat-menu");
+      const btn = document.querySelector("#categoryPills .cat-more-btn");
+      if (!menu || !btn) return;
+      const open = menu.hidden;
+      menu.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+      if (open) {
+        const first = menu.querySelector(".cat-menu-item:not([hidden])");
+        if (first) first.focus();
+      }
     },
 
     showMoreDirectory() {

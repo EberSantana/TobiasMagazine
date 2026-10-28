@@ -190,6 +190,7 @@
     { slug: "restaurantes", label: "Restaurantes & Lanches", icon: "🍽️" },
     { slug: "saude", label: "Saúde & Farmácias", icon: "🩺" },
     { slug: "hospedagem", label: "Hospedagem", icon: "🏨" },
+    { slug: "beleza", label: "Beleza & Estética", icon: "💇" },
     { slug: "lojas", label: "Lojas & Varejo", icon: "🛍️" },
     { slug: "veiculos", label: "Veículos & Oficinas", icon: "🚗" },
     { slug: "bancos", label: "Bancos", icon: "🏦" },
@@ -800,21 +801,62 @@
           ${on ? '<span class="cat-tile-check" aria-hidden="true">✓</span>' : ""}
         </button>`;
     };
-    const extraCount = Math.max(0, cats.length + 1 - 5);
-    box.classList.toggle("expanded", categoriesExpanded);
     box.innerHTML =
       tile("todos", "🏪", "Todos", total) +
       cats.map((c) => tile(c.slug, c.icon, c.label, c.n)).join("") +
-      // Só no celular: mostra 5 categorias + este quadrado para abrir as demais
-      (extraCount > 0
-        ? `<button class="cat-tile cat-tile-more" aria-expanded="${categoriesExpanded}"
-                   onclick="window.TobiasApp.toggleCategoryTiles()">
-             <span class="cat-tile-icon">${categoriesExpanded ? "←" : "→"}</span>
-             <span class="cat-tile-name">${categoriesExpanded ? "Mostrar menos" : "Ver todas"}</span>
-             <span class="cat-tile-count">${categoriesExpanded ? "Recolher" : "+" + extraCount + " categorias"}</span>
-           </button>`
-        : "");
+      `<button class="cat-tile cat-tile-more" hidden onclick="window.TobiasApp.toggleCategoryTiles()">
+         <span class="cat-tile-icon"></span><span class="cat-tile-name"></span><span class="cat-tile-count"></span>
+       </button>`;
+    layoutCategoryTiles();
   }
+
+  // Mostra no máximo 2 linhas de quadrados (conforme a largura); o último vira
+  // "Ver todas". A categoria escolhida sempre fica visível. Nunca sobra quadrado sozinho.
+  function layoutCategoryTiles() {
+    const box = document.getElementById("categoryPills");
+    if (!box || !box.classList.contains("category-tiles")) return;
+    const tiles = Array.from(box.querySelectorAll(".cat-tile:not(.cat-tile-more)"));
+    const more = box.querySelector(".cat-tile-more");
+    if (!more) return;
+    const cols = getComputedStyle(box).gridTemplateColumns.split(" ").filter(Boolean).length || 3;
+    const cap = cols * 2;
+    tiles.forEach((t) => t.classList.remove("is-collapsed"));
+    if (tiles.length <= cap) {
+      more.hidden = true;
+      return;
+    }
+    more.hidden = false;
+    if (categoriesExpanded) {
+      more.querySelector(".cat-tile-icon").textContent = "←";
+      more.querySelector(".cat-tile-name").textContent = "Mostrar menos";
+      more.querySelector(".cat-tile-count").textContent = "Recolher categorias";
+      more.setAttribute("aria-expanded", "true");
+    } else {
+      const keep = cap - 1;
+      const activeIdx = tiles.findIndex((t) => t.classList.contains("active"));
+      tiles.forEach((t, i) => {
+        let hide = i >= keep;
+        if (activeIdx >= keep) hide = i === activeIdx ? false : i >= keep - 1;
+        t.classList.toggle("is-collapsed", hide);
+      });
+      const hiddenN = tiles.filter((t) => t.classList.contains("is-collapsed")).length;
+      more.querySelector(".cat-tile-icon").textContent = "→";
+      more.querySelector(".cat-tile-name").textContent = "Ver todas";
+      more.querySelector(".cat-tile-count").textContent = `+${hiddenN} categorias`;
+      more.setAttribute("aria-expanded", "false");
+      if (window.TMIcons) TMIcons.replaceIn(more);
+    }
+  }
+
+  let tilesLayoutQueued = false;
+  window.addEventListener("resize", () => {
+    if (tilesLayoutQueued) return;
+    tilesLayoutQueued = true;
+    requestAnimationFrame(() => {
+      tilesLayoutQueued = false;
+      layoutCategoryTiles();
+    });
+  });
 
   // Computador: mede o espaço e manda para o menu "Mais" as categorias que não cabem.
   function fitCategoryPills() {

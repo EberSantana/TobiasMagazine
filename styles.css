@@ -2787,20 +2787,15 @@ body.admin-active .admin-wrapper {
   }
 }
 
-/* Celular: 5 categorias + "Ver todas" (a categoria escolhida sempre aparece) */
+/* "Ver todas": aparece quando as categorias passam de 2 linhas */
+.cat-tile.is-collapsed,
+.cat-tile-more[hidden] {
+  display: none !important;
+}
 .cat-tile-more {
-  display: none;
   border-style: dashed;
 }
 .cat-tile-more .cat-tile-icon {
   background: var(--bg-subtle);
   color: var(--text-main);
-}
-@media (max-width: 720px) {
-  .cat-tile-more {
-    display: flex;
-  }
-  .category-tiles:not(.expanded) .cat-tile:nth-child(n + 6):not(.active):not(.cat-tile-more) {
-    display: none;
-  }
 }

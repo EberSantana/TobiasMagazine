@@ -1325,20 +1325,100 @@ body.flipbook-active .flipbook-wrapper {
 }
 
 /* ==========================================================================
-   PRINT / EXPORTAR CARTAZ QR CODE OU EDIÇÃO
+   SISTEMA PROFISSIONAL DE IMPRESSÃO A4 (CARTAZ QR CODE OU EDIÇÃO COMPLETA)
    ========================================================================== */
+#printableArea {
+  display: none;
+}
+
 @media print {
-  .site-header,
-  .bottom-nav,
-  .utility-ticker,
-  .filter-toolbar {
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Quando acionado via botão de impressão, oculta a interface web e exibe apenas o layout A4 diagramado */
+  body.printing-active > *:not(#printableArea) {
     display: none !important;
   }
-  body {
-    background: #fff;
-    color: #000;
-    padding: 0;
+
+  body.printing-active {
+    background: #ffffff !important;
+    color: #181614 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
+
+  body.printing-active #printableArea {
+    display: block !important;
+    width: 100% !important;
+    background: #ffffff !important;
+    color: #181614 !important;
+  }
+
+  /* Fallback caso o usuário aperte Ctrl+P / Cmd+P direto pelo navegador */
+  body:not(.printing-active) .site-header,
+  body:not(.printing-active) .editions-shelf-bar,
+  body:not(.printing-active) .stories-bar,
+  body:not(.printing-active) .bottom-nav,
+  body:not(.printing-active) .utility-ticker,
+  body:not(.printing-active) .filter-toolbar,
+  body:not(.printing-active) .admin-wrapper,
+  body:not(.printing-active) .flipbook-wrapper,
+  body:not(.printing-active) .btn {
+    display: none !important;
+  }
+}
+
+.print-poster-a4 {
+  border: 6px solid #181614;
+  border-radius: 18px;
+  padding: 28px 24px;
+  text-align: center;
+  background: #ffffff;
+  color: #181614;
+  max-width: 180mm;
+  margin: 0 auto;
+  page-break-inside: avoid;
+}
+
+.print-newspaper-sheet {
+  background: #ffffff;
+  color: #181614;
+  font-family: var(--font-sans);
+}
+
+.print-sheet-block {
+  page-break-inside: avoid;
+  border-bottom: 1.5px solid #d6d0c4;
+  padding: 12px 0;
+  margin-bottom: 12px;
+}
+
+.audit-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.audit-log-table th,
+.audit-log-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.audit-log-table th {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
 }
 
 /* ==========================================================================

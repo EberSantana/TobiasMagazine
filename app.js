@@ -17,7 +17,9 @@
     { id: "classifieds", label: "📌 7. Classificados", desc: "Imóveis, vagas, vendas e adoção pet" },
     { id: "flipbook", label: "📖 8. Páginas Flipbook", desc: "Diagramação das 10 páginas mobile" },
     { id: "monetization", label: "💰 9. Receita & Backup", desc: "Contratos publicitários, backup e data.js" },
-    { id: "users_rbac", label: "🔐 10. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" }
+    { id: "whatsapp_config", label: "📲 10. Config. WhatsApp", desc: "Números oficiais, grupos, templates e QR Code" },
+    { id: "audit_logs", label: "📋 11. Logs & Auditoria", desc: "Histórico de acessos e ações de todos os perfis" },
+    { id: "users_rbac", label: "🔐 12. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" }
   ];
 
   // Perfis padrão pré-configurados (O Administrador pode criar novos perfis personalizados)
@@ -27,7 +29,7 @@
         id: "role-admin",
         name: "Administrador Geral",
         badgeColor: "#d94e1f",
-        description: "Acesso total a todos os módulos, financeiro, exportação e criação de perfis/usuários.",
+        description: "Acesso total a todos os módulos, WhatsApp, logs de auditoria, financeiro e criação de perfis.",
         permissions: ALL_MODULES.map((m) => m.id),
         isSystem: true
       },
@@ -35,25 +37,77 @@
         id: "role-editor",
         name: "Editor de Pauta & Jornalismo",
         badgeColor: "#1b6b53",
-        description: "Gerencia Edição & Capa, Utilidade Pública, Gente do Bairro, Agenda Cultural e Páginas do Flipbook.",
-        permissions: ["edition", "utility", "people", "events", "flipbook"],
+        description: "Gerencia Edição & Capa, Utilidade Pública, Gente do Bairro, Agenda, Flipbook e Logs.",
+        permissions: ["edition", "utility", "people", "events", "flipbook", "audit_logs"],
         isSystem: false
       },
       {
         id: "role-comercial",
         name: "Gestor Comercial & Guia",
         badgeColor: "#d99b1f",
-        description: "Gerencia Guia do Comércio, Cupons de Promoções, Classificados e Contratos Publicitários.",
-        permissions: ["directory", "promotions", "classifieds", "monetization"],
+        description: "Gerencia Guia do Comércio, Cupons, Classificados, Receita, Config. WhatsApp e Logs.",
+        permissions: ["directory", "promotions", "classifieds", "monetization", "whatsapp_config", "audit_logs"],
         isSystem: false
       },
       {
         id: "role-colab",
         name: "Colaborador Comunitário",
         badgeColor: "#1f3a60",
-        description: "Apoia na atualização de Utilidade Pública, Agenda da Praça e moderação de Classificados.",
-        permissions: ["utility", "events", "classifieds"],
+        description: "Apoia na atualização de Utilidade Pública, Agenda da Praça, Classificados e Logs.",
+        permissions: ["utility", "events", "classifieds", "audit_logs"],
         isSystem: false
+      }
+    ];
+  }
+
+  function getDefaultWhatsappConfig() {
+    return {
+      redacaoPhone: "5579999990000",
+      comercialPhone: "5579999990000",
+      groupInviteLink: "https://chat.whatsapp.com/TobiasMagazineBairro",
+      shareTemplate: "🗞️ *TOBIAS MAGAZINE — {EDICAO} no ar!* \nConfira o Guia do Comércio no WhatsApp, horários do Posto de Saúde, Agenda da Praça e Cupons de Desconto no nosso bairro:\n{URL}",
+      storeTemplate: "Olá! Vi o contato de *{LOJA}* no Guia da Tobias Magazine ({EDICAO}) e gostaria de atendimento.",
+      couponTemplate: "Olá! Quero usar o cupom *{CUPOM}* ({DESCONTO}) na *{LOJA}* que vi na Tobias Magazine!",
+      commercialTemplate: "Olá! Quero anunciar meu comércio/serviço na próxima edição da Tobias Magazine!",
+      qrPosterUrl: "https://ebersantana.github.io/TobiasMagazine/",
+      qrPosterTitle: "LEIA GRÁTIS A REVISTA DO NOSSO BAIRRO!",
+      qrPosterFooter: "Escaneie com a câmera do celular • Sem instalar aplicativo"
+    };
+  }
+
+  function getDefaultAuditLogs() {
+    const now = new Date();
+    const fmt = (d) => d.toLocaleString("pt-BR");
+    return [
+      {
+        id: "log-init-1",
+        timestamp: fmt(new Date(now.getTime() - 3600000 * 4)),
+        username: "admin",
+        fullName: "Administrador Chefe (Tobias)",
+        roleName: "Administrador Geral",
+        module: "🗞️ Edição & Capa",
+        action: "Publicação Oficial",
+        details: "Publicou o acervo das 6 Edições Quinzenais (#14 a #19) na Banca Digital"
+      },
+      {
+        id: "log-init-2",
+        timestamp: fmt(new Date(now.getTime() - 3600000 * 2)),
+        username: "comercial",
+        fullName: "Roberto • Gestor Comercial",
+        roleName: "Gestor Comercial & Guia",
+        module: "🏪 Guia do Comércio",
+        action: "Destaque Patrocinado",
+        details: "Ativou selo Destaque na Padaria Seu Tobias e Farmácia Vida & Saúde 24h"
+      },
+      {
+        id: "log-init-3",
+        timestamp: fmt(new Date(now.getTime() - 1800000)),
+        username: "editor",
+        fullName: "Mariana • Editora de Jornalismo",
+        roleName: "Editor de Pauta & Jornalismo",
+        module: "🚨 Utilidade Pública",
+        action: "Alerta de Água & UBS",
+        details: "Cadastrou aviso de manutenção hidráulica na Rua das Acácias e horário estendido da UBS"
       }
     ];
   }
@@ -138,6 +192,13 @@
           if (!parsed.sponsors) parsed.sponsors = getDefaultSponsors();
           if (!parsed.roles) parsed.roles = getDefaultRoles();
           if (!parsed.users) parsed.users = getDefaultUsers();
+          if (!parsed.whatsappConfig) parsed.whatsappConfig = getDefaultWhatsappConfig();
+          if (!parsed.auditLogs) parsed.auditLogs = getDefaultAuditLogs();
+          // Garante que os novos módulos estejam presentes no perfil Admin
+          const adminRole = parsed.roles.find((r) => r.id === "role-admin");
+          if (adminRole) {
+            adminRole.permissions = ALL_MODULES.map((m) => m.id);
+          }
           if (!parsed.editionsCatalog || parsed.editionsCatalog.length < 6) {
             parsed.editionsCatalog = JSON.parse(JSON.stringify(window.TOBIAS_DATA.editionsCatalog || []));
           }
@@ -152,6 +213,8 @@
     clone.sponsors = getDefaultSponsors();
     clone.roles = getDefaultRoles();
     clone.users = getDefaultUsers();
+    clone.whatsappConfig = getDefaultWhatsappConfig();
+    clone.auditLogs = getDefaultAuditLogs();
     clone.activeEditionId = "ed-14";
     return clone;
   }
@@ -170,6 +233,31 @@
   let searchQuery = "";
   let currentFlipPage = 1;
   let currentAdminTab = "edition";
+  let auditFilterUser = "todos";
+
+  // Registra automaticamente no Log de Auditoria qualquer acesso ou alteração feita por qualquer perfil
+  function logAction(moduleName, actionTitle, detailsText, customUserObj) {
+    if (!STATE.auditLogs) STATE.auditLogs = [];
+    const actor = customUserObj || CURRENT_USER;
+    let roleName = "Visitante / Morador";
+    if (actor) {
+      const r = (STATE.roles || []).find((rl) => rl.id === actor.roleId);
+      if (r) roleName = r.name;
+    }
+    STATE.auditLogs.unshift({
+      id: "log-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      timestamp: new Date().toLocaleString("pt-BR"),
+      username: actor ? actor.username : "publico",
+      fullName: actor ? actor.fullName : "Morador via Portal",
+      roleName: roleName,
+      module: moduleName,
+      action: actionTitle,
+      details: detailsText
+    });
+    if (STATE.auditLogs.length > 250) {
+      STATE.auditLogs = STATE.auditLogs.slice(0, 250);
+    }
+  }
 
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
@@ -426,9 +514,15 @@
       return;
     }
 
+    const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
+    const storeTpl = w.storeTemplate || "Olá! Vi o contato de *{LOJA}* no Guia da Tobias Magazine ({EDICAO}) e gostaria de atendimento.";
+
     grid.innerHTML = filtered
-      .map(
-        (biz) => `
+      .map((biz) => {
+        const msg = storeTpl
+          .replace(/\{LOJA\}/g, biz.name)
+          .replace(/\{EDICAO\}/g, STATE.edition.number);
+        return `
       <article class="biz-card ${biz.sponsored ? "sponsored" : ""}">
         ${biz.sponsored ? '<span class="sponsored-ribbon">★ Destaque do Bairro</span>' : ""}
         <div>
@@ -449,15 +543,15 @@
           <div class="biz-footer" style="margin-top:12px;">
             <span class="status-dot">● ${biz.status}</span>
             <a class="btn btn-whatsapp" style="padding:7px 12px; font-size:0.8rem;"
-               href="https://wa.me/${biz.phone}?text=${encodeURIComponent(`Olá! Vi o contato de *${biz.name}* no Guia da Tobias Magazine e gostaria de atendimento.`)}"
+               href="https://wa.me/${biz.phone}?text=${encodeURIComponent(msg)}"
                target="_blank" rel="noopener">
               💬 WhatsApp
             </a>
           </div>
         </div>
       </article>
-    `
-      )
+    `;
+      })
       .join("");
   }
 
@@ -533,9 +627,16 @@
     const grid = document.getElementById("promotionsGrid");
     if (!grid) return;
 
+    const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
+    const couponTpl = w.couponTemplate || "Olá! Quero usar o cupom *{CUPOM}* ({DESCONTO}) na *{LOJA}* que vi na Tobias Magazine!";
+
     grid.innerHTML = STATE.promotions
-      .map(
-        (pr) => `
+      .map((pr) => {
+        const msg = couponTpl
+          .replace(/\{CUPOM\}/g, pr.code)
+          .replace(/\{DESCONTO\}/g, pr.discount)
+          .replace(/\{LOJA\}/g, pr.store);
+        return `
       <article class="coupon-card">
         <div>
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px;">
@@ -554,14 +655,14 @@
             </button>
           </div>
           <a class="btn btn-primary" style="width:100%; margin-top:8px; font-size:0.8rem; padding:8px;"
-             href="https://wa.me/${pr.phone}?text=${encodeURIComponent(`Olá! Quero usar o cupom *${pr.code}* (${pr.discount}) que vi na Tobias Magazine!`)}"
+             href="https://wa.me/${pr.phone}?text=${encodeURIComponent(msg)}"
              target="_blank" rel="noopener">
             Resgatar no WhatsApp →
           </a>
         </div>
       </article>
-    `
-      )
+    `;
+      })
       .join("");
   }
 
@@ -905,6 +1006,13 @@
       );
 
       if (!found) {
+        logAction(
+          "🔐 Autenticação",
+          "Tentativa de Login Falhou",
+          `Tentativa inválida com usuário "${uName}"`,
+          { username: uName || "desconhecido", fullName: "Tentativa Não Autorizada", roleId: "" }
+        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
         const errEl = document.getElementById("loginErrorMsg");
         if (errEl) {
           errEl.style.display = "block";
@@ -915,10 +1023,16 @@
 
       saveSession(found);
       const role = getActiveRole();
+      logAction(
+        "🔐 Autenticação",
+        "Login Realizado com Sucesso",
+        `Acessou a Central de Gestão com o perfil "${role ? role.name : "Perfil"}"`,
+        found
+      );
       if (role && role.permissions.length > 0) {
         currentAdminTab = role.permissions[0];
       }
-      renderAdminView();
+      saveState();
     };
   }
 
@@ -962,12 +1076,12 @@
         <span class="kpi-label">🚨 Avisos Utilidade</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-num">${STATE.peopleStories.length}</span>
-        <span class="kpi-label">🎙️ Matérias & Publis</span>
-      </div>
-      <div class="kpi-card">
         <span class="kpi-num">${STATE.promotions.length}</span>
         <span class="kpi-label">🏷️ Cupons Ativos</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-num">${(STATE.auditLogs || []).length}</span>
+        <span class="kpi-label">📋 Eventos no Log</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-num">${STATE.roles.length} / ${STATE.users.length}</span>
@@ -1020,9 +1134,199 @@
       renderAdminFlipbookTab(panelContainer);
     } else if (currentAdminTab === "monetization") {
       renderAdminMonetizationTab(panelContainer, totalRevenue);
+    } else if (currentAdminTab === "whatsapp_config") {
+      renderAdminWhatsappTab(panelContainer);
+    } else if (currentAdminTab === "audit_logs") {
+      renderAdminAuditLogsTab(panelContainer);
     } else if (currentAdminTab === "users_rbac") {
       renderAdminRbacTab(panelContainer);
     }
+  }
+
+  // --------------------------------------------------------------------------
+  // MÓDULO 10: CONFIGURAÇÕES DO WHATSAPP NA PLATAFORMA & CARTAZ QR CODE
+  // --------------------------------------------------------------------------
+  function renderAdminWhatsappTab(container) {
+    const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
+    container.innerHTML = `
+      <h3 style="font-family:var(--font-serif); font-size:1.45rem; margin-bottom:4px;">
+        📲 Configurações do WhatsApp na Plataforma & Cartaz QR Code
+      </h3>
+      <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:18px;">
+        Defina os números centrais da Redação e do Comercial, o link do grupo de moradores e os modelos (templates) automáticos de mensagens que abrem quando o leitor clica nos botões de WhatsApp do portal.
+      </p>
+
+      <form id="cmsWhatsappConfigForm" class="cms-form-grid two-cols">
+        <div class="cms-field">
+          <label>📞 WhatsApp Oficial da Redação (Sugestões de Pauta / Reclamações)</label>
+          <input name="redacaoPhone" value="${w.redacaoPhone}" placeholder="5579999990000" required />
+        </div>
+        <div class="cms-field">
+          <label>💼 WhatsApp Comercial (Venda de Anúncios & Mídia Kit)</label>
+          <input name="comercialPhone" value="${w.comercialPhone}" placeholder="5579999990000" required />
+        </div>
+        <div class="cms-field full">
+          <label>👥 Link do Grupo / Comunidade Oficial do Bairro no WhatsApp</label>
+          <input name="groupInviteLink" value="${w.groupInviteLink}" placeholder="https://chat.whatsapp.com/..." required />
+        </div>
+        <div class="cms-field full">
+          <label>📤 Modelo de Mensagem ao Compartilhar Edição nos Grupos ({EDICAO} e {URL})</label>
+          <textarea name="shareTemplate" rows="3" required>${w.shareTemplate}</textarea>
+        </div>
+        <div class="cms-field full">
+          <label>🏪 Modelo de Mensagem ao Chamar Loja no Guia ({LOJA} e {EDICAO})</label>
+          <input name="storeTemplate" value="${w.storeTemplate}" required />
+        </div>
+        <div class="cms-field full">
+          <label>🏷️ Modelo de Mensagem ao Resgatar Cupom ({CUPOM}, {DESCONTO}, {LOJA})</label>
+          <input name="couponTemplate" value="${w.couponTemplate}" required />
+        </div>
+        <div class="cms-field full">
+          <label>🚀 Modelo de Mensagem ao Clicar em "Quero Anunciar" no Mídia Kit</label>
+          <input name="commercialTemplate" value="${w.commercialTemplate}" required />
+        </div>
+
+        <div class="cms-field full" style="border-top:1px dashed var(--border-color); padding-top:12px; margin-top:4px;">
+          <strong style="font-size:0.9rem; color:var(--brand-primary);">🖨️ Personalização do Cartaz QR Code de Vitrine (Impressão A4)</strong>
+        </div>
+        <div class="cms-field">
+          <label>Título Principal do Cartaz A4</label>
+          <input name="qrPosterTitle" value="${w.qrPosterTitle}" required />
+        </div>
+        <div class="cms-field">
+          <label>URL de Destino do QR Code</label>
+          <input name="qrPosterUrl" value="${w.qrPosterUrl}" required />
+        </div>
+        <div class="cms-field full">
+          <label>Rodapé de Instrução do Cartaz</label>
+          <input name="qrPosterFooter" value="${w.qrPosterFooter}" required />
+        </div>
+
+        <div class="cms-field full" style="display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" onclick="window.TobiasApp.shareWhatsAppEdition()">
+            📲 Testar Disparo no WhatsApp
+          </button>
+          <button type="button" class="btn btn-outline" onclick="window.TobiasApp.printPosterA4()">
+            🖨️ Testar Impressão do Cartaz A4
+          </button>
+          <button type="submit" class="btn btn-primary">
+            💾 Salvar Configurações do WhatsApp
+          </button>
+        </div>
+      </form>
+    `;
+
+    document.getElementById("cmsWhatsappConfigForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      STATE.whatsappConfig = {
+        redacaoPhone: fd.get("redacaoPhone").replace(/\D/g, ""),
+        comercialPhone: fd.get("comercialPhone").replace(/\D/g, ""),
+        groupInviteLink: fd.get("groupInviteLink").trim(),
+        shareTemplate: fd.get("shareTemplate"),
+        storeTemplate: fd.get("storeTemplate"),
+        couponTemplate: fd.get("couponTemplate"),
+        commercialTemplate: fd.get("commercialTemplate"),
+        qrPosterTitle: fd.get("qrPosterTitle"),
+        qrPosterUrl: fd.get("qrPosterUrl"),
+        qrPosterFooter: fd.get("qrPosterFooter")
+      };
+      logAction(
+        "📲 Config. WhatsApp",
+        "Atualizou Integração WhatsApp",
+        `Redação: ${STATE.whatsappConfig.redacaoPhone} | Comercial: ${STATE.whatsappConfig.comercialPhone}`
+      );
+      saveState();
+      alert("✓ Configurações do WhatsApp e Cartaz QR Code atualizadas com sucesso!");
+    };
+  }
+
+  // --------------------------------------------------------------------------
+  // MÓDULO 11: LOGS DE ACESSO E AUDITORIA DE ATIVIDADES POR PERFIL
+  // --------------------------------------------------------------------------
+  function renderAdminAuditLogsTab(container) {
+    const logs = STATE.auditLogs || [];
+    const filteredLogs = logs.filter(
+      (l) => auditFilterUser === "todos" || l.username === auditFilterUser
+    );
+
+    container.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+        <div>
+          <h3 style="font-family:var(--font-serif); font-size:1.45rem; margin-bottom:4px;">
+            📋 Logs de Acesso & Auditoria de Ações por Perfil (${filteredLogs.length})
+          </h3>
+          <p style="font-size:0.86rem; color:var(--text-secondary);">
+            Rastreabilidade completa: veja quem entrou no sistema, qual perfil utilizou, o horário exato e o que cadastrou, editou ou excluiu.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-outline" style="padding:7px 12px; font-size:0.78rem;" onclick="window.TobiasApp.exportAuditLogsCsv()">
+            📊 Exportar Relatório CSV
+          </button>
+          <button class="btn btn-outline" style="padding:7px 12px; font-size:0.78rem;" onclick="window.TobiasApp.printAuditLogsA4()">
+            🖨️ Imprimir Relatório de Auditoria (A4)
+          </button>
+          ${
+            hasPermission("users_rbac")
+              ? `<button class="btn-danger" onclick="window.TobiasApp.clearAuditLogs()">🗑️ Limpar Histórico</button>`
+              : ""
+          }
+        </div>
+      </div>
+
+      <!-- Filtro por Usuário / Perfil -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; padding:12px; background:var(--bg-subtle); border-radius:8px;">
+        <span style="font-size:0.78rem; font-weight:800; color:var(--text-secondary); align-self:center;">Filtrar por Usuário:</span>
+        <button class="cat-pill ${auditFilterUser === "todos" ? "active" : ""}" onclick="window.TobiasApp.filterAuditByUser('todos')">
+          Todos (${logs.length})
+        </button>
+        ${STATE.users
+          .map(
+            (u) => `
+          <button class="cat-pill ${auditFilterUser === u.username ? "active" : ""}" onclick="window.TobiasApp.filterAuditByUser('${u.username}')">
+            👤 ${u.username}
+          </button>
+        `
+          )
+          .join("")}
+      </div>
+
+      <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:10px;">
+        <table class="audit-log-table">
+          <thead>
+            <tr>
+              <th>Data / Hora</th>
+              <th>Usuário & Nome</th>
+              <th>Perfil Ativo</th>
+              <th>Módulo</th>
+              <th>Ação Realizada</th>
+              <th>Detalhes do Registro</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${
+              filteredLogs.length === 0
+                ? `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">Nenhum registro encontrado para este filtro.</td></tr>`
+                : filteredLogs
+                    .map(
+                      (l) => `
+              <tr>
+                <td style="font-family:var(--font-mono); font-size:0.74rem; white-space:nowrap;">${l.timestamp}</td>
+                <td><strong>${l.fullName}</strong> <br/><span style="font-size:0.72rem; color:var(--text-muted);">@${l.username}</span></td>
+                <td><span class="tag-badge" style="font-size:0.65rem; background:var(--brand-navy);">${l.roleName}</span></td>
+                <td style="font-weight:700; white-space:nowrap;">${l.module}</td>
+                <td><strong style="color:var(--brand-primary);">${l.action}</strong></td>
+                <td style="color:var(--text-secondary);">${l.details}</td>
+              </tr>
+            `
+                    )
+                    .join("")
+            }
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   // --------------------------------------------------------------------------
@@ -1196,6 +1500,11 @@
         permissions: selectedPerms,
         isSystem: false
       });
+      logAction(
+        "🔐 Perfis & Acessos",
+        "Criou Novo Perfil",
+        `Perfil "${fd.get("name")}" com ${selectedPerms.length} atribuições`
+      );
       saveState();
       alert("✓ Novo perfil criado com sucesso!");
     };
@@ -1213,6 +1522,11 @@
         if (CURRENT_USER && CURRENT_USER.id === existing.id) {
           saveSession(existing);
         }
+        logAction(
+          "🔐 Perfis & Acessos",
+          "Atualizou Usuário",
+          `Conta @${uName} (${fd.get("fullName")})`
+        );
       } else {
         STATE.users.push({
           id: "usr-" + Date.now(),
@@ -1221,6 +1535,11 @@
           fullName: fd.get("fullName"),
           roleId: fd.get("roleId")
         });
+        logAction(
+          "🔐 Perfis & Acessos",
+          "Cadastrou Novo Usuário",
+          `Conta @${uName} (${fd.get("fullName")})`
+        );
       }
       saveState();
       alert("✓ Usuário salvo com sucesso!");
@@ -1289,6 +1608,11 @@
       STATE.edition.coverStory.lead = fd.get("lead");
       STATE.edition.coverStory.image = fd.get("image");
       STATE.edition.coverStory.fullText = fd.get("fullText");
+      logAction(
+        "🗞️ Edição & Capa",
+        "Editou Capa e Alerta",
+        `${fd.get("number")} — "${fd.get("title")}"`
+      );
       saveState();
       alert("✓ Edição e Reportagem de Capa atualizadas com sucesso!");
     };
@@ -1398,6 +1722,11 @@
         phone: fd.get("phone").replace(/\D/g, ""),
         status: fd.get("status")
       });
+      logAction(
+        "🏪 Guia do Comércio",
+        "Cadastrou Comércio/Profissional",
+        `${fd.get("name")} (${catLabels[slug] || "Comércio"})`
+      );
       saveState();
     };
   }
@@ -1471,6 +1800,11 @@
         summary: fd.get("summary"),
         source: fd.get("source")
       });
+      logAction(
+        "🚨 Utilidade Pública",
+        "Publicou Alerta",
+        `${fd.get("badge")}: ${fd.get("title")}`
+      );
       saveState();
     };
   }
@@ -1544,6 +1878,11 @@
         image: fd.get("image"),
         story: fd.get("story")
       });
+      logAction(
+        "🎙️ Gente & Publieditorial",
+        "Publicou Matéria",
+        `[${fd.get("type")}] ${fd.get("name")}`
+      );
       saveState();
     };
   }
@@ -1604,15 +1943,21 @@
     document.getElementById("cmsPromoForm").onsubmit = (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
+      const code = fd.get("code").toUpperCase().replace(/\s+/g, "");
       STATE.promotions.unshift({
         id: "pr-" + Date.now(),
         store: fd.get("store"),
         discount: fd.get("discount").toUpperCase(),
-        code: fd.get("code").toUpperCase().replace(/\s+/g, ""),
+        code,
         validUntil: fd.get("validUntil"),
         phone: fd.get("phone").replace(/\D/g, ""),
         title: fd.get("title")
       });
+      logAction(
+        "🏷️ Cupons & Ofertas",
+        "Criou Cupom",
+        `Loja: ${fd.get("store")} | Código: ${code}`
+      );
       saveState();
     };
   }
@@ -1687,6 +2032,11 @@
         title: fd.get("title"),
         description: fd.get("description")
       });
+      logAction(
+        "📅 Agenda Cultural",
+        "Adicionou Evento",
+        `${fd.get("day")}/${fd.get("month").toUpperCase()} — ${fd.get("title")}`
+      );
       saveState();
     };
   }
@@ -1759,6 +2109,11 @@
         details: fd.get("details"),
         phone: fd.get("phone").replace(/\D/g, "")
       });
+      logAction(
+        "📌 Classificados",
+        "Publicou Classificado",
+        `[${fd.get("category")}] ${fd.get("title")} (${fd.get("price")})`
+      );
       saveState();
     };
   }
@@ -1883,6 +2238,11 @@
         amount: Number(fd.get("amount")),
         status: fd.get("status")
       });
+      logAction(
+        "💰 Receita & Backup",
+        "Registrou Contrato Publicitário",
+        `${fd.get("client")} — R$ ${fd.get("amount")} (${fd.get("status")})`
+      );
       saveState();
     };
   }
@@ -1942,6 +2302,10 @@
     },
 
     logoutAdmin() {
+      if (CURRENT_USER) {
+        logAction("🔐 Autenticação", "Logout Realizado", `Encerrou sessão do usuário @${CURRENT_USER.username}`);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+      }
       saveSession(null);
       renderAdminView();
     },
@@ -1953,6 +2317,41 @@
       }
       currentAdminTab = tabName;
       renderAdminDashboard();
+    },
+
+    filterAuditByUser(username) {
+      auditFilterUser = username;
+      renderAdminDashboard();
+    },
+
+    clearAuditLogs() {
+      if (confirm("Deseja limpar o histórico de logs de auditoria?")) {
+        STATE.auditLogs = [];
+        logAction("📋 Logs & Auditoria", "Reinício do Log", "Histórico limpo pelo Administrador");
+        saveState();
+      }
+    },
+
+    exportAuditLogsCsv() {
+      const logs = STATE.auditLogs || [];
+      const header = ["Data_Hora", "Usuario", "Nome", "Perfil", "Modulo", "Acao", "Detalhes"];
+      const rows = logs.map((l) => [
+        `"${l.timestamp}"`,
+        `"${l.username}"`,
+        `"${l.fullName}"`,
+        `"${l.roleName}"`,
+        `"${l.module}"`,
+        `"${l.action}"`,
+        `"${(l.details || "").replace(/"/g, '""')}"`
+      ]);
+      const csv = [header.join(";"), ...rows.map((r) => r.join(";"))].join("\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tobias-magazine-auditoria-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
     },
 
     selectEdition(editionId, targetMode) {
@@ -1974,6 +2373,7 @@
         STATE.flipbookPages[3].highlight = ed.coverStory.lead;
       }
 
+      logAction("📚 Banca Digital", "Trocou Edição Ativa", `Carregou ${ed.number} (${ed.shortLabel})`);
       saveState();
       if (targetMode === "flipbook") {
         currentFlipPage = 1;
@@ -1990,21 +2390,26 @@
         alert("O perfil Administrador Geral não pode perder a atribuição de Gerenciar Perfis.");
         return;
       }
+      let actionDesc = "";
       if (role.permissions.includes(permId)) {
         if (role.permissions.length <= 1) {
           alert("O perfil deve ter pelo menos 1 atribuição ativa.");
           return;
         }
         role.permissions = role.permissions.filter((p) => p !== permId);
+        actionDesc = `Removeu atribuição [${permId}] do perfil "${role.name}"`;
       } else {
         role.permissions.push(permId);
+        actionDesc = `Concedeu atribuição [${permId}] ao perfil "${role.name}"`;
       }
+      logAction("🔐 Perfis & Acessos", "Alterou Atribuição de Perfil", actionDesc);
       saveState();
     },
 
     deleteRole(roleId) {
       const role = STATE.roles.find((r) => r.id === roleId);
       if (!role || role.isSystem) return;
+      logAction("🔐 Perfis & Acessos", "Excluiu Perfil", `Removeu o perfil "${role.name}"`);
       STATE.roles = STATE.roles.filter((r) => r.id !== roleId);
       saveState();
     },
@@ -2018,6 +2423,7 @@
         if (CURRENT_USER && CURRENT_USER.id === u.id) {
           saveSession(u);
         }
+        logAction("🔐 Perfis & Acessos", "Alterou Senha", `Senha atualizada para o usuário @${u.username}`);
         saveState();
         alert(`✓ Senha de "${u.username}" atualizada com sucesso!`);
       }
@@ -2026,13 +2432,17 @@
     deleteUser(userId) {
       const u = STATE.users.find((usr) => usr.id === userId);
       if (!u || u.username === "admin") return;
+      logAction("🔐 Perfis & Acessos", "Removeu Usuário", `Excluiu conta @${u.username} (${u.fullName})`);
       STATE.users = STATE.users.filter((usr) => usr.id !== userId);
       saveState();
     },
 
     deleteItem(collectionName, id) {
       if (!STATE[collectionName]) return;
-      STATE[collectionName] = STATE[collectionName].filter((item) => item.id !== id);
+      const item = STATE[collectionName].find((i) => i.id === id);
+      const itemLabel = item ? item.name || item.title || item.client || item.code || id : id;
+      logAction(`🗂️ ${collectionName}`, "Excluiu Registro", `Removeu "${itemLabel}"`);
+      STATE[collectionName] = STATE[collectionName].filter((i) => i.id !== id);
       saveState();
     },
 
@@ -2040,6 +2450,11 @@
       const item = STATE.directory.find((b) => b.id === id);
       if (item) {
         item.sponsored = !item.sponsored;
+        logAction(
+          "🏪 Guia do Comércio",
+          item.sponsored ? "Ativou Destaque Patrocinado" : "Removeu Destaque",
+          `Comércio: ${item.name}`
+        );
         saveState();
       }
     },
@@ -2051,12 +2466,15 @@
         STATE.flipbookPages[index].title = fd.get("title");
         STATE.flipbookPages[index].subtitle = fd.get("subtitle");
         STATE.flipbookPages[index].highlight = fd.get("highlight");
+        logAction("📖 Páginas Flipbook", `Editou Página ${index + 1}`, `Novo título: "${fd.get("title")}"`);
         saveState();
         alert(`✓ Página ${index + 1} atualizada no Flipbook!`);
       }
     },
 
     exportDataJsFile() {
+      logAction("💰 Receita & Backup", "Exportou data.js", "Gerou arquivo data.js para atualização no GitHub");
+      saveState();
       const content = `// ==========================================================================\n// TOBIAS MAGAZINE — Base de Dados Gerada pelo Painel de Gestão (CMS)\n// ==========================================================================\n\nwindow.TOBIAS_DATA = ${JSON.stringify(STATE, null, 2)};\n`;
       const blob = new Blob([content], { type: "application/javascript;charset=utf-8" });
       const url = URL.createObjectURL(blob);
@@ -2068,6 +2486,8 @@
     },
 
     exportBackupJson() {
+      logAction("💰 Receita & Backup", "Exportou Backup JSON", "Download completo da base local");
+      saveState();
       const blob = new Blob([JSON.stringify(STATE, null, 2)], { type: "application/json;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -2086,6 +2506,7 @@
           const imported = JSON.parse(e.target.result);
           if (imported && imported.edition && imported.directory) {
             STATE = imported;
+            logAction("💰 Receita & Backup", "Importou Backup JSON", `Arquivo: ${file.name}`);
             saveState();
             alert("✓ Backup importado com sucesso!");
           } else {
@@ -2227,6 +2648,7 @@
             phone: fd.get("phone").replace(/\D/g, ""),
             status: "Novo no Bairro"
           });
+          logAction("🏪 Guia do Comércio", "Cadastro via Portal", `Novo negócio: ${fd.get("name")}`);
           saveState();
           window.TobiasApp.closeModal();
         };
@@ -2263,6 +2685,7 @@
             details: fd.get("details"),
             phone: fd.get("phone").replace(/\D/g, "")
           });
+          logAction("📌 Classificados", "Anúncio via Portal", `Título: ${fd.get("title")} (${fd.get("price")})`);
           saveState();
           window.TobiasApp.closeModal();
         };
@@ -2275,10 +2698,239 @@
       if (modal) modal.classList.remove("open");
     },
 
+    // Integração Dinâmica com as Configurações do WhatsApp
     shareWhatsAppEdition() {
-      const url = window.location.href;
-      const text = `🗞️ *TOBIAS MAGAZINE — ${STATE.edition.number} no ar!* \nConfira o Guia do Comércio no WhatsApp, horários do Posto de Saúde, Agenda da Praça e Cupons de Desconto no nosso bairro:\n${url}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+      const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
+      const url = w.qrPosterUrl || window.location.href;
+      const msg = (w.shareTemplate || "")
+        .replace(/\{EDICAO\}/g, STATE.edition.number)
+        .replace(/\{URL\}/g, url);
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
+    },
+
+    contactCommercialWhatsApp() {
+      const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
+      const phone = w.comercialPhone || "5579999990000";
+      const msg = w.commercialTemplate || "Olá! Quero anunciar meu comércio na Tobias Magazine!";
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+    },
+
+    // ========================================================================
+    // SISTEMA DEDICADO DE IMPRESSÃO A4 (SEM DESCONFIGURAR O LAYOUT)
+    // ========================================================================
+    triggerCleanPrint(htmlContent) {
+      const printBox = document.getElementById("printableArea");
+      if (!printBox) return;
+      printBox.innerHTML = htmlContent;
+      document.body.classList.add("printing-active");
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.body.classList.remove("printing-active");
+          printBox.innerHTML = "";
+        }, 400);
+      }, 150);
+    },
+
+    // 1. Imprimir Cartaz de Vitrine QR Code (1 Página A4 Perfeitamente Centralizada)
+    printPosterA4() {
+      const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
+      logAction("🖨️ Impressão A4", "Imprimiu Cartaz QR Code", `Edição: ${STATE.edition.number}`);
+      saveState();
+
+      const html = `
+        <div class="print-poster-a4">
+          <div style="background:#181614; color:#fff; display:inline-block; padding:6px 18px; border-radius:99px; font-family:monospace; font-size:13px; font-weight:800; letter-spacing:0.08em; text-transform:uppercase;">
+            LOJA PARCEIRA OFICIAL • ${STATE.edition.number}
+          </div>
+
+          <h1 style="font-family:Georgia, serif; font-size:36px; font-weight:900; margin:16px 0 6px; letter-spacing:-0.02em; color:#d94e1f;">
+            TOBIAS MAGAZINE
+          </h1>
+          <div style="font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#524d47; margin-bottom:20px;">
+            O Jornal & Revista Digital do Nosso Bairro
+          </div>
+
+          <div style="background:#faf8f5; border:2px dashed #d94e1f; border-radius:14px; padding:18px; margin-bottom:22px;">
+            <h2 style="font-family:Georgia, serif; font-size:24px; font-weight:900; color:#181614; margin-bottom:8px;">
+              ${w.qrPosterTitle}
+            </h2>
+            <p style="font-size:15px; color:#524d47; max-width:460px; margin:0 auto;">
+              Aponte a câmera do seu celular para o QR Code abaixo e acesse gratuitamente o <strong>Guia do Comércio no WhatsApp</strong>, <strong>Horários do Posto de Saúde</strong>, <strong>Cupons de Desconto</strong> e <strong>Classificados</strong>:
+            </p>
+          </div>
+
+          <div style="width:230px; height:230px; margin:0 auto 18px; padding:14px; border:4px solid #181614; border-radius:16px; background:#fff;">
+            <svg viewBox="0 0 100 100" width="100%" height="100%" fill="#181614">
+              <rect x="5" y="5" width="26" height="26" fill="none" stroke="#181614" stroke-width="6"/>
+              <rect x="13" y="13" width="10" height="10"/>
+              <rect x="69" y="5" width="26" height="26" fill="none" stroke="#181614" stroke-width="6"/>
+              <rect x="77" y="13" width="10" height="10"/>
+              <rect x="5" y="69" width="26" height="26" fill="none" stroke="#181614" stroke-width="6"/>
+              <rect x="13" y="77" width="10" height="10"/>
+              <rect x="40" y="8" width="6" height="6"/>
+              <rect x="52" y="8" width="6" height="12"/>
+              <rect x="40" y="20" width="6" height="12"/>
+              <rect x="46" y="38" width="12" height="6"/>
+              <rect x="10" y="42" width="18" height="6"/>
+              <rect x="34" y="46" width="8" height="16"/>
+              <rect x="50" y="50" width="14" height="8"/>
+              <rect x="72" y="42" width="18" height="6"/>
+              <rect x="78" y="54" width="12" height="12"/>
+              <rect x="42" y="70" width="12" height="6"/>
+              <rect x="60" y="68" width="8" height="18"/>
+              <rect x="40" y="82" width="14" height="10"/>
+              <rect x="74" y="76" width="18" height="8"/>
+              <rect x="82" y="88" width="10" height="6"/>
+            </svg>
+          </div>
+
+          <div style="font-family:monospace; font-size:13px; font-weight:800; color:#1b6b53; margin-bottom:8px;">
+            🌐 ${w.qrPosterUrl}
+          </div>
+          <div style="font-size:14px; font-weight:700; color:#181614;">
+            📱 ${w.qrPosterFooter} • 📞 Redação WhatsApp: ${w.redacaoPhone}
+          </div>
+        </div>
+      `;
+      this.triggerCleanPrint(html);
+    },
+
+    // 2. Imprimir Boletim / Edição Completa Diagramada em A4 (Estilo Jornal Impresso para Mural)
+    printFullEditionA4() {
+      logAction("🖨️ Impressão A4", "Imprimiu Boletim da Edição", `Edição: ${STATE.edition.number}`);
+      saveState();
+
+      const c = STATE.edition.coverStory;
+      const html = `
+        <div class="print-newspaper-sheet">
+          <div style="border-bottom:3px solid #181614; padding-bottom:10px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:flex-end;">
+            <div>
+              <h1 style="font-family:Georgia, serif; font-size:30px; font-weight:900; margin:0; color:#181614;">
+                TOBIAS <span style="color:#d94e1f; font-style:italic;">Magazine</span>
+              </h1>
+              <div style="font-size:12px; font-weight:700; color:#524d47;">
+                JORNAL & GUIA COMUNITÁRIO DO BAIRRO • VERSÃO IMPRESSA PARA MURAL E CONDOMÍNIOS
+              </div>
+            </div>
+            <div style="text-align:right; font-family:monospace; font-size:12px; font-weight:800;">
+              <div>${STATE.edition.number}</div>
+              <div>${STATE.edition.periodicity}</div>
+            </div>
+          </div>
+
+          <div style="background:#fef2f2; border:1.5px solid #b91c1c; color:#b91c1c; padding:8px 12px; border-radius:6px; font-size:12px; font-weight:700; margin-bottom:14px;">
+            ⚡ ${STATE.edition.urgentTicker}
+          </div>
+
+          <div class="print-sheet-block">
+            <div style="font-size:11px; font-weight:800; color:#d94e1f; text-transform:uppercase;">${c.kicker}</div>
+            <h2 style="font-family:Georgia, serif; font-size:20px; font-weight:900; margin:4px 0 6px;">${c.title}</h2>
+            <p style="font-size:13px; color:#333; margin-bottom:8px;"><strong>${c.lead}</strong></p>
+            <div style="font-size:12.5px; color:#222; line-height:1.5;">${c.fullText}</div>
+          </div>
+
+          <div class="print-sheet-block">
+            <h3 style="font-family:Georgia, serif; font-size:16px; margin-bottom:8px; color:#1b6b53;">
+              🏪 Guia Rápido do Comércio & Profissionais do Bairro (WhatsApp)
+            </h3>
+            <table style="width:100%; border-collapse:collapse; font-size:12px;">
+              ${STATE.directory
+                .map(
+                  (b) => `
+                <tr style="border-bottom:1px dashed #ccc;">
+                  <td style="padding:5px 2px;"><strong>${b.avatar || ""} ${b.name}</strong> (${b.category})</td>
+                  <td style="padding:5px 2px;">📍 ${b.address}</td>
+                  <td style="padding:5px 2px; text-align:right; font-family:monospace; font-weight:700;">📞 ${b.phone}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </table>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;" class="print-sheet-block">
+            <div>
+              <h3 style="font-family:Georgia, serif; font-size:15px; margin-bottom:6px; color:#d94e1f;">
+                🏷️ Cupons de Desconto da Quinzena
+              </h3>
+              ${STATE.promotions
+                .map(
+                  (p) => `
+                <div style="font-size:11.5px; margin-bottom:6px; padding:6px; border:1px dashed #d94e1f; border-radius:4px;">
+                  <strong>[${p.discount}] ${p.store}</strong> — Código: <strong>${p.code}</strong><br/>
+                  <span>${p.title}</span>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+            <div>
+              <h3 style="font-family:Georgia, serif; font-size:15px; margin-bottom:6px; color:#1f3a60;">
+                📅 Agenda Cultural & Horários Úteis
+              </h3>
+              ${STATE.events
+                .map(
+                  (ev) => `
+                <div style="font-size:11.5px; margin-bottom:5px;">
+                  • <strong>${ev.day}/${ev.month} (${ev.time}):</strong> ${ev.title} — <em>${ev.location}</em>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+
+          <div style="text-align:center; font-size:11px; color:#555; margin-top:10px;">
+            Acesse a versão interativa no celular: <strong>${(STATE.whatsappConfig && STATE.whatsappConfig.qrPosterUrl) || "https://ebersantana.github.io/TobiasMagazine/"}</strong>
+          </div>
+        </div>
+      `;
+      this.triggerCleanPrint(html);
+    },
+
+    // 3. Imprimir Relatório de Auditoria de Acessos e Ações em A4
+    printAuditLogsA4() {
+      const logs = STATE.auditLogs || [];
+      const html = `
+        <div class="print-newspaper-sheet">
+          <h1 style="font-family:Georgia, serif; font-size:22px; margin-bottom:4px;">
+            📋 Relatório Oficial de Auditoria & Logs de Acesso — Tobias Magazine
+          </h1>
+          <p style="font-size:12px; color:#555; margin-bottom:14px;">
+            Gerado em: ${new Date().toLocaleString("pt-BR")} • Total de Eventos Registrados: ${logs.length}
+          </p>
+          <table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <thead>
+              <tr style="background:#f3efe9; border-bottom:2px solid #181614;">
+                <th style="padding:6px; text-align:left;">Data/Hora</th>
+                <th style="padding:6px; text-align:left;">Usuário</th>
+                <th style="padding:6px; text-align:left;">Perfil</th>
+                <th style="padding:6px; text-align:left;">Módulo</th>
+                <th style="padding:6px; text-align:left;">Ação</th>
+                <th style="padding:6px; text-align:left;">Detalhes</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${logs
+                .map(
+                  (l) => `
+                <tr style="border-bottom:1px solid #ddd;">
+                  <td style="padding:5px;">${l.timestamp}</td>
+                  <td style="padding:5px;"><strong>${l.fullName}</strong> (@${l.username})</td>
+                  <td style="padding:5px;">${l.roleName}</td>
+                  <td style="padding:5px;">${l.module}</td>
+                  <td style="padding:5px;"><strong>${l.action}</strong></td>
+                  <td style="padding:5px;">${l.details}</td>
+                </tr>
+              `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+      this.triggerCleanPrint(html);
     }
   };
 })();

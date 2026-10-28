@@ -74,7 +74,7 @@ Clique no botão **`⚙️ Gestão / CMS`** no cabeçalho (ou no ícone **`⚙�
 - **Gestor Comercial & Guia**: Usuário `comercial` | Senha `123` *(Acessa apenas Guia do Comércio, Cupons, Classificados e Receita)*
 - **Colaborador Comunitário**: Usuário `comunidade` | Senha `123` *(Acessa apenas Utilidade Pública, Agenda e Classificados)*
 
-#### 🛠️ Os 10 Módulos do Painel Administrativo (Filtrados conforme as Atribuições de cada Perfil):
+#### 🛠️ Os 12 Módulos do Painel Administrativo (Filtrados conforme as Atribuições de cada Perfil):
 1. **🗞️ 1. Edição & Capa**: Altere o número da edição quinzenal, o texto do Alerta Vermelho de Utilidade Pública no topo e a foto/texto da Reportagem de Capa.
 2. **🏪 2. Guia do Comércio**: Adicione, destaque (`★ Patrocinado`) ou exclua padarias, farmácias, pet shops, chaveiros e profissionais liberais.
 3. **🚨 3. Utilidade Pública**: Publique ou remova avisos urgentes de falta de água, obras nas ruas, vacinação no posto de saúde e segurança.
@@ -84,10 +84,23 @@ Clique no botão **`⚙️ Gestão / CMS`** no cabeçalho (ou no ícone **`⚙�
 7. **📌 7. Classificados**: Modere ou publique anúncios de aluguel/venda de imóveis, vagas de emprego e adoção pet.
 8. **📖 8. Páginas Flipbook**: Edite os títulos, subtítulos e chamadas de cada uma das **10 páginas enxutas** da revista folheável mobile.
 9. **💰 9. Receita & Backup**: Controle os contratos publicitários da quinzena (Planos R\$ 49, R\$ 120 e R\$ 220), veja o faturamento total em tempo real, faça **Backup/Importação JSON** ou clique em **`⬇️ Baixar data.js Atualizado`** para substituir no GitHub com 1 clique.
-10. **🔐 10. Perfis & Acessos (Exclusivo Administrador)**:
-    - **Criar Novos Perfis Personalizados**: Dê um nome ao perfil (ex.: *Repórter Fotográfico*, *Moderador de Classificados*) e marque em caixas de seleção exatamente quais dos 10 módulos ele poderá acessar.
+10. **📲 10. Config. WhatsApp**:
+    - Configure os números oficiais de **WhatsApp da Redação** (sugestões de pauta/reclamações) e do **WhatsApp Comercial** (venda de anúncios e Mídia Kit).
+    - Defina o link de convite do **Grupo/Comunidade Oficial do Bairro** e personalize os modelos (*templates*) automáticos de mensagens com variáveis dinâmicas (`{EDICAO}`, `{URL}`, `{LOJA}`, `{CUPOM}`, `{DESCONTO}`).
+    - Personalize o título, a URL e o rodapé do **Cartaz QR Code de Vitrine A4**.
+11. **📋 11. Logs & Auditoria (Rastreabilidade por Perfil)**:
+    - Registra automaticamente todos os logins (bem-sucedidos e tentativas inválidas), logouts, trocas de edição e todas as ações de criação, edição ou exclusão realizadas por qualquer perfil (`admin`, `editor`, `comercial`, `comunidade` ou perfis criados).
+    - Permite filtrar eventos por usuário, exportar planilha **CSV (`📊 Exportar Relatório CSV`)** para o Excel e imprimir relatório oficial em **A4 (`🖨️ Imprimir Relatório de Auditoria A4`)**.
+12. **🔐 12. Perfis & Acessos (Exclusivo Administrador)**:
+    - **Criar Novos Perfis Personalizados**: Dê um nome ao perfil (ex.: *Repórter Fotográfico*, *Moderador de Classificados*) e marque em caixas de seleção exatamente quais dos 12 módulos ele poderá acessar.
     - **Ativar/Desativar Atribuições em 1 Clique**: Nos cartões de perfis existentes, basta clicar sobre os botões de atribuição (`✓ 1. Edição & Capa`, `+ 5. Cupons & Ofertas`, etc.) para ligar ou desligar permissões instantaneamente.
     - **Gerenciar Usuários e Senhas**: Crie novos logins vinculados a qualquer perfil e altere a senha do Administrador ou de qualquer membro da equipe.
+
+#### 🖨️ Sistema de Impressão A4 Dedicado (Sem Desconfigurar o Layout)
+O portal conta com um motor exclusivo de impressão (`#printableArea` + `@page { size: A4 portrait; }`) que isola a folha impressa da interface escura/responsiva e gera 3 documentos diagramados:
+1. **🖨️ Cartaz QR Code de Vitrine (1 Página A4)**: Pronto para fixar no caixa ou vitrine das lojas parceiras.
+2. **📰 Boletim da Edição para Mural/Condomínio (A4)**: Resumo impresso estilo jornal com reportagem de capa, tabela do Guia do Comércio com telefones, cupons de desconto e agenda da praça.
+3. **📋 Relatório Oficial de Auditoria & Acessos (A4)**: Tabela completa com data/hora, usuário, perfil, módulo e detalhes das ações executadas.
 
 ### 4. Como Executar Localmente ou Ativar o GitHub Pages
 ```bash

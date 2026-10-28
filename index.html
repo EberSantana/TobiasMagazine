@@ -336,22 +336,24 @@
           </div>
 
           <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
-            <a href="https://wa.me/5579999990000?text=Ol%C3%A1!%20Quero%20anunciar%20meu%20neg%C3%B3cio%20na%20pr%C3%B3xima%20edi%C3%A7%C3%A3o%20da%20Tobias%20Magazine!"
-               target="_blank" rel="noopener" class="btn btn-whatsapp">
+            <button type="button" class="btn btn-whatsapp" onclick="window.TobiasApp.contactCommercialWhatsApp()">
               💬 Falar com Comercial no WhatsApp
-            </a>
-            <button class="btn btn-glass" onclick="window.print()">
-              🖨️ Imprimir Cartaz QR Code de Vitrine
+            </button>
+            <button type="button" class="btn btn-glass" onclick="window.TobiasApp.printPosterA4()">
+              🖨️ Imprimir Cartaz QR Code (A4 Vitrine)
+            </button>
+            <button type="button" class="btn btn-glass" onclick="window.TobiasApp.printFullEditionA4()">
+              📰 Imprimir Edição Resumo (A4)
             </button>
           </div>
         </div>
 
         <!-- Cartaz Pronto para Imprimir e Colar na Vitrine -->
         <div class="qr-poster-card">
-          <span style="background:#181614; color:#fff; font-size:0.68rem; font-weight:800; padding:3px 10px; border-radius:99px; text-transform:uppercase;">
+          <span id="qrPosterHeadlineBadge" style="background:#181614; color:#fff; font-size:0.68rem; font-weight:800; padding:3px 10px; border-radius:99px; text-transform:uppercase;">
             Cartaz de Vitrine • Loja Parceira
           </span>
-          <h3 style="font-family:var(--font-serif); font-size:1.35rem; font-weight:900; margin-top:8px;">
+          <h3 id="qrPosterMainTitle" style="font-family:var(--font-serif); font-size:1.35rem; font-weight:900; margin-top:8px;">
             LEIA GRÁTIS A REVISTA DO NOSSO BAIRRO!
           </h3>
           <p style="font-size:0.8rem; color:#524d47; margin-top:4px;">
@@ -419,6 +421,12 @@
           </p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-glass" onclick="window.TobiasApp.printPosterA4()">
+            🖨️ Cartaz QR (A4)
+          </button>
+          <button type="button" class="btn btn-glass" onclick="window.TobiasApp.printFullEditionA4()">
+            📰 Imprimir Edição (A4)
+          </button>
           <button id="exportDataBtnTop" class="btn btn-primary" onclick="window.TobiasApp.exportDataJsFile()">
             ⬇️ Baixar data.js
           </button>
@@ -466,6 +474,9 @@
   <div id="genericModal" class="modal-backdrop" onclick="if(event.target===this) window.TobiasApp.closeModal()">
     <div class="modal-box" id="genericModalContent"></div>
   </div>
+
+  <!-- ÁREA DEDICADA E ISOLADA PARA IMPRESSÃO A4 (CARTAZ QR CODE OU EDIÇÃO IMPRESSA) -->
+  <div id="printableArea" aria-hidden="true"></div>
 
   <!-- BARRA DE NAVEGAÇÃO INFERIOR (EXCLUSIVA PARA CELULAR / MOBILE-FIRST) -->
   <nav class="bottom-nav" aria-label="Navegação Rápida no Celular">

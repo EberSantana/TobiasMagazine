@@ -554,17 +554,31 @@
     const container = document.getElementById("storiesBar");
     if (!container) return;
 
+    // Cores de fundo dos cards (texto branco com contraste AA). Cada story pode
+    // definir a sua em "color" ou uma foto em "image" no data.js.
+    const TONES = ["#9a3412", "#1f4e5f", "#3f6212", "#c2410c", "#6b3f2a", "#1c1917"];
+
     container.innerHTML = STATE.stories
-      .map(
-        (st) => `
-      <button class="story-item" onclick="window.TobiasApp.openStory('${st.id}')">
-        <div class="story-ring">
-          <div class="story-avatar">${st.icon}</div>
-        </div>
-        <span class="story-label">${st.label}</span>
+      .map((st, i) => {
+        const bg = st.image
+          ? `background-color:${TONES[i % TONES.length]}; background-image:url('${escapeAttr(st.image)}');`
+          : `background-color:${escapeAttr(st.color || TONES[i % TONES.length])};`;
+        return `
+      <button class="story-card ${st.image ? "has-photo" : ""}" style="${bg}"
+              onclick="window.TobiasApp.openStory('${st.id}')"
+              aria-label="${escapeAttr(st.label + ": " + (st.title || ""))}">
+        <span class="story-card-art" aria-hidden="true">${st.icon}</span>
+        <span class="story-card-top">
+          <span class="story-card-icon">${st.icon}</span>
+          ${st.duration ? `<span class="story-card-dur">▶ ${st.duration}</span>` : ""}
+        </span>
+        <span class="story-card-text">
+          <span class="story-card-kicker">${st.label}</span>
+          <span class="story-card-title">${st.title || st.label}</span>
+        </span>
       </button>
-    `
-      )
+    `;
+      })
       .join("");
   }
 

@@ -570,7 +570,6 @@
         <span class="story-card-art" aria-hidden="true">${st.icon}</span>
         <span class="story-card-top">
           <span class="story-card-icon">${st.icon}</span>
-          ${st.duration ? `<span class="story-card-dur">▶ ${st.duration}</span>` : ""}
         </span>
         <span class="story-card-text">
           <span class="story-card-kicker">${st.label}</span>
@@ -2723,7 +2722,7 @@
       content.innerHTML = `
         <div style="text-align:center; padding:8px 0;">
           <div style="font-size:3rem; margin-bottom:8px;">${st.icon}</div>
-          <span class="tag-badge">Story do Bairro • ⏱️ ${st.duration}</span>
+          <span class="tag-badge">Story do Bairro</span>
           <h3 style="font-family:var(--font-serif); font-size:1.5rem; margin:12px 0 8px;">${st.title}</h3>
           <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:20px;">${st.summary}</p>
           <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">

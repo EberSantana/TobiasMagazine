@@ -1,27 +1,95 @@
 // ==========================================================================
-// TOBIAS MAGAZINE — Lógica Interativa + Painel Completo de Gestão (CMS Local)
+// TOBIAS MAGAZINE — Lógica Interativa + CMS Editorial com Login & RBAC
 // ==========================================================================
 
 (function () {
-  const STORAGE_KEY = "tobias_cms_state_v1";
+  const STORAGE_KEY = "tobias_cms_state_v2";
+  const SESSION_KEY = "tobias_cms_session_v2";
 
-  // Carrega estado salvo no CMS ou clona a base padrão do data.js
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.edition && parsed.directory) {
-          if (!parsed.sponsors) parsed.sponsors = getDefaultSponsors();
-          return parsed;
-        }
+  // Catálogo oficial de módulos/permissões que o Administrador pode atribuir aos perfis
+  const ALL_MODULES = [
+    { id: "edition", label: "🗞️ 1. Edição & Capa", desc: "Capa, número da edição e alerta urgente" },
+    { id: "directory", label: "🏪 2. Guia do Comércio", desc: "Lojas, serviços e selo patrocinado" },
+    { id: "utility", label: "🚨 3. Utilidade Pública", desc: "Avisos de água, luz, obras e saúde" },
+    { id: "people", label: "🎙️ 4. Gente & Publis", desc: "Histórias de moradores e publieditoriais" },
+    { id: "promotions", label: "🏷️ 5. Cupons & Ofertas", desc: "Descontos exclusivos dos lojistas" },
+    { id: "events", label: "📅 6. Agenda & Lazer", desc: "Feiras, quermesses, esportes e cultura" },
+    { id: "classifieds", label: "📌 7. Classificados", desc: "Imóveis, vagas, vendas e adoção pet" },
+    { id: "flipbook", label: "📖 8. Páginas Flipbook", desc: "Diagramação das 10 páginas mobile" },
+    { id: "monetization", label: "💰 9. Receita & Backup", desc: "Contratos publicitários, backup e data.js" },
+    { id: "users_rbac", label: "🔐 10. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" }
+  ];
+
+  // Perfis padrão pré-configurados (O Administrador pode criar novos perfis personalizados)
+  function getDefaultRoles() {
+    return [
+      {
+        id: "role-admin",
+        name: "Administrador Geral",
+        badgeColor: "#d94e1f",
+        description: "Acesso total a todos os módulos, financeiro, exportação e criação de perfis/usuários.",
+        permissions: ALL_MODULES.map((m) => m.id),
+        isSystem: true
+      },
+      {
+        id: "role-editor",
+        name: "Editor de Pauta & Jornalismo",
+        badgeColor: "#1b6b53",
+        description: "Gerencia Edição & Capa, Utilidade Pública, Gente do Bairro, Agenda Cultural e Páginas do Flipbook.",
+        permissions: ["edition", "utility", "people", "events", "flipbook"],
+        isSystem: false
+      },
+      {
+        id: "role-comercial",
+        name: "Gestor Comercial & Guia",
+        badgeColor: "#d99b1f",
+        description: "Gerencia Guia do Comércio, Cupons de Promoções, Classificados e Contratos Publicitários.",
+        permissions: ["directory", "promotions", "classifieds", "monetization"],
+        isSystem: false
+      },
+      {
+        id: "role-colab",
+        name: "Colaborador Comunitário",
+        badgeColor: "#1f3a60",
+        description: "Apoia na atualização de Utilidade Pública, Agenda da Praça e moderação de Classificados.",
+        permissions: ["utility", "events", "classifieds"],
+        isSystem: false
       }
-    } catch (e) {
-      console.warn("Erro ao ler estado salvo, usando padrão:", e);
-    }
-    const clone = JSON.parse(JSON.stringify(window.TOBIAS_DATA));
-    clone.sponsors = getDefaultSponsors();
-    return clone;
+    ];
+  }
+
+  // Usuários iniciais (Credenciais para login e demonstração rápida)
+  function getDefaultUsers() {
+    return [
+      {
+        id: "usr-1",
+        username: "admin",
+        password: "123",
+        fullName: "Administrador Chefe (Tobias)",
+        roleId: "role-admin"
+      },
+      {
+        id: "usr-2",
+        username: "editor",
+        password: "123",
+        fullName: "Mariana • Editora de Jornalismo",
+        roleId: "role-editor"
+      },
+      {
+        id: "usr-3",
+        username: "comercial",
+        password: "123",
+        fullName: "Roberto • Gestor Comercial",
+        roleId: "role-comercial"
+      },
+      {
+        id: "usr-4",
+        username: "comunidade",
+        password: "123",
+        fullName: "Dona Lurdes • Associação de Moradores",
+        roleId: "role-colab"
+      }
+    ];
   }
 
   function getDefaultSponsors() {
@@ -61,7 +129,38 @@
     ];
   }
 
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && parsed.edition && parsed.directory) {
+          if (!parsed.sponsors) parsed.sponsors = getDefaultSponsors();
+          if (!parsed.roles) parsed.roles = getDefaultRoles();
+          if (!parsed.users) parsed.users = getDefaultUsers();
+          return parsed;
+        }
+      }
+    } catch (e) {
+      console.warn("Erro ao carregar estado salvo:", e);
+    }
+    const clone = JSON.parse(JSON.stringify(window.TOBIAS_DATA));
+    clone.sponsors = getDefaultSponsors();
+    clone.roles = getDefaultRoles();
+    clone.users = getDefaultUsers();
+    return clone;
+  }
+
+  function loadSession() {
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return null;
+  }
+
   let STATE = loadState();
+  let CURRENT_USER = loadSession();
   let currentCategory = "todos";
   let searchQuery = "";
   let currentFlipPage = 1;
@@ -70,6 +169,32 @@
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
     renderAll();
+  }
+
+  function saveSession(userObj) {
+    CURRENT_USER = userObj;
+    if (userObj) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(userObj));
+    } else {
+      localStorage.removeItem(SESSION_KEY);
+    }
+  }
+
+  function getActiveRole() {
+    if (!CURRENT_USER) return null;
+    return (
+      STATE.roles.find((r) => r.id === CURRENT_USER.roleId) || {
+        id: "role-guest",
+        name: "Convidado",
+        permissions: ["utility"]
+      }
+    );
+  }
+
+  function hasPermission(permId) {
+    const role = getActiveRole();
+    if (!role) return false;
+    return role.permissions.includes(permId);
   }
 
   function renderAll() {
@@ -82,10 +207,9 @@
     renderEvents();
     renderClassifieds();
     renderFlipbookPage(currentFlipPage);
-    renderAdminDashboard();
+    renderAdminView();
   }
 
-  // Inicialização
   document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     renderAll();
@@ -274,7 +398,7 @@
   }
 
   // --------------------------------------------------------------------------
-  // 3. HISTÓRIAS DE MORADORES (GENTE DO BAIRRO & PUBLIEDITORIAL)
+  // 3. HISTÓRIAS DE MORADORES
   // --------------------------------------------------------------------------
   function renderPeopleSection() {
     const grid = document.getElementById("peopleStoriesGrid");
@@ -300,7 +424,7 @@
   }
 
   // --------------------------------------------------------------------------
-  // 4. ACHADOS E PROMOÇÕES (CUPONS COPIÁVEIS)
+  // 4. ACHADOS E PROMOÇÕES
   // --------------------------------------------------------------------------
   function renderPromotions() {
     const grid = document.getElementById("promotionsGrid");
@@ -339,7 +463,7 @@
   }
 
   // --------------------------------------------------------------------------
-  // 5. AGENDA DE EVENTOS E LAZER
+  // 5. AGENDA DE EVENTOS
   // --------------------------------------------------------------------------
   function renderEvents() {
     const grid = document.getElementById("eventsGrid");
@@ -400,7 +524,7 @@
   }
 
   // --------------------------------------------------------------------------
-  // MODO FLIPBOOK INTERATIVO (10 PÁGINAS ENXUTAS PARA CELULAR)
+  // MODO FLIPBOOK INTERATIVO (10 PÁGINAS)
   // --------------------------------------------------------------------------
   function renderFlipbookPage(pageNum) {
     const totalFlipPages = STATE.flipbookPages.length;
@@ -412,12 +536,8 @@
     const progressFill = document.getElementById("flipProgressFill");
     const dotsContainer = document.getElementById("flipPageDots");
 
-    if (counter) {
-      counter.textContent = `Página ${currentFlipPage} de ${totalFlipPages}`;
-    }
-    if (progressFill) {
-      progressFill.style.width = `${(currentFlipPage / totalFlipPages) * 100}%`;
-    }
+    if (counter) counter.textContent = `Página ${currentFlipPage} de ${totalFlipPages}`;
+    if (progressFill) progressFill.style.width = `${(currentFlipPage / totalFlipPages) * 100}%`;
     if (dotsContainer) {
       dotsContainer.innerHTML = STATE.flipbookPages
         .map(
@@ -607,12 +727,125 @@
   }
 
   // ==========================================================================
-  // PAINEL DE GESTÃO / CMS EDITORIAL (ADMIN)
+  // AUTENTICAÇÃO (LOGIN) & PAINEL DE GESTÃO COM CONTROLE DE PERFIS (RBAC)
   // ==========================================================================
+  function renderAdminView() {
+    const loginGate = document.getElementById("adminLoginGate");
+    const protectedArea = document.getElementById("adminProtectedArea");
+    if (!loginGate || !protectedArea) return;
+
+    if (!CURRENT_USER) {
+      loginGate.style.display = "block";
+      protectedArea.style.display = "none";
+      renderLoginScreen(loginGate);
+    } else {
+      loginGate.style.display = "none";
+      protectedArea.style.display = "block";
+      renderAdminDashboard();
+    }
+  }
+
+  function renderLoginScreen(container) {
+    container.innerHTML = `
+      <div class="auth-card">
+        <div style="text-align:center; margin-bottom:20px;">
+          <span class="tag-badge">Acesso Restrito • Equipe & Colaboradores</span>
+          <h2 style="font-family:var(--font-serif); font-size:1.65rem; margin-top:10px;">
+            🔐 Login da Central de Gestão
+          </h2>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">
+            Entre com seu usuário e senha para acessar os módulos atribuídos ao seu perfil.
+          </p>
+        </div>
+
+        <form id="cmsLoginForm" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="cms-field">
+            <label>Usuário (Login)</label>
+            <input id="loginUsername" name="username" placeholder="Ex: admin, editor, comercial..." required />
+          </div>
+          <div class="cms-field">
+            <label>Senha</label>
+            <input id="loginPassword" type="password" name="password" placeholder="Digite sua senha (padrão: 123)" required />
+          </div>
+          <div id="loginErrorMsg" style="display:none; color:var(--urgent-text); background:var(--urgent-bg); padding:8px 12px; border-radius:6px; font-size:0.8rem; font-weight:700;"></div>
+          <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:0.95rem; margin-top:4px;">
+            Entrar no Painel de Gestão →
+          </button>
+        </form>
+
+        <div class="auth-demo-pills">
+          <span style="width:100%; font-size:0.74rem; color:var(--text-muted); font-weight:700;">
+            ⚡ Preenchimento Rápido para Teste de Perfis (Senha: <code>123</code>):
+          </span>
+          ${STATE.users
+            .map((u) => {
+              const r = STATE.roles.find((rl) => rl.id === u.roleId);
+              return `
+              <button type="button" class="auth-demo-btn" onclick="window.TobiasApp.fillDemoLogin('${u.username}', '${u.password}')">
+                👤 <strong>${u.username}</strong> (${r ? r.name : "Perfil"})
+              </button>
+            `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `;
+
+    document.getElementById("cmsLoginForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const uName = (fd.get("username") || "").trim().toLowerCase();
+      const pass = fd.get("password") || "";
+
+      const found = STATE.users.find(
+        (u) => u.username.toLowerCase() === uName && u.password === pass
+      );
+
+      if (!found) {
+        const errEl = document.getElementById("loginErrorMsg");
+        if (errEl) {
+          errEl.style.display = "block";
+          errEl.textContent = "✗ Usuário ou senha inválidos. Tente novamente.";
+        }
+        return;
+      }
+
+      saveSession(found);
+      const role = getActiveRole();
+      if (role && role.permissions.length > 0) {
+        currentAdminTab = role.permissions[0];
+      }
+      renderAdminView();
+    };
+  }
+
   function renderAdminDashboard() {
     const kpiContainer = document.getElementById("adminKpis");
+    const sidebarContainer = document.getElementById("adminSidebarNav");
     const panelContainer = document.getElementById("adminContentPanel");
-    if (!kpiContainer || !panelContainer) return;
+    const userBadge = document.getElementById("activeUserBadge");
+    const permsLabel = document.getElementById("activeUserPermsLabel");
+    const exportBtnTop = document.getElementById("exportDataBtnTop");
+
+    if (!kpiContainer || !sidebarContainer || !panelContainer) return;
+
+    const role = getActiveRole();
+    const allowedModules = ALL_MODULES.filter((m) => role.permissions.includes(m.id));
+
+    // Garante que a aba ativa pertence às permissões do usuário logado
+    if (!role.permissions.includes(currentAdminTab) && allowedModules.length > 0) {
+      currentAdminTab = allowedModules[0].id;
+    }
+
+    if (userBadge) {
+      userBadge.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> • <span style="background:${role.badgeColor || "#d94e1f"}; padding:2px 8px; border-radius:99px; font-size:0.72rem;">${role.name}</span>`;
+    }
+    if (permsLabel) {
+      permsLabel.textContent = `${role.description} (${allowedModules.length} de ${ALL_MODULES.length} módulos liberados)`;
+    }
+    if (exportBtnTop) {
+      exportBtnTop.style.display = hasPermission("monetization") || hasPermission("users_rbac") ? "inline-flex" : "none";
+    }
 
     const totalRevenue = (STATE.sponsors || []).reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
 
@@ -634,19 +867,37 @@
         <span class="kpi-label">🏷️ Cupons Ativos</span>
       </div>
       <div class="kpi-card">
-        <span class="kpi-num">${STATE.events.length + STATE.classifieds.length}</span>
-        <span class="kpi-label">📅 Eventos & Anúncios</span>
+        <span class="kpi-num">${STATE.roles.length} / ${STATE.users.length}</span>
+        <span class="kpi-label">🔐 Perfis / Usuários</span>
       </div>
+      ${
+        hasPermission("monetization")
+          ? `
       <div class="kpi-card">
         <span class="kpi-num" style="color:var(--brand-secondary);">R$ ${totalRevenue}</span>
         <span class="kpi-label">💰 Receita da Edição</span>
-      </div>
+      </div>`
+          : ""
+      }
     `;
 
-    // Atualiza estado visual das abas laterais
-    document.querySelectorAll(".admin-tab-btn").forEach((btn) => {
-      btn.classList.toggle("active", btn.getAttribute("data-tab") === currentAdminTab);
-    });
+    // Renderiza apenas as abas permitidas para o perfil do usuário logado
+    sidebarContainer.innerHTML = allowedModules
+      .map(
+        (m) => `
+      <button class="admin-tab-btn ${m.id === currentAdminTab ? "active" : ""}"
+              onclick="window.TobiasApp.switchAdminTab('${m.id}')">
+        <span>${m.label}</span>
+        <span>→</span>
+      </button>
+    `
+      )
+      .join("");
+
+    if (allowedModules.length === 0) {
+      panelContainer.innerHTML = `<p>Seu perfil não possui módulos atribuídos no momento. Solicite liberação ao Administrador.</p>`;
+      return;
+    }
 
     if (currentAdminTab === "edition") {
       renderAdminEditionTab(panelContainer);
@@ -666,10 +917,214 @@
       renderAdminFlipbookTab(panelContainer);
     } else if (currentAdminTab === "monetization") {
       renderAdminMonetizationTab(panelContainer, totalRevenue);
+    } else if (currentAdminTab === "users_rbac") {
+      renderAdminRbacTab(panelContainer);
     }
   }
 
-  // 1. Aba Edição, Alerta Topo e Reportagem de Capa
+  // --------------------------------------------------------------------------
+  // MÓDULO 10 (EXCLUSIVO ADMIN): CRIAR PERFIS (ROLES), ATRIBUIÇÕES E USUÁRIOS
+  // --------------------------------------------------------------------------
+  function renderAdminRbacTab(container) {
+    container.innerHTML = `
+      <h3 style="font-family:var(--font-serif); font-size:1.45rem; margin-bottom:4px;">
+        🔐 Gestão de Perfis de Acesso (RBAC), Atribuições & Usuários
+      </h3>
+      <p style="font-size:0.86rem; color:var(--text-secondary); margin-bottom:20px;">
+        Como <strong>Administrador</strong>, você pode criar novos perfis personalizados, escolher exatamente quais módulos cada perfil pode acessar, criar contas de usuários e alterar sua senha de Administrador.
+      </p>
+
+      <!-- BLOCO A: CRIAR NOVO PERFIL COM ATRIBUIÇÕES ESPECÍFICAS -->
+      <div style="margin-bottom:28px;">
+        <h4 style="font-family:var(--font-serif); font-size:1.18rem; margin-bottom:10px;">
+          1️⃣ Criar Novo Perfil & Definir Atribuições (Permissões)
+        </h4>
+        <form id="cmsCreateRoleForm" class="cms-form-grid two-cols">
+          <div class="cms-field">
+            <label>Nome do Perfil</label>
+            <input name="name" placeholder="Ex: Repórter Fotográfico, Moderador de Ofertas..." required />
+          </div>
+          <div class="cms-field">
+            <label>Cor do Selo do Perfil</label>
+            <select name="badgeColor">
+              <option value="#1b6b53">🟢 Verde Editorial</option>
+              <option value="#1f3a60">🔵 Azul Institucional</option>
+              <option value="#d99b1f">🟡 Dourado Comercial</option>
+              <option value="#7c3aed">🟣 Roxo Criativo</option>
+              <option value="#d94e1f">🟠 Terracota Principal</option>
+            </select>
+          </div>
+          <div class="cms-field full">
+            <label>Descrição das Responsabilidades do Perfil</label>
+            <input name="description" placeholder="Descreva o que este perfil faz na revista..." required />
+          </div>
+          <div class="cms-field full">
+            <label>Selecione as Atribuições (Módulos que este perfil poderá gerenciar):</label>
+            <div class="perm-checkbox-grid">
+              ${ALL_MODULES.map(
+                (m) => `
+                <label class="perm-check-label">
+                  <input type="checkbox" name="perms" value="${m.id}" ${m.id === "utility" || m.id === "events" ? "checked" : ""} />
+                  <span>${m.label}</span>
+                </label>
+              `
+              ).join("")}
+            </div>
+          </div>
+          <div class="cms-field full" style="display:flex; justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary">+ Criar Perfil com Estas Atribuições</button>
+          </div>
+        </form>
+
+        <!-- Lista de Perfis Existentes (Com edição rápida de atribuições) -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          ${STATE.roles
+            .map(
+              (r) => `
+            <div class="cms-list-item" style="align-items:flex-start; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; width:100%; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div>
+                  <span style="background:${r.badgeColor || "#1f3a60"}; color:#fff; font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:99px;">
+                    ${r.name}
+                  </span>
+                  <span style="font-size:0.82rem; color:var(--text-secondary); margin-left:8px;">${r.description}</span>
+                </div>
+                ${
+                  r.isSystem
+                    ? '<span style="font-size:0.72rem; font-family:var(--font-mono); color:var(--text-muted);">Perfil Mestre do Sistema</span>'
+                    : `<button class="btn-danger" onclick="window.TobiasApp.deleteRole('${r.id}')">Excluir Perfil</button>`
+                }
+              </div>
+
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                ${ALL_MODULES.map((m) => {
+                  const active = r.permissions.includes(m.id);
+                  return `
+                    <button type="button"
+                            style="border:1px solid ${active ? "var(--brand-secondary)" : "var(--border-color)"}; background:${active ? "var(--ok-bg)" : "var(--bg-surface)"}; color:${active ? "var(--ok-text)" : "var(--text-muted)"}; font-size:0.72rem; font-weight:700; padding:4px 8px; border-radius:6px; cursor:${r.isSystem && m.id === "users_rbac" ? "not-allowed" : "pointer"};"
+                            onclick="window.TobiasApp.toggleRolePermission('${r.id}', '${m.id}')"
+                            title="Clique para ativar/desativar esta atribuição neste perfil">
+                      ${active ? "✓" : "+"} ${m.label}
+                    </button>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+
+      <!-- BLOCO B: CRIAR E GERENCIAR USUÁRIOS / SENHAS -->
+      <div style="border-top:2px solid var(--border-color); padding-top:24px;">
+        <h4 style="font-family:var(--font-serif); font-size:1.18rem; margin-bottom:10px;">
+          2️⃣ Cadastrar Usuários da Equipe & Alterar Senhas
+        </h4>
+        <form id="cmsCreateUserForm" class="cms-form-grid two-cols">
+          <div class="cms-field">
+            <label>Nome Completo / Cargo</label>
+            <input name="fullName" placeholder="Ex: Carlos • Fotógrafo do Bairro" required />
+          </div>
+          <div class="cms-field">
+            <label>Perfil Atribuído</label>
+            <select name="roleId">
+              ${STATE.roles.map((r) => `<option value="${r.id}">${r.name}</option>`).join("")}
+            </select>
+          </div>
+          <div class="cms-field">
+            <label>Login (Nome de Usuário)</label>
+            <input name="username" placeholder="Ex: carlos" required />
+          </div>
+          <div class="cms-field">
+            <label>Senha de Acesso</label>
+            <input name="password" type="text" placeholder="Defina a senha" required />
+          </div>
+          <div class="cms-field full" style="display:flex; justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary">+ Criar / Atualizar Usuário</button>
+          </div>
+        </form>
+
+        <div>
+          ${STATE.users
+            .map((u) => {
+              const r = STATE.roles.find((rl) => rl.id === u.roleId);
+              return `
+              <div class="cms-list-item">
+                <div>
+                  <strong>👤 ${u.fullName}</strong> (Login: <code>${u.username}</code> • Senha: <code>${u.password}</code>)
+                  <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
+                    Perfil: <strong style="color:var(--brand-primary);">${r ? r.name : "Sem perfil"}</strong>
+                  </div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                  <button class="btn btn-outline" style="padding:5px 10px; font-size:0.74rem;"
+                          onclick="window.TobiasApp.changeUserPasswordPrompt('${u.id}')">
+                    🔑 Alterar Senha
+                  </button>
+                  ${
+                    u.username === "admin"
+                      ? ""
+                      : `<button class="btn-danger" onclick="window.TobiasApp.deleteUser('${u.id}')">Remover</button>`
+                  }
+                </div>
+              </div>
+            `;
+            })
+            .join("")}
+        </div>
+      </div>
+    `;
+
+    // Criar novo Perfil com atribuições marcadas
+    document.getElementById("cmsCreateRoleForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const selectedPerms = fd.getAll("perms");
+      if (selectedPerms.length === 0) {
+        alert("Selecione pelo menos 1 atribuição (módulo) para este perfil.");
+        return;
+      }
+      STATE.roles.push({
+        id: "role-" + Date.now(),
+        name: fd.get("name"),
+        badgeColor: fd.get("badgeColor"),
+        description: fd.get("description"),
+        permissions: selectedPerms,
+        isSystem: false
+      });
+      saveState();
+      alert("✓ Novo perfil criado com sucesso!");
+    };
+
+    // Criar ou atualizar Usuário
+    document.getElementById("cmsCreateUserForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const uName = fd.get("username").trim().toLowerCase();
+      const existing = STATE.users.find((u) => u.username.toLowerCase() === uName);
+      if (existing) {
+        existing.fullName = fd.get("fullName");
+        existing.roleId = fd.get("roleId");
+        existing.password = fd.get("password");
+        if (CURRENT_USER && CURRENT_USER.id === existing.id) {
+          saveSession(existing);
+        }
+      } else {
+        STATE.users.push({
+          id: "usr-" + Date.now(),
+          username: uName,
+          password: fd.get("password"),
+          fullName: fd.get("fullName"),
+          roleId: fd.get("roleId")
+        });
+      }
+      saveState();
+      alert("✓ Usuário salvo com sucesso!");
+    };
+  }
+
+  // 1. Aba Edição & Capa
   function renderAdminEditionTab(container) {
     const ed = STATE.edition;
     const c = ed.coverStory;
@@ -736,7 +1191,7 @@
     };
   }
 
-  // 2. Aba Guia do Comércio e Profissionais
+  // 2. Aba Guia do Comércio
   function renderAdminDirectoryTab(container) {
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">🏪 Gerenciar Guia do Comércio & Profissionais (${STATE.directory.length})</h3>
@@ -844,7 +1299,7 @@
     };
   }
 
-  // 3. Aba Utilidade Pública e Horários Fixos
+  // 3. Aba Utilidade Pública
   function renderAdminUtilityTab(container) {
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">🚨 Gerenciar Avisos de Utilidade Pública (${STATE.utilityNews.length})</h3>
@@ -990,7 +1445,7 @@
     };
   }
 
-  // 5. Aba Achados & Promoções (Cupons)
+  // 5. Aba Promoções
   function renderAdminPromotionsTab(container) {
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">🏷️ Gerenciar Cupons & Promoções (${STATE.promotions.length})</h3>
@@ -1059,7 +1514,7 @@
     };
   }
 
-  // 6. Aba Agenda de Eventos & Lazer
+  // 6. Aba Agenda
   function renderAdminEventsTab(container) {
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">📅 Gerenciar Agenda de Eventos & Lazer (${STATE.events.length})</h3>
@@ -1133,7 +1588,7 @@
     };
   }
 
-  // 7. Aba Classificados Locais
+  // 7. Aba Classificados
   function renderAdminClassifiedsTab(container) {
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">📌 Moderar Classificados Locais (${STATE.classifieds.length})</h3>
@@ -1205,7 +1660,7 @@
     };
   }
 
-  // 8. Aba Editor das 10 Páginas do Flipbook
+  // 8. Aba Flipbook
   function renderAdminFlipbookTab(container) {
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">📖 Editor de Diagramação do Flipbook (${STATE.flipbookPages.length} Páginas)</h3>
@@ -1242,7 +1697,7 @@
     `;
   }
 
-  // 9. Aba Monetização, Anunciantes, Backup JSON e Exportação data.js
+  // 9. Aba Receita & Backup
   function renderAdminMonetizationTab(container, totalRevenue) {
     const sponsors = STATE.sponsors || [];
     container.innerHTML = `
@@ -1367,16 +1822,81 @@
       } else if (mode === "admin") {
         document.body.classList.add("admin-active");
         if (btnAdmin) btnAdmin.classList.add("active");
-        renderAdminDashboard();
+        renderAdminView();
       } else {
         if (btnPortal) btnPortal.classList.add("active");
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
 
+    fillDemoLogin(username, password) {
+      const uEl = document.getElementById("loginUsername");
+      const pEl = document.getElementById("loginPassword");
+      if (uEl && pEl) {
+        uEl.value = username;
+        pEl.value = password;
+      }
+    },
+
+    logoutAdmin() {
+      saveSession(null);
+      renderAdminView();
+    },
+
     switchAdminTab(tabName) {
+      if (!hasPermission(tabName)) {
+        alert("Seu perfil não possui atribuição para acessar este módulo.");
+        return;
+      }
       currentAdminTab = tabName;
       renderAdminDashboard();
+    },
+
+    toggleRolePermission(roleId, permId) {
+      const role = STATE.roles.find((r) => r.id === roleId);
+      if (!role) return;
+      if (role.isSystem && permId === "users_rbac") {
+        alert("O perfil Administrador Geral não pode perder a atribuição de Gerenciar Perfis.");
+        return;
+      }
+      if (role.permissions.includes(permId)) {
+        if (role.permissions.length <= 1) {
+          alert("O perfil deve ter pelo menos 1 atribuição ativa.");
+          return;
+        }
+        role.permissions = role.permissions.filter((p) => p !== permId);
+      } else {
+        role.permissions.push(permId);
+      }
+      saveState();
+    },
+
+    deleteRole(roleId) {
+      const role = STATE.roles.find((r) => r.id === roleId);
+      if (!role || role.isSystem) return;
+      STATE.roles = STATE.roles.filter((r) => r.id !== roleId);
+      saveState();
+    },
+
+    changeUserPasswordPrompt(userId) {
+      const u = STATE.users.find((usr) => usr.id === userId);
+      if (!u) return;
+      const newPass = prompt(`Digite a nova senha para o usuário "${u.username}":`, u.password);
+      if (newPass && newPass.trim().length > 0) {
+        u.password = newPass.trim();
+        if (CURRENT_USER && CURRENT_USER.id === u.id) {
+          saveSession(u);
+        }
+        saveState();
+        alert(`✓ Senha de "${u.username}" atualizada com sucesso!`);
+      }
+    },
+
+    deleteUser(userId) {
+      const u = STATE.users.find((usr) => usr.id === userId);
+      if (!u || u.username === "admin") return;
+      STATE.users = STATE.users.filter((usr) => usr.id !== userId);
+      saveState();
     },
 
     deleteItem(collectionName, id) {
@@ -1533,13 +2053,90 @@
     },
 
     openSubmitModal(type) {
+      const modal = document.getElementById("genericModal");
+      const content = document.getElementById("genericModalContent");
+      if (!modal || !content) return;
+
       if (type === "biz") {
-        window.TobiasApp.switchMode("admin");
-        window.TobiasApp.switchAdminTab("directory");
+        content.innerHTML = `
+          <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:6px;">🏪 Cadastrar Meu Negócio no Guia do Bairro</h3>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Preencha os dados abaixo para aparecer imediatamente no Guia da Vizinhança.</p>
+          <form id="publicBizForm" style="display:flex; flex-direction:column; gap:10px;">
+            <input required name="name" placeholder="Nome da Loja ou Profissional" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <select name="catSlug" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+              <option value="alimentacao">Padarias & Mercados</option>
+              <option value="saude">Farmácias & Saúde</option>
+              <option value="pets">Pet Shops</option>
+              <option value="reparos">Chaveiros & Reparos</option>
+              <option value="profissionais">Profissionais Liberais</option>
+            </select>
+            <input required name="address" placeholder="Endereço ou Rua" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <input required name="hours" placeholder="Horário de Atendimento" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <input required name="phone" placeholder="WhatsApp com DDD (ex: 5579999990000)" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <textarea required name="description" rows="2" placeholder="O que você oferece para os vizinhos?" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);"></textarea>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+              <button type="button" class="btn btn-outline" onclick="window.TobiasApp.closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Publicar no Guia</button>
+            </div>
+          </form>
+        `;
+        document.getElementById("publicBizForm").onsubmit = (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          STATE.directory.unshift({
+            id: "biz-" + Date.now(),
+            name: fd.get("name"),
+            catSlug: fd.get("catSlug"),
+            category: "Parceiro Local",
+            avatar: "⭐",
+            sponsored: false,
+            description: fd.get("description"),
+            address: fd.get("address"),
+            hours: fd.get("hours"),
+            phone: fd.get("phone").replace(/\D/g, ""),
+            status: "Novo no Bairro"
+          });
+          saveState();
+          window.TobiasApp.closeModal();
+        };
       } else {
-        window.TobiasApp.switchMode("admin");
-        window.TobiasApp.switchAdminTab("classifieds");
+        content.innerHTML = `
+          <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:6px;">📌 Publicar Classificado do Morador</h3>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Divulgue imóvel, venda, vaga ou adoção pet gratuitamente no mural do bairro.</p>
+          <form id="publicClassifiedForm" style="display:flex; flex-direction:column; gap:10px;">
+            <select name="category" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+              <option value="Compra & Venda">Compra & Venda</option>
+              <option value="Imóveis • Aluguel/Venda">Imóveis • Aluguel/Venda</option>
+              <option value="Empregos no Bairro">Empregos no Bairro</option>
+              <option value="Doação Responsável Pet">Doação Responsável Pet</option>
+            </select>
+            <input required name="title" placeholder="Título do Anúncio" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <input required name="price" placeholder="Preço ou Condição (ex: R$ 800 ou Grátis)" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <input required name="phone" placeholder="Seu WhatsApp com DDD" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
+            <textarea required name="details" rows="2" placeholder="Detalhes..." style="padding:10px; border-radius:8px; border:1px solid var(--border-color);"></textarea>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+              <button type="button" class="btn btn-outline" onclick="window.TobiasApp.closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Publicar Anúncio</button>
+            </div>
+          </form>
+        `;
+        document.getElementById("publicClassifiedForm").onsubmit = (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          STATE.classifieds.unshift({
+            id: "cl-" + Date.now(),
+            category: fd.get("category"),
+            badgeColor: "#d94e1f",
+            title: fd.get("title"),
+            price: fd.get("price"),
+            details: fd.get("details"),
+            phone: fd.get("phone").replace(/\D/g, "")
+          });
+          saveState();
+          window.TobiasApp.closeModal();
+        };
       }
+      modal.classList.add("open");
     },
 
     closeModal() {

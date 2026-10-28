@@ -401,75 +401,52 @@
   </main>
 
   <!-- ========================================================================
-       MODO 3: PAINEL DE GESTÃO DA APLICAÇÃO & CMS EDITORIAL (ADMIN)
+       MODO 3: PAINEL DE GESTÃO DA APLICAÇÃO & CMS EDITORIAL (COM LOGIN & RBAC)
        ======================================================================== -->
   <section class="admin-wrapper" aria-label="Painel de Gestão Editorial da Tobias Magazine">
-    <div class="admin-header-banner">
-      <div>
-        <span class="tag-badge" style="background:var(--brand-gold); color:#181614;">Painel Administrativo & CMS Hiperlocal</span>
-        <h2 style="font-family:var(--font-serif); font-size:clamp(1.4rem, 3vw, 2rem); margin-top:6px;">
-          ⚙️ Central de Gestão Editorial — Tobias Magazine
-        </h2>
-        <p style="font-size:0.88rem; opacity:0.88; margin-top:4px;">
-          Gerencie a capa, alertas urgentes, comércios do guia, cupons, agenda, classificados, as 10 páginas do Flipbook e os anunciantes da quinzena.
-        </p>
+    <!-- TELA DE LOGIN (QUANDO NÃO AUTENTICADO) -->
+    <div id="adminLoginGate" style="display:none;"></div>
+
+    <!-- ÁREA LOGADA DO CMS (FILTRADA PELAS ATRIBUIÇÕES DO PERFIL) -->
+    <div id="adminProtectedArea" style="display:none;">
+      <div class="admin-header-banner">
+        <div>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+            <span class="tag-badge" style="background:var(--brand-gold); color:#181614;">CMS & Controle de Acesso (RBAC)</span>
+            <span id="activeUserBadge" class="user-session-badge">👤 Administrador</span>
+          </div>
+          <h2 style="font-family:var(--font-serif); font-size:clamp(1.4rem, 3vw, 2rem);">
+            ⚙️ Central de Gestão Editorial — Tobias Magazine
+          </h2>
+          <p id="activeUserPermsLabel" style="font-size:0.84rem; opacity:0.88; margin-top:4px;">
+            Acesso liberado conforme as atribuições do seu perfil.
+          </p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="exportDataBtnTop" class="btn btn-primary" onclick="window.TobiasApp.exportDataJsFile()">
+            ⬇️ Baixar data.js
+          </button>
+          <button class="btn btn-glass" onclick="window.TobiasApp.switchMode('portal')">
+            👁️ Ver Portal
+          </button>
+          <button class="btn btn-danger" style="background:#dc2626; color:#fff; border:none; padding:10px 14px;" onclick="window.TobiasApp.logoutAdmin()">
+            🔒 Sair (Logout)
+          </button>
+        </div>
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="window.TobiasApp.exportDataJsFile()">
-          ⬇️ Baixar data.js (Publicar no GitHub)
-        </button>
-        <button class="btn btn-glass" onclick="window.TobiasApp.switchMode('portal')">
-          👁️ Ver Portal ao Vivo
-        </button>
-      </div>
-    </div>
 
-    <!-- Indicadores (KPIs) da Edição -->
-    <div id="adminKpis" class="admin-kpis"></div>
+      <!-- Indicadores (KPIs) da Edição -->
+      <div id="adminKpis" class="admin-kpis"></div>
 
-    <!-- Layout Principal do CMS: Menu Lateral + Área de Formulários e Listagem -->
-    <div class="admin-layout">
-      <aside class="admin-sidebar" role="tablist" aria-label="Módulos de Gestão">
-        <button class="admin-tab-btn active" data-tab="edition" onclick="window.TobiasApp.switchAdminTab('edition')">
-          <span>🗞️ 1. Edição & Capa</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="directory" onclick="window.TobiasApp.switchAdminTab('directory')">
-          <span>🏪 2. Guia do Comércio</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="utility" onclick="window.TobiasApp.switchAdminTab('utility')">
-          <span>🚨 3. Utilidade Pública</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="people" onclick="window.TobiasApp.switchAdminTab('people')">
-          <span>🎙️ 4. Gente & Publis</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="promotions" onclick="window.TobiasApp.switchAdminTab('promotions')">
-          <span>🏷️ 5. Cupons & Ofertas</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="events" onclick="window.TobiasApp.switchAdminTab('events')">
-          <span>📅 6. Agenda & Lazer</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="classifieds" onclick="window.TobiasApp.switchAdminTab('classifieds')">
-          <span>📌 7. Classificados</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="flipbook" onclick="window.TobiasApp.switchAdminTab('flipbook')">
-          <span>📖 8. Páginas Flipbook</span>
-          <span>→</span>
-        </button>
-        <button class="admin-tab-btn" data-tab="monetization" onclick="window.TobiasApp.switchAdminTab('monetization')">
-          <span>💰 9. Receita & Backup</span>
-          <span>→</span>
-        </button>
-      </aside>
+      <!-- Layout Principal do CMS: Menu Lateral Dinâmico (RBAC) + Área de Formulários -->
+      <div class="admin-layout">
+        <aside id="adminSidebarNav" class="admin-sidebar" role="tablist" aria-label="Módulos de Gestão">
+          <!-- Renderizado dinamicamente conforme permissões do perfil logado -->
+        </aside>
 
-      <div id="adminContentPanel" class="admin-content-panel">
-        <!-- Renderizado dinamicamente via app.js -->
+        <div id="adminContentPanel" class="admin-content-panel">
+          <!-- Renderizado dinamicamente via app.js -->
+        </div>
       </div>
     </div>
   </section>

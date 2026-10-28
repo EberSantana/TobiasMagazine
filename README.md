@@ -58,17 +58,29 @@ Portal digital hiperlocal e revista interativa (**Flipbook de 10 páginas**) des
 - **Imprimir o Cartaz com QR Code para a Vitrine**: Role até o final da página na seção **Mídia Kit & Parcerias Locais** e clique em **`🖨️ Imprimir Cartaz QR Code de Vitrine`**. Cole no caixa ou na vitrine da sua loja para os clientes escanearem com a câmera do celular.
 - **Compartilhar nos Grupos de Condomínios e Ruas**: Clique no botão **`📤`** no topo ou em **`📲 Enviar no Grupo`** para disparar o link da edição quinzenal diretamente no WhatsApp.
 
-### 3. ⚙️ Para o Editor / Administrador (Central de Gestão Editorial & CMS)
-Clique no botão **`⚙️ Gestão / CMS`** no cabeçalho (ou no ícone **`⚙️ Gestão`** na barra inferior do celular) para abrir o painel administrativo completo com **9 módulos de gestão**:
-1. **🗞️ Edição & Capa**: Altere o número da edição quinzenal, o texto do Alerta Vermelho de Utilidade Pública no topo e a foto/texto da Reportagem de Capa.
-2. **🏪 Guia do Comércio**: Adicione, destaque (`★ Patrocinado`) ou exclua padarias, farmácias, pet shops, chaveiros e profissionais liberais.
-3. **🚨 Utilidade Pública**: Publique ou remova avisos urgentes de falta de água, obras nas ruas, vacinação no posto de saúde e segurança.
-4. **🎙️ Gente & Publis**: Cadastre novas histórias de moradores tradicionais, talentos locais ou matérias patrocinadas (*Publieditoriais*).
-5. **🏷️ Cupons & Ofertas**: Crie novos cupons copiáveis com código promocional e redirecionamento automático para o WhatsApp da loja.
-6. **📅 Agenda & Lazer**: Cadastre eventos culturais, feiras livres, festas da paróquia e jogos amadores.
-7. **📌 Classificados**: Modere ou publique anúncios de aluguel/venda de imóveis, vagas de emprego e adoção pet.
-8. **📖 Páginas Flipbook**: Edite os títulos, subtítulos e chamadas de cada uma das **10 páginas enxutas** da revista folheável mobile.
-9. **💰 Receita & Backup**: Controle os contratos publicitários da quinzena (Planos R\$ 49, R\$ 120 e R\$ 220), veja o faturamento total em tempo real, faça **Backup/Importação JSON** ou clique em **`⬇️ Baixar data.js Atualizado`** para substituir no GitHub com 1 clique.
+### 3. 🔐 Para o Administrador e Equipe (Login, Perfis RBAC & Central de Gestão CMS)
+Clique no botão **`⚙️ Gestão / CMS`** no cabeçalho (ou no ícone **`⚙️ Gestão`** na barra inferior do celular) para abrir a tela de **Autenticação e Controle de Acesso Baseado em Perfis (RBAC)**:
+
+#### 🔑 Credenciais Iniciais de Acesso (Podem ser alteradas pelo Administrador no painel):
+- **Administrador Geral (Acesso Total + Criação de Perfis)**: Usuário `admin` | Senha `123`
+- **Editor de Pauta & Jornalismo**: Usuário `editor` | Senha `123` *(Acessa apenas Capa, Utilidade, Gente do Bairro, Agenda e Flipbook)*
+- **Gestor Comercial & Guia**: Usuário `comercial` | Senha `123` *(Acessa apenas Guia do Comércio, Cupons, Classificados e Receita)*
+- **Colaborador Comunitário**: Usuário `comunidade` | Senha `123` *(Acessa apenas Utilidade Pública, Agenda e Classificados)*
+
+#### 🛠️ Os 10 Módulos do Painel Administrativo (Filtrados conforme as Atribuições de cada Perfil):
+1. **🗞️ 1. Edição & Capa**: Altere o número da edição quinzenal, o texto do Alerta Vermelho de Utilidade Pública no topo e a foto/texto da Reportagem de Capa.
+2. **🏪 2. Guia do Comércio**: Adicione, destaque (`★ Patrocinado`) ou exclua padarias, farmácias, pet shops, chaveiros e profissionais liberais.
+3. **🚨 3. Utilidade Pública**: Publique ou remova avisos urgentes de falta de água, obras nas ruas, vacinação no posto de saúde e segurança.
+4. **🎙️ 4. Gente & Publis**: Cadastre novas histórias de moradores tradicionais, talentos locais ou matérias patrocinadas (*Publieditoriais*).
+5. **🏷️ 5. Cupons & Ofertas**: Crie novos cupons copiáveis com código promocional e redirecionamento automático para o WhatsApp da loja.
+6. **📅 6. Agenda & Lazer**: Cadastre eventos culturais, feiras livres, festas da paróquia e jogos amadores.
+7. **📌 7. Classificados**: Modere ou publique anúncios de aluguel/venda de imóveis, vagas de emprego e adoção pet.
+8. **📖 8. Páginas Flipbook**: Edite os títulos, subtítulos e chamadas de cada uma das **10 páginas enxutas** da revista folheável mobile.
+9. **💰 9. Receita & Backup**: Controle os contratos publicitários da quinzena (Planos R\$ 49, R\$ 120 e R\$ 220), veja o faturamento total em tempo real, faça **Backup/Importação JSON** ou clique em **`⬇️ Baixar data.js Atualizado`** para substituir no GitHub com 1 clique.
+10. **🔐 10. Perfis & Acessos (Exclusivo Administrador)**:
+    - **Criar Novos Perfis Personalizados**: Dê um nome ao perfil (ex.: *Repórter Fotográfico*, *Moderador de Classificados*) e marque em caixas de seleção exatamente quais dos 10 módulos ele poderá acessar.
+    - **Ativar/Desativar Atribuições em 1 Clique**: Nos cartões de perfis existentes, basta clicar sobre os botões de atribuição (`✓ 1. Edição & Capa`, `+ 5. Cupons & Ofertas`, etc.) para ligar ou desligar permissões instantaneamente.
+    - **Gerenciar Usuários e Senhas**: Crie novos logins vinculados a qualquer perfil e altere a senha do Administrador ou de qualquer membro da equipe.
 
 ### 4. Como Executar Localmente ou Ativar o GitHub Pages
 ```bash

@@ -258,7 +258,7 @@ O arquivo [`index.html`](index.html) implementa o cabeçalho editorial, o palco 
 ## 🎨 Identidade Visual 2.0 (Paleta Terracota + Ícones SVG)
 
 - **Paleta Terracota Editorial**: primária `#C2410C`, escura `#1C1917`, destaque `#FB923C`, suave `#FBE9DC`, fundo `#FAF7F2`. Todas as cores ficam em variáveis no topo do `styles.css` (tema claro e escuro).
-- **Tipografia**: Plus Jakarta Sans para títulos e texto; JetBrains Mono só para códigos de cupom.
+- **Tipografia**: Fraunces (serifa de revista) no logo, manchetes e títulos; Plus Jakarta Sans no texto, menus e botões; JetBrains Mono só nos códigos de cupom.
 - **Ícones**: o arquivo `icons.js` converte automaticamente os emojis do conteúdo (data.js, CMS e templates) em ícones SVG de traço fino. O conteúdo continua salvo como emoji, então backups antigos seguem compatíveis. Para usar um ícone direto em código: `TMIcons.svg("map-pin")`.
 
 ## 📍 Foto do Estabelecimento & "Como chegar" (Google Maps)

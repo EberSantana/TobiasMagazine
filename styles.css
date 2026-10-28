@@ -34,9 +34,9 @@
   --warn-bg: #fffbeb;
   --warn-text: #b45309;
 
-  /* Typography — títulos e texto em Plus Jakarta Sans (moderno, legível no celular).
-     --font-serif é mantido como nome da variável de "títulos" por compatibilidade. */
-  --font-serif: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Typography — títulos com serifa de revista (Fraunces); texto, botões e menus
+     em Plus Jakarta Sans (moderno e legível no celular). */
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
@@ -901,6 +901,52 @@ img {
   padding: 10px 12px;
   font-size: 0.84rem;
   white-space: nowrap;
+}
+
+/* ==========================================================================
+   TÍTULOS EM SERIFA DE REVISTA (Fraunces)
+   Logo, manchete de capa, títulos de seção e manchetes dos cards.
+   ========================================================================== */
+.brand-title {
+  font-family: var(--font-serif);
+  font-weight: 800;
+  letter-spacing: -0.005em;
+  font-size: clamp(1.45rem, 3vw, 1.8rem);
+}
+.brand-title span.accent {
+  font-style: italic;
+  font-weight: 700;
+}
+.cover-title {
+  font-weight: 700;
+  letter-spacing: 0;
+  word-spacing: 0.04em;
+  line-height: 1.1;
+  font-variation-settings: "opsz" 72, "SOFT" 0, "WONK" 0;
+}
+@media (max-width: 720px) {
+  .cover-title {
+    font-size: 1.62rem;
+  }
+}
+.section-title {
+  font-weight: 700;
+  letter-spacing: 0;
+  font-variation-settings: "opsz" 48, "SOFT" 0, "WONK" 0;
+}
+.biz-name,
+.news-title,
+.hero-side-card h2,
+.edition-cover-card h3,
+.profile-card h3,
+.coupon-card h3,
+.event-card h3,
+.classified-card h3,
+.monetization-banner h2 {
+  font-family: var(--font-serif) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  font-variation-settings: "opsz" 24, "SOFT" 0, "WONK" 0;
 }
 
 /* ==========================================================================

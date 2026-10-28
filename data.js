@@ -3,6 +3,10 @@
 // ==========================================================================
 
 window.TOBIAS_DATA = {
+  // Aumente este número sempre que adicionar itens novos aqui no data.js:
+  // assim quem já visitou o site (dados guardados no navegador) também recebe.
+  dataVersion: 2,
+
   edition: {
     number: "Edição #14 • Ano I",
     periodicity: "Quinzenal (1ª Quinzena do Mês)",
@@ -199,6 +203,142 @@ window.TOBIAS_DATA = {
       hours: "Seg a Sex • 09h às 18h (Hora marcada)",
       phone: "5579999990008",
       status: "1ª Orientação pelo WhatsApp"
+    },
+
+    // ----------------------------------------------------------------------
+    // HOSPEDAGEM EM TOBIAS BARRETO - SE (dados públicos levantados em 28/10/2026:
+    // pousadas.vip, ferias.tur.br, lemeshotel.com.br, Kayak, Booking e perfis
+    // oficiais no Instagram/Facebook). Confirme com cada estabelecimento.
+    // phone = WhatsApp (botão verde) | landline = telefone fixo (botão "Ligar")
+    // ----------------------------------------------------------------------
+    {
+      id: "hosp-millennio",
+      name: "Hotel Millennio",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🏨",
+      sponsored: false,
+      description: "Hotel no centro de Tobias Barreto, na Avenida 7 de Junho — perto do comércio e dos principais serviços da cidade.",
+      address: "Av. 7 de Junho, 490 — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Hotel%20Millennio%2C%20Av.%207%20de%20Junho%2C%20490%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte disponibilidade por telefone",
+      phone: "",
+      landline: "557935414834",
+      status: "Hotel • Centro"
+    },
+    {
+      id: "hosp-trindade",
+      name: "Hotel e Pousada Trindade",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🏨",
+      sponsored: false,
+      description: "Hospedagem com restaurante próprio de comida regional sergipana, com opções vegetarianas e veganas.",
+      address: "Rod. João Valeriano dos Santos, s/n — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Hotel%20Trindade%2C%20Rodovia%20Jo%C3%A3o%20Valeriano%20dos%20Santos%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte disponibilidade pelo WhatsApp",
+      phone: "5579996333737",
+      status: "Hotel • Restaurante"
+    },
+    {
+      id: "hosp-moura",
+      name: "Pousada Moura",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Quartos com ar-condicionado, frigobar, TV e internet, no centro da cidade. Café da manhã incluído e aceita pets.",
+      address: "Av. 7 de Junho, 535 — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Moura%2C%20Av.%207%20de%20Junho%2C%20535%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte disponibilidade por telefone",
+      phone: "",
+      landline: "557935411939",
+      status: "Café incluso • Aceita pets"
+    },
+    {
+      id: "hosp-rainha",
+      name: "Pousada Rainha",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Pousada do Grupo Reis dos Tecidos, ao lado do Posto Rainha, com atendimento 24 horas.",
+      address: "Av. Dr. Airton de Andrade — ao lado do Posto Rainha",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Rainha%2C%20Av.%20Dr.%20Airton%20de%20Andrade%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Atendimento 24 horas",
+      phone: "5579996045880",
+      landline: "557935413115",
+      status: "Atendimento 24h"
+    },
+    {
+      id: "hosp-paraiso",
+      name: "Pousada Paraíso",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Pousada na área do comércio local de Tobias Barreto. Informações e reservas pelo WhatsApp.",
+      address: "Centro — área comercial de Tobias Barreto",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Para%C3%ADso%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Reservas pelo WhatsApp",
+      phone: "5579999378891",
+      status: "Perto do comércio"
+    },
+    {
+      id: "hosp-bela-vista",
+      name: "Pousada Bela Vista",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Pousada tradicional da cidade, na Praça Dom José Thomaz — uma das localizações mais centrais de Tobias Barreto.",
+      address: "Praça Dom José Thomaz, 275 — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Bela%20Vista%2C%20Pra%C3%A7a%20Dom%20Jos%C3%A9%20Thomaz%2C%20275%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte disponibilidade no local",
+      phone: "",
+      status: "Praça central"
+    },
+    {
+      id: "hosp-oliveiras",
+      name: "Pousada Oliveira's",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Hospedagem confortável e acessível, com Wi-Fi, ar-condicionado e estacionamento. Aceita pets.",
+      address: "Rua Severiano Cardoso — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Oliveira%27s%2C%20Rua%20Severiano%20Cardoso%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Reservas pelo Instagram @pousadaoliveirass",
+      phone: "",
+      status: "Estacionamento • Aceita pets"
+    },
+    {
+      id: "hosp-bem-estar",
+      name: "Pousada Bem Estar",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Pousada no bairro Lagoinha, conhecida pelo bom atendimento. Reservas direto pelo WhatsApp.",
+      address: "Rua Porongaba, 34 — Lagoinha",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Bem%20Estar%2C%20Rua%20Porongaba%2C%2034%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Reservas pelo WhatsApp",
+      phone: "5579997133883",
+      status: "Bairro Lagoinha"
+    },
+    {
+      id: "hosp-uniao-gabriel",
+      name: "Pousada União Gabriel",
+      category: "Hospedagem",
+      catSlug: "hospedagem",
+      avatar: "🛏️",
+      sponsored: false,
+      description: "Casa de hóspedes com quartos para famílias, café da manhã incluído, Wi-Fi grátis e estacionamento.",
+      address: "Tobias Barreto - SE (veja no mapa)",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pousada%20Uni%C3%A3o%20Gabriel%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Reservas pelo Booking.com",
+      phone: "",
+      status: "Café incluso • Família"
     }
   ],
 

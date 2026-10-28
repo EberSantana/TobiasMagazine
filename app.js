@@ -203,6 +203,7 @@
             parsed.editionsCatalog = JSON.parse(JSON.stringify(window.TOBIAS_DATA.editionsCatalog || []));
           }
           if (!parsed.activeEditionId) parsed.activeEditionId = "ed-14";
+          mergeNewDataItems(parsed);
           return parsed;
         }
       }
@@ -217,6 +218,30 @@
     clone.auditLogs = getDefaultAuditLogs();
     clone.activeEditionId = "ed-14";
     return clone;
+  }
+
+  // Quando o data.js ganha itens novos (dataVersion maior), acrescenta ao estado
+  // salvo no navegador apenas os itens cujo "id" ainda não existe — sem apagar
+  // nada do que foi editado pelo CMS.
+  function mergeNewDataItems(saved) {
+    const base = window.TOBIAS_DATA || {};
+    const target = base.dataVersion || 1;
+    if ((saved.dataVersion || 1) >= target) return;
+    ["directory", "stories", "utilityNews", "peopleStories", "promotions", "events", "classifieds"].forEach((key) => {
+      if (!Array.isArray(base[key])) return;
+      if (!Array.isArray(saved[key])) saved[key] = [];
+      const have = new Set(saved[key].map((it) => it && it.id));
+      base[key].forEach((it) => {
+        if (it && it.id && !have.has(it.id)) saved[key].push(JSON.parse(JSON.stringify(it)));
+      });
+    });
+    if (base.edition && saved.edition && saved.edition.mapsRegion === undefined) {
+      saved.edition.mapsRegion = base.edition.mapsRegion || "";
+    }
+    saved.dataVersion = target;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    } catch (e) {}
   }
 
   function loadSession() {
@@ -653,19 +678,29 @@
               ? `<a href="${mapsHref}" target="_blank" rel="noopener" title="Abrir endereço no Google Maps">📍 <span>${biz.address}</span></a>`
               : `<span>📍 <span>${biz.address}</span></span>`}
             <span>🕒 <span>${biz.hours}</span></span>
+            ${biz.landline
+              ? `<a href="tel:+${String(biz.landline).replace(/\D/g, "")}" title="Ligar">📞 <span>${formatPhoneBR(biz.landline)}</span></a>`
+              : ""}
           </div>
-          <div class="biz-actions" style="${hasPlace ? "" : "grid-template-columns:1fr;"}">
+          <div class="biz-actions" style="${(hasPlace ? 1 : 0) + (biz.phone || biz.landline ? 1 : 0) < 2 ? "grid-template-columns:1fr;" : ""}">
             ${hasPlace
               ? `<a class="btn btn-outline" href="${mapsHref}" target="_blank" rel="noopener"
                aria-label="Como chegar até ${escapeAttr(biz.name)} pelo Google Maps">
               ${window.TMIcons ? TMIcons.svg("navigation") : "📍"} Como chegar
             </a>`
               : ""}
-            <a class="btn btn-whatsapp"
+            ${biz.phone
+              ? `<a class="btn btn-whatsapp"
                href="https://wa.me/${biz.phone}?text=${encodeURIComponent(msg)}"
                target="_blank" rel="noopener">
               ${window.TMIcons ? TMIcons.svg("whatsapp") : "💬"} WhatsApp
-            </a>
+            </a>`
+              : biz.landline
+              ? `<a class="btn btn-primary" href="tel:+${String(biz.landline).replace(/\D/g, "")}"
+                 aria-label="Ligar para ${escapeAttr(biz.name)}">
+              ${window.TMIcons ? TMIcons.svg("phone") : "📞"} Ligar
+            </a>`
+              : ""}
           </div>
         </div>
       </article>
@@ -681,6 +716,15 @@
     const region = (STATE.edition && STATE.edition.mapsRegion) || "";
     const query = [name, address, region].filter(Boolean).join(", ");
     return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query);
+  }
+
+  // 557935414834 -> (79) 3541-4834 | 5579996333737 -> (79) 99633-3737
+  function formatPhoneBR(raw) {
+    let d = String(raw || "").replace(/\D/g, "");
+    if (d.length > 11 && d.startsWith("55")) d = d.slice(2);
+    if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+    return raw;
   }
 
   function escapeAttr(str) {
@@ -1781,6 +1825,7 @@
             <option value="pets">🐾 Pet Shops</option>
             <option value="reparos">🔑 Chaveiros & Reparos</option>
             <option value="profissionais">⚡ Profissionais Liberais</option>
+            <option value="hospedagem">🏨 Hospedagem (Hotéis & Pousadas)</option>
           </select>
         </div>
         <div class="cms-field">
@@ -1789,7 +1834,11 @@
         </div>
         <div class="cms-field">
           <label>WhatsApp com DDD (Somente números)</label>
-          <input name="phone" placeholder="5579999990000" required />
+          <input name="phone" placeholder="5579999990000" />
+        </div>
+        <div class="cms-field">
+          <label>Telefone fixo (opcional — botão "Ligar")</label>
+          <input name="landline" placeholder="557935410000" />
         </div>
         <div class="cms-field">
           <label>Endereço / Rua</label>
@@ -1854,7 +1903,8 @@
       saude: "Farmácias & Saúde",
       pets: "Pet Shops",
       reparos: "Chaveiros & Reparos",
-      profissionais: "Profissionais Liberais"
+      profissionais: "Profissionais Liberais",
+      hospedagem: "Hospedagem"
     };
 
     document.getElementById("cmsDirForm").onsubmit = (e) => {
@@ -1871,7 +1921,8 @@
         description: fd.get("description"),
         address: fd.get("address"),
         hours: fd.get("hours"),
-        phone: fd.get("phone").replace(/\D/g, ""),
+        phone: (fd.get("phone") || "").replace(/\D/g, ""),
+        landline: (fd.get("landline") || "").replace(/\D/g, ""),
         status: fd.get("status"),
         photo: (fd.get("photo") || "").trim(),
         mapsUrl: (fd.get("mapsUrl") || "").trim()
@@ -2776,6 +2827,7 @@
               <option value="pets">Pet Shops</option>
               <option value="reparos">Chaveiros & Reparos</option>
               <option value="profissionais">Profissionais Liberais</option>
+              <option value="hospedagem">Hospedagem (Hotéis & Pousadas)</option>
             </select>
             <input required name="address" placeholder="Endereço ou Rua" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
             <input required name="hours" placeholder="Horário de Atendimento" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />

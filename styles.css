@@ -950,10 +950,25 @@ textarea {
 
 .category-pills {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  overflow-x: auto;
   padding-bottom: 4px;
   max-width: 100%;
+}
+
+/* Celular: uma linha deslizante (com esmaecimento na borda) em vez de várias linhas */
+@media (max-width: 720px) {
+  .category-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .category-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .category-pills .cat-pill {
+    flex-shrink: 0;
+  }
 }
 
 .cat-pill {

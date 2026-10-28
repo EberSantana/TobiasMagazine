@@ -114,7 +114,7 @@
     "⏱": "clock", "⏳": "hourglass", "→": "arrow-right", "←": "arrow-left", "✓": "check", "✅": "check",
     "✔️": "check", "✔": "check", "✗": "x", "❌": "x", "★": "star", "⭐": "star", "💰": "wallet",
     "📞": "phone", "💾": "save", "📊": "chart", "🗑️": "trash", "🗑": "trash", "📦": "package",
-    "🏨": "hotel", "🛏️": "bed", "🛏": "bed",
+    "🍽️": "utensils", "🍽": "utensils", "🏨": "hotel", "🛏️": "bed", "🛏": "bed",
     "📂": "folder", "🗂️": "folder", "🗂": "folder", "🌐": "globe", "⬇️": "download", "⬇": "download"
   };
 

@@ -5,7 +5,7 @@
 window.TOBIAS_DATA = {
   // Aumente este número sempre que adicionar itens novos aqui no data.js:
   // assim quem já visitou o site (dados guardados no navegador) também recebe.
-  dataVersion: 2,
+  dataVersion: 3,
 
   edition: {
     number: "Edição #14 • Ano I",
@@ -339,6 +339,192 @@ window.TOBIAS_DATA = {
       hours: "Reservas pelo Booking.com",
       phone: "",
       status: "Café incluso • Família"
+    },
+    // ----------------------------------------------------------------------
+    // MERCADOS, FARMÁCIAS E RESTAURANTES DE TOBIAS BARRETO - SE
+    // (lista enviada pela redação em 28/10/2026 — telefones e horários a confirmar)
+    // ----------------------------------------------------------------------
+    {
+      id: "merc-superlar",
+      name: "Supermercado Superlar",
+      category: "Padarias & Mercados",
+      catSlug: "alimentacao",
+      avatar: "🛒",
+      sponsored: false,
+      description: "Supermercado conhecido pelos preços acessíveis, com serviço de entrega de compras.",
+      address: "Av. Luís Alves de Oliveira Filho, 289",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Supermercado%20Superlar%2C%20Av.%20Lu%C3%ADs%20Alves%20de%20Oliveira%20Filho%2C%20289%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Entrega de compras"
+    },
+    {
+      id: "merc-gbarbosa",
+      name: "GBarbosa Tobias Barreto",
+      category: "Padarias & Mercados",
+      catSlug: "alimentacao",
+      avatar: "🛒",
+      sponsored: false,
+      description: "Uma das redes mais tradicionais, bem no centro da cidade, com ampla variedade de produtos e boa estrutura.",
+      address: "Av. 7 de Junho, 380 — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=GBarbosa%2C%20Av.%207%20de%20Junho%2C%20380%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Rede tradicional • Centro"
+    },
+    {
+      id: "merc-fasouto",
+      name: "Lojão Fasouto",
+      category: "Padarias & Mercados",
+      catSlug: "alimentacao",
+      avatar: "🛒",
+      sponsored: false,
+      description: "Atacarejo ideal tanto para compras do dia a dia quanto para compras em maior quantidade.",
+      address: "Av. Dr. José Airton de Andrade, 1507",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Loj%C3%A3o%20Fasouto%2C%20Av.%20Dr.%20Jos%C3%A9%20Airton%20de%20Andrade%2C%201507%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Atacarejo"
+    },
+    {
+      id: "merc-santa-rita",
+      name: "Supermercado Santa Rita",
+      category: "Padarias & Mercados",
+      catSlug: "alimentacao",
+      avatar: "🛒",
+      sponsored: false,
+      description: "Supermercado completo e tradicional na cidade.",
+      address: "Av. José David dos Santos",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Supermercado%20Santa%20Rita%2C%20Av.%20Jos%C3%A9%20David%20dos%20Santos%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Tradicional na cidade"
+    },
+    {
+      id: "farm-mais-saude",
+      name: "Farmácia Mais Saúde",
+      category: "Farmácias & Saúde",
+      catSlug: "saude",
+      avatar: "💊",
+      sponsored: false,
+      description: "Atendimento presencial bem avaliado e serviço de delivery pelo WhatsApp.",
+      address: "Av. 7 de Junho, 503 — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Farm%C3%A1cia%20Mais%20Sa%C3%BAde%2C%20Av.%207%20de%20Junho%2C%20503%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Delivery via WhatsApp"
+    },
+    {
+      id: "farm-costa",
+      name: "Farmácia Costa",
+      category: "Farmácias & Saúde",
+      catSlug: "saude",
+      avatar: "💊",
+      sponsored: false,
+      description: "Ambiente climatizado, com variedade em medicamentos e cosméticos.",
+      address: "Av. Dr. José Airton de Andrade, 1280",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Farm%C3%A1cia%20Costa%2C%20Av.%20Dr.%20Jos%C3%A9%20Airton%20de%20Andrade%2C%201280%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Climatizada • Cosméticos"
+    },
+    {
+      id: "farm-mais-barato",
+      name: "Rede de Farmácias Mais Barato",
+      category: "Farmácias & Saúde",
+      catSlug: "saude",
+      avatar: "💊",
+      sponsored: false,
+      description: "Rede com mais de uma unidade na cidade, conhecida pelas ofertas e pelo bom atendimento.",
+      address: "Av. 7 de Junho, 421 • SE-170, 908",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Farm%C3%A1cia%20Mais%20Barato%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "2 unidades na cidade"
+    },
+    {
+      id: "farm-atacadao-remedios",
+      name: "Atacadão dos Remédios",
+      category: "Farmácias & Saúde",
+      catSlug: "saude",
+      avatar: "💊",
+      sponsored: false,
+      description: "Preços competitivos e variedade de produtos de cuidados pessoais.",
+      address: "R. Antônio Muniz, 77",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Atacad%C3%A3o%20dos%20Rem%C3%A9dios%2C%20Rua%20Ant%C3%B4nio%20Muniz%2C%2077%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Preço baixo"
+    },
+    {
+      id: "rest-barreto",
+      name: "Restaurante e Churrascaria do Barreto",
+      category: "Restaurantes & Lanchonetes",
+      catSlug: "restaurantes",
+      avatar: "🍽️",
+      sponsored: false,
+      description: "Restaurante bem avaliado na cidade, com ambiente climatizado, comida de ótima qualidade e churrasco.",
+      address: "Tobias Barreto - SE (veja no mapa)",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Restaurante%20e%20Churrascaria%20do%20Barreto%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Churrasco • Climatizado"
+    },
+    {
+      id: "rest-bichinho",
+      name: "Restaurante Do Bichinho",
+      category: "Restaurantes & Lanchonetes",
+      catSlug: "restaurantes",
+      avatar: "🍽️",
+      sponsored: false,
+      description: "Churrascaria e self-service durante o dia, com clima de boteco à noite e boa variedade de pratos.",
+      address: "Av. Luís Alves de Oliveira Filho",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Restaurante%20Do%20Bichinho%2C%20Av.%20Lu%C3%ADs%20Alves%20de%20Oliveira%20Filho%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Self-service • Boteco à noite"
+    },
+    {
+      id: "rest-tempero-bom",
+      name: "Restaurante Tempero Bom",
+      category: "Restaurantes & Lanchonetes",
+      catSlug: "restaurantes",
+      avatar: "🍽️",
+      sponsored: false,
+      description: "Almoço casual em self-service ou prato feito, com bom churrasco.",
+      address: "Av. 7 de Junho, 513 — Centro",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Restaurante%20Tempero%20Bom%2C%20Av.%207%20de%20Junho%2C%20513%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Self-service • PF"
+    },
+    {
+      id: "rest-tia-lili",
+      name: "Restaurante e Churrascaria Tia Lili",
+      category: "Restaurantes & Lanchonetes",
+      catSlug: "restaurantes",
+      avatar: "🍽️",
+      sponsored: false,
+      description: "Ambiente limpo e climatizado, com cardápio variado para o almoço.",
+      address: "SE-170, 2180",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Restaurante%20e%20Churrascaria%20Tia%20Lili%2C%20SE-170%2C%202180%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Almoço • Climatizado"
+    },
+    {
+      id: "rest-cantinho-gostoso",
+      name: "Cantinho Gostoso Pizzaria e Lanchonete",
+      category: "Restaurantes & Lanchonetes",
+      catSlug: "restaurantes",
+      avatar: "🍕",
+      sponsored: false,
+      description: "Uma das pizzarias favoritas da cidade para quem quer uma boa pizza à noite.",
+      address: "Av. Manoel Joaquim Neto",
+      mapsUrl: "https://www.google.com/maps/search/?api=1&query=Cantinho%20Gostoso%20Pizzaria%2C%20Av.%20Manoel%20Joaquim%20Neto%2C%20Tobias%20Barreto%20-%20SE",
+      hours: "Consulte horário de funcionamento",
+      phone: "",
+      status: "Pizza à noite"
     }
   ],
 

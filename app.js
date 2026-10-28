@@ -1825,6 +1825,7 @@
             <option value="pets">🐾 Pet Shops</option>
             <option value="reparos">🔑 Chaveiros & Reparos</option>
             <option value="profissionais">⚡ Profissionais Liberais</option>
+            <option value="restaurantes">🍽️ Restaurantes & Lanchonetes</option>
             <option value="hospedagem">🏨 Hospedagem (Hotéis & Pousadas)</option>
           </select>
         </div>
@@ -1904,6 +1905,7 @@
       pets: "Pet Shops",
       reparos: "Chaveiros & Reparos",
       profissionais: "Profissionais Liberais",
+      restaurantes: "Restaurantes & Lanchonetes",
       hospedagem: "Hospedagem"
     };
 
@@ -2827,6 +2829,7 @@
               <option value="pets">Pet Shops</option>
               <option value="reparos">Chaveiros & Reparos</option>
               <option value="profissionais">Profissionais Liberais</option>
+              <option value="restaurantes">Restaurantes & Lanchonetes</option>
               <option value="hospedagem">Hospedagem (Hotéis & Pousadas)</option>
             </select>
             <input required name="address" placeholder="Endereço ou Rua" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />

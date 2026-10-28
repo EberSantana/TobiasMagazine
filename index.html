@@ -200,16 +200,8 @@
           <input type="search" id="directorySearchInput" placeholder="Buscar padaria, farmácia, eletricista, chaveiro, manicure..." aria-label="Buscar no guia do bairro" />
         </div>
 
-        <div class="category-pills h-scroll" role="tablist">
-          <button id="catCountAll" class="cat-pill active" onclick="window.TobiasApp.filterCategory('todos', this)">Todos (8)</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('alimentacao', this)">🥖 Padarias & Mercados</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('saude', this)">💊 Farmácias & Saúde</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('pets', this)">🐾 Pet Shops</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('reparos', this)">🔑 Chaveiro & Reparos</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('profissionais', this)">⚡ Profissionais Liberais</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('restaurantes', this)" title="Restaurantes & Lanchonetes">🍽️ Restaurantes</button>
-          <button class="cat-pill" onclick="window.TobiasApp.filterCategory('hospedagem', this)">🏨 Hospedagem</button>
-        </div>
+        <!-- Filtros gerados pelo app.js a partir das categorias cadastradas (com contagem) -->
+        <div id="categoryPills" class="category-pills h-scroll" role="tablist" aria-label="Filtrar por categoria"></div>
       </div>
 
       <div id="directoryGrid" class="cards-grid"></div>

@@ -183,6 +183,25 @@
     ];
   }
 
+  // Catálogo oficial de categorias do Guia (ordem = ordem dos filtros).
+  // Só aparecem nos filtros as categorias que têm ao menos um cadastro.
+  const CATEGORY_META = [
+    { slug: "alimentacao", label: "Mercados & Padarias", icon: "🛒" },
+    { slug: "restaurantes", label: "Restaurantes & Lanches", icon: "🍽️" },
+    { slug: "saude", label: "Farmácias & Saúde", icon: "💊" },
+    { slug: "hospedagem", label: "Hospedagem", icon: "🏨" },
+    { slug: "lojas", label: "Lojas & Varejo", icon: "🛍️" },
+    { slug: "veiculos", label: "Veículos & Oficinas", icon: "🚗" },
+    { slug: "bancos", label: "Bancos", icon: "🏦" },
+    { slug: "educacao", label: "Educação", icon: "🎓" },
+    { slug: "pets", label: "Pet Shops", icon: "🐾" },
+    { slug: "reparos", label: "Chaveiros & Reparos", icon: "🔑" },
+    { slug: "profissionais", label: "Profissionais Liberais", icon: "⚡" }
+  ];
+  const categoryLabel = (slug) => (CATEGORY_META.find((c) => c.slug === slug) || {}).label || "Comércio Local";
+  const categoryOptionsHtml = (withIcons) =>
+    CATEGORY_META.map((c) => `<option value="${c.slug}">${withIcons ? c.icon + " " : ""}${c.label}</option>`).join("");
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -232,7 +251,16 @@
       if (!Array.isArray(saved[key])) saved[key] = [];
       const have = new Set(saved[key].map((it) => it && it.id));
       base[key].forEach((it) => {
-        if (it && it.id && !have.has(it.id)) saved[key].push(JSON.parse(JSON.stringify(it)));
+        if (!it || !it.id) return;
+        if (!have.has(it.id)) {
+          saved[key].push(JSON.parse(JSON.stringify(it)));
+          return;
+        }
+        // item corrigido no data.js (campo "rev" maior): substitui a cópia antiga
+        const idx = saved[key].findIndex((s) => s && s.id === it.id);
+        if ((it.rev || 1) > ((saved[key][idx] && saved[key][idx].rev) || 1)) {
+          saved[key][idx] = JSON.parse(JSON.stringify(it));
+        }
       });
     });
     if (base.edition && saved.edition && saved.edition.mapsRegion === undefined) {
@@ -255,6 +283,9 @@
   let STATE = loadState();
   let CURRENT_USER = loadSession();
   let currentCategory = "todos";
+  // Guia do Comércio: quantos cards aparecem antes do botão "Ver mais"
+  const DIR_PAGE = 12;
+  let directoryLimit = DIR_PAGE;
   let searchQuery = "";
   let currentFlipPage = 1;
   let currentAdminTab = "edition";
@@ -613,19 +644,25 @@
     const grid = document.getElementById("directoryGrid");
     if (!grid) return;
 
-    const countAllBtn = document.getElementById("catCountAll");
-    if (countAllBtn) countAllBtn.textContent = `Todos (${STATE.directory.length})`;
+    renderCategoryPills();
 
-    const filtered = STATE.directory.filter((item) => {
-      const matchCat = currentCategory === "todos" || item.catSlug === currentCategory;
-      const q = searchQuery.toLowerCase();
-      const matchText =
-        !q ||
-        item.name.toLowerCase().includes(q) ||
-        item.category.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q);
-      return matchCat && matchText;
-    });
+    // Busca sem acento e sem diferenciar maiúsculas ("farmacia" acha "Farmácia")
+    const norm = (s) =>
+      String(s || "")
+        .normalize("NFD")
+        .replace(/[̀-ͯ]/g, "")
+        .toLowerCase();
+    const q = norm(searchQuery.trim());
+    const filtered = STATE.directory
+      .filter((item) => {
+        const matchCat = currentCategory === "todos" || item.catSlug === currentCategory;
+        const matchText =
+          !q ||
+          [item.name, item.category, item.description, item.address, item.status].some((f) => norm(f).includes(q));
+        return matchCat && matchText;
+      })
+      // Patrocinados primeiro; o resto mantém a ordem de cadastro
+      .sort((a, b) => (b.sponsored ? 1 : 0) - (a.sponsored ? 1 : 0));
 
     if (filtered.length === 0) {
       grid.innerHTML = `
@@ -640,7 +677,10 @@
     const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
     const storeTpl = w.storeTemplate || "Olá! Vi o contato de *{LOJA}* no Guia da Tobias Magazine ({EDICAO}) e gostaria de atendimento.";
 
-    grid.innerHTML = filtered
+    const visible = filtered.slice(0, directoryLimit);
+    const remaining = filtered.length - visible.length;
+
+    grid.innerHTML = visible
       .map((biz) => {
         const msg = storeTpl
           .replace(/\{LOJA\}/g, biz.name)
@@ -667,7 +707,7 @@
             <div class="biz-header">
               <div class="biz-avatar">${biz.avatar || "🏪"}</div>
               <div>
-                <span class="biz-category">${biz.category}</span>
+                <span class="biz-category">${CATEGORY_META.some((c) => c.slug === biz.catSlug) ? categoryLabel(biz.catSlug) : biz.category}</span>
                 <h3 class="biz-name">${biz.name}</h3>
               </div>
             </div>
@@ -706,7 +746,46 @@
       </article>
     `;
       })
-      .join("");
+      .join("") +
+      (remaining > 0
+        ? `<div class="dir-more">
+            <button class="btn btn-outline" onclick="window.TobiasApp.showMoreDirectory()">
+              Ver mais ${Math.min(remaining, DIR_PAGE)} de ${remaining} restantes
+            </button>
+            <span class="dir-more-count">Mostrando ${visible.length} de ${filtered.length}</span>
+          </div>`
+        : "");
+  }
+
+  // Filtros do Guia: gerados a partir das categorias realmente cadastradas
+  function renderCategoryPills() {
+    const box = document.getElementById("categoryPills");
+    if (!box) return;
+    const counts = {};
+    STATE.directory.forEach((b) => (counts[b.catSlug] = (counts[b.catSlug] || 0) + 1));
+    const known = CATEGORY_META.filter((c) => counts[c.slug]);
+    // categorias criadas fora do catálogo (ex.: pelo data.js) também aparecem
+    const extra = Object.keys(counts)
+      .filter((s) => !CATEGORY_META.some((c) => c.slug === s))
+      .map((s) => {
+        const any = STATE.directory.find((b) => b.catSlug === s);
+        return { slug: s, label: (any && any.category) || s, icon: (any && any.avatar) || "🏪" };
+      });
+    if (currentCategory !== "todos" && !counts[currentCategory]) currentCategory = "todos";
+    const pill = (slug, text, n) =>
+      `<button class="cat-pill ${currentCategory === slug ? "active" : ""}" role="tab"
+               aria-selected="${currentCategory === slug}"
+               onclick="window.TobiasApp.filterCategory('${slug}', this)">
+         ${text} <span class="pill-count">${n}</span>
+       </button>`;
+    box.innerHTML =
+      pill("todos", "Todos", STATE.directory.length) +
+      known.concat(extra).map((c) => pill(c.slug, `${c.icon} ${c.label}`, counts[c.slug])).join("");
+    // No celular (barra deslizante), mantém o filtro escolhido à vista
+    const active = box.querySelector(".cat-pill.active");
+    if (active && box.scrollWidth > box.clientWidth) {
+      box.scrollLeft = Math.max(0, active.offsetLeft - box.offsetLeft - 16);
+    }
   }
 
   // Link do Google Maps: usa o link próprio do local (Perfil da Empresa no Google)
@@ -1820,13 +1899,7 @@
         <div class="cms-field">
           <label>Categoria</label>
           <select name="catSlug">
-            <option value="alimentacao">🥖 Padarias & Mercados</option>
-            <option value="saude">💊 Farmácias & Saúde</option>
-            <option value="pets">🐾 Pet Shops</option>
-            <option value="reparos">🔑 Chaveiros & Reparos</option>
-            <option value="profissionais">⚡ Profissionais Liberais</option>
-            <option value="restaurantes">🍽️ Restaurantes & Lanchonetes</option>
-            <option value="hospedagem">🏨 Hospedagem (Hotéis & Pousadas)</option>
+            ${categoryOptionsHtml(true)}
           </select>
         </div>
         <div class="cms-field">
@@ -1917,7 +1990,7 @@
         id: "biz-" + Date.now(),
         name: fd.get("name"),
         catSlug: slug,
-        category: catLabels[slug] || "Comércio Local",
+        category: categoryLabel(slug),
         avatar: fd.get("avatar") || "🏪",
         sponsored: fd.get("sponsored") === "true",
         description: fd.get("description"),
@@ -2462,6 +2535,7 @@
     if (searchInput) {
       searchInput.addEventListener("input", (e) => {
         searchQuery = e.target.value;
+        directoryLimit = DIR_PAGE;
         renderDirectory();
       });
     }
@@ -2735,10 +2809,14 @@
       }
     },
 
-    filterCategory(catSlug, btnEl) {
+    filterCategory(catSlug) {
       currentCategory = catSlug;
-      document.querySelectorAll(".cat-pill").forEach((el) => el.classList.remove("active"));
-      if (btnEl) btnEl.classList.add("active");
+      directoryLimit = DIR_PAGE;
+      renderDirectory();
+    },
+
+    showMoreDirectory() {
+      directoryLimit += DIR_PAGE;
       renderDirectory();
     },
 
@@ -2824,14 +2902,8 @@
           <form id="publicBizForm" style="display:flex; flex-direction:column; gap:10px;">
             <input required name="name" placeholder="Nome da Loja ou Profissional" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
             <select name="catSlug" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);">
-              <option value="alimentacao">Padarias & Mercados</option>
-              <option value="saude">Farmácias & Saúde</option>
-              <option value="pets">Pet Shops</option>
-              <option value="reparos">Chaveiros & Reparos</option>
-              <option value="profissionais">Profissionais Liberais</option>
-              <option value="restaurantes">Restaurantes & Lanchonetes</option>
-              <option value="hospedagem">Hospedagem (Hotéis & Pousadas)</option>
-            </select>
+            ${categoryOptionsHtml(true)}
+          </select>
             <input required name="address" placeholder="Endereço ou Rua" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
             <input required name="hours" placeholder="Horário de Atendimento" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
             <input required name="phone" placeholder="WhatsApp com DDD (ex: 5579999990000)" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
@@ -2849,7 +2921,7 @@
             id: "biz-" + Date.now(),
             name: fd.get("name"),
             catSlug: fd.get("catSlug"),
-            category: "Parceiro Local",
+            category: categoryLabel(fd.get("catSlug")),
             avatar: "⭐",
             sponsored: false,
             description: fd.get("description"),

@@ -188,7 +188,7 @@
   const CATEGORY_META = [
     { slug: "alimentacao", label: "Mercados & Padarias", icon: "🛒" },
     { slug: "restaurantes", label: "Restaurantes & Lanches", icon: "🍽️" },
-    { slug: "saude", label: "Farmácias & Saúde", icon: "💊" },
+    { slug: "saude", label: "Saúde & Farmácias", icon: "🩺" },
     { slug: "hospedagem", label: "Hospedagem", icon: "🏨" },
     { slug: "lojas", label: "Lojas & Varejo", icon: "🛍️" },
     { slug: "veiculos", label: "Veículos & Oficinas", icon: "🚗" },
@@ -246,7 +246,7 @@
     const base = window.TOBIAS_DATA || {};
     const target = base.dataVersion || 1;
     if ((saved.dataVersion || 1) >= target) return;
-    ["directory", "stories", "utilityNews", "peopleStories", "promotions", "events", "classifieds"].forEach((key) => {
+    ["directory", "essentialSchedules", "stories", "utilityNews", "peopleStories", "promotions", "events", "classifieds"].forEach((key) => {
       if (!Array.isArray(base[key])) return;
       if (!Array.isArray(saved[key])) saved[key] = [];
       const have = new Set(saved[key].map((it) => it && it.id));
@@ -661,8 +661,9 @@
           [item.name, item.category, item.description, item.address, item.status].some((f) => norm(f).includes(q));
         return matchCat && matchText;
       })
-      // Patrocinados primeiro; o resto mantém a ordem de cadastro
-      .sort((a, b) => (b.sponsored ? 1 : 0) - (a.sponsored ? 1 : 0));
+      // Serviços essenciais ("priority", ex.: UPA) primeiro, depois patrocinados;
+      // o resto mantém a ordem de cadastro
+      .sort((a, b) => (b.priority || 0) - (a.priority || 0) || (b.sponsored ? 1 : 0) - (a.sponsored ? 1 : 0));
 
     if (filtered.length === 0) {
       grid.innerHTML = `
@@ -720,6 +721,14 @@
             <span>🕒 <span>${biz.hours}</span></span>
             ${biz.landline
               ? `<a href="tel:+${String(biz.landline).replace(/\D/g, "")}" title="Ligar">📞 <span>${formatPhoneBR(biz.landline)}</span></a>`
+              : ""}
+            ${biz.instagram
+              ? `<a href="https://www.instagram.com/${escapeAttr(String(biz.instagram).replace(/^@/, ""))}/" target="_blank" rel="noopener">${
+                  window.TMIcons ? TMIcons.svg("instagram") : ""
+                } <span>@${String(biz.instagram).replace(/^@/, "")}</span></a>`
+              : ""}
+            ${biz.website
+              ? `<a href="${escapeAttr(biz.website)}" target="_blank" rel="noopener">🌐 <span>${String(biz.website).replace(/^https?:\/\//, "").replace(/\/$/, "")}</span></a>`
               : ""}
           </div>
           <div class="biz-actions" style="${(hasPlace ? 1 : 0) + (biz.phone || biz.landline ? 1 : 0) < 2 ? "grid-template-columns:1fr;" : ""}">
@@ -1931,6 +1940,14 @@
           <input name="photo" type="url" placeholder="https://... (horizontal, até ~150 KB)" />
         </div>
         <div class="cms-field">
+          <label>Instagram (opcional)</label>
+          <input name="instagram" placeholder="@nomedaloja" />
+        </div>
+        <div class="cms-field">
+          <label>Site (opcional)</label>
+          <input name="website" type="url" placeholder="https://..." />
+        </div>
+        <div class="cms-field">
           <label>Link do Google Maps (opcional)</label>
           <input name="mapsUrl" type="url" placeholder="https://maps.app.goo.gl/... (Perfil da Empresa)" />
         </div>
@@ -2000,7 +2017,9 @@
         landline: (fd.get("landline") || "").replace(/\D/g, ""),
         status: fd.get("status"),
         photo: (fd.get("photo") || "").trim(),
-        mapsUrl: (fd.get("mapsUrl") || "").trim()
+        mapsUrl: (fd.get("mapsUrl") || "").trim(),
+        instagram: (fd.get("instagram") || "").trim().replace(/^@/, ""),
+        website: (fd.get("website") || "").trim()
       });
       logAction(
         "🏪 Guia do Comércio",

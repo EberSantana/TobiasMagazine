@@ -784,7 +784,7 @@
     // No celular (barra deslizante), mantém o filtro escolhido à vista
     const active = box.querySelector(".cat-pill.active");
     if (active && box.scrollWidth > box.clientWidth) {
-      box.scrollLeft = Math.max(0, active.offsetLeft - box.offsetLeft - 16);
+      box.scrollLeft = Math.max(0, active.offsetLeft - box.offsetLeft - 44);
     }
   }
 

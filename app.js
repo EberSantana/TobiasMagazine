@@ -16,7 +16,7 @@
     { id: "events", label: "📅 6. Agenda & Lazer", desc: "Feiras, quermesses, esportes e cultura" },
     { id: "classifieds", label: "📌 7. Classificados", desc: "Imóveis, vagas, vendas e adoção pet" },
     { id: "flipbook", label: "📖 8. Páginas Flipbook", desc: "Diagramação das 10 páginas mobile" },
-    { id: "monetization", label: "💰 9. Receita & Backup", desc: "Contratos publicitários, backup e data.js" },
+    { id: "monetization", label: "💰 9. Anuncie: Planos, Receita & Backup", desc: "Preços dos planos, contratos publicitários, backup e data.js" },
     { id: "whatsapp_config", label: "📲 10. Config. WhatsApp", desc: "Números oficiais, grupos, templates e QR Code" },
     { id: "audit_logs", label: "📋 11. Logs & Auditoria", desc: "Histórico de acessos e ações de todos os perfis" },
     { id: "users_rbac", label: "🔐 12. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" }
@@ -146,6 +146,47 @@
     ];
   }
 
+  function getDefaultAdsKit() {
+    return {
+      badge: "Mídia Kit & Parcerias Locais",
+      title: "Coloque Sua Loja ou Serviço no Celular de Todo o Bairro",
+      intro: "A <strong>Tobias Magazine</strong> é distribuída quinzenalmente nos grupos de WhatsApp dos condomínios, impulsionada por geolocalização no Instagram/Facebook (raio de 2km) e lida via QR Code no balcão das lojas parceiras.",
+      plans: [
+        { name: "Plano Guia & Rodapé", price: 49, unit: "quinzena", desc: "Card com botão direto para seu WhatsApp + Cupom na aba de Promoções.", featured: false, flag: "" },
+        { name: "Destaque Página Inteira", price: 120, unit: "quinzena", desc: "Banner no Flipbook de 10 páginas + Selo Destaque no topo do Guia.", featured: true, flag: "Mais escolhido" },
+        { name: "Publieditorial + Reels", price: 220, unit: "edição", desc: "Matéria contando a história da sua loja + Story em vídeo + Cartaz QR Code.", featured: false, flag: "" }
+      ]
+    };
+  }
+
+  function planLabel(p) {
+    return `${p.name} (R$ ${p.price})`;
+  }
+
+  function renderAdsKit() {
+    const kit = STATE.adsKit || getDefaultAdsKit();
+    const set = (id, html) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    };
+    set("adsKitBadge", escapeHtml(kit.badge));
+    set("adsKitTitle", escapeHtml(kit.title));
+    set("adsKitIntro", kit.intro);
+    set(
+      "adsKitTiers",
+      (kit.plans || [])
+        .map(
+          (p) => `
+        <div class="tier-box ${p.featured ? "featured" : ""}">
+          <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">${escapeHtml(p.name)}${p.flag ? " • " + escapeHtml(p.flag) : ""}</strong>
+          <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ ${escapeHtml(String(p.price))} <span style="font-size:0.75rem; font-weight:400;">/ ${escapeHtml(p.unit)}</span></div>
+          <p style="font-size:0.78rem; opacity:0.85;">${escapeHtml(p.desc)}</p>
+        </div>`
+        )
+        .join("")
+    );
+  }
+
   function getDefaultSponsors() {
     return [
       {
@@ -210,6 +251,7 @@
         const parsed = JSON.parse(raw);
         if (parsed && parsed.edition && parsed.directory) {
           if (!parsed.sponsors) parsed.sponsors = getDefaultSponsors();
+          if (!parsed.adsKit) parsed.adsKit = getDefaultAdsKit();
           if (!parsed.roles) parsed.roles = getDefaultRoles();
           if (!parsed.users) parsed.users = getDefaultUsers();
           if (!parsed.whatsappConfig) parsed.whatsappConfig = getDefaultWhatsappConfig();
@@ -232,6 +274,7 @@
     }
     const clone = JSON.parse(JSON.stringify(window.TOBIAS_DATA));
     clone.sponsors = getDefaultSponsors();
+    clone.adsKit = getDefaultAdsKit();
     clone.roles = getDefaultRoles();
     clone.users = getDefaultUsers();
     clone.whatsappConfig = getDefaultWhatsappConfig();
@@ -358,6 +401,7 @@
     renderPromotions();
     renderEvents();
     renderClassifieds();
+    renderAdsKit();
     renderFlipbookPage(currentFlipPage);
     renderAdminView();
   }
@@ -953,6 +997,13 @@
     if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
     if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
     return raw;
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   function escapeAttr(str) {
@@ -2597,6 +2648,7 @@
   // 9. Aba Receita & Backup
   function renderAdminMonetizationTab(container, totalRevenue) {
     const sponsors = STATE.sponsors || [];
+    const kit = STATE.adsKit || getDefaultAdsKit();
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">💰 Controle de Anunciantes, Receita & Exportação para GitHub</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">
@@ -2619,6 +2671,38 @@
         </button>
       </div>
 
+      <h4 style="font-family:var(--font-serif); font-size:1.15rem; margin-bottom:4px;">📢 Mídia Kit: Planos, Preços e Textos da seção "Anuncie"</h4>
+      <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">O que você alterar aqui muda o bloco "Coloque sua loja…" do portal e as opções de plano dos contratos abaixo.</p>
+      <form id="cmsAdsKitForm" class="cms-form-grid two-cols" style="margin-bottom:26px;">
+        <div class="cms-field">
+          <label>Selo do topo</label>
+          <input name="badge" value="${escapeAttr(kit.badge)}" required />
+        </div>
+        <div class="cms-field">
+          <label>Título</label>
+          <input name="title" value="${escapeAttr(kit.title)}" required />
+        </div>
+        <div class="cms-field full">
+          <label>Texto de apresentação (aceita &lt;strong&gt;)</label>
+          <textarea name="intro" rows="3" required>${escapeHtml(kit.intro)}</textarea>
+        </div>
+        ${kit.plans
+          .map(
+            (p, i) => `
+        <div class="cms-field full" style="margin-top:6px;"><strong>Plano ${i + 1}</strong></div>
+        <div class="cms-field"><label>Nome do plano</label><input name="name${i}" value="${escapeAttr(p.name)}" required /></div>
+        <div class="cms-field"><label>Preço (R$)</label><input type="number" min="0" step="1" name="price${i}" value="${escapeAttr(String(p.price))}" required /></div>
+        <div class="cms-field"><label>Período (ex.: quinzena, edição, mês)</label><input name="unit${i}" value="${escapeAttr(p.unit)}" required /></div>
+        <div class="cms-field"><label>Selo de destaque (opcional, ex.: Mais escolhido)</label><input name="flag${i}" value="${escapeAttr(p.flag || "")}" /></div>
+        <div class="cms-field full"><label>O que está incluso</label><input name="desc${i}" value="${escapeAttr(p.desc)}" required /></div>
+        <div class="cms-field full"><label style="display:flex; gap:8px; align-items:center;"><input type="radio" name="featured" value="${i}" ${p.featured ? "checked" : ""} /> Destacar este plano em laranja</label></div>`
+          )
+          .join("")}
+        <div class="cms-field full" style="display:flex; justify-content:flex-end;">
+          <button type="submit" class="btn btn-primary">💾 Salvar Planos & Preços</button>
+        </div>
+      </form>
+
       <h4 style="font-family:var(--font-serif); font-size:1.15rem; margin-bottom:10px;">📋 Contratos Publicitários da Quinzena</h4>
       <form id="cmsSponsorForm" class="cms-form-grid two-cols">
         <div class="cms-field">
@@ -2628,9 +2712,9 @@
         <div class="cms-field">
           <label>Plano Contratado</label>
           <select name="plan">
-            <option value="Plano Guia & Rodapé (R$ 49)">Plano Guia & Rodapé (R$ 49)</option>
-            <option value="Destaque Página Inteira (R$ 120)">Destaque Página Inteira (R$ 120)</option>
-            <option value="Publieditorial + Reels (R$ 220)">Publieditorial + Reels (R$ 220)</option>
+            ${((STATE.adsKit || getDefaultAdsKit()).plans || [])
+              .map((p) => `<option value="${escapeAttr(planLabel(p))}" data-price="${p.price}">${escapeHtml(planLabel(p))}</option>`)
+              .join("")}
           </select>
         </div>
         <div class="cms-field">
@@ -2665,6 +2749,39 @@
           .join("")}
       </div>
     `;
+
+    document.getElementById("cmsAdsKitForm").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const feat = Number(fd.get("featured"));
+      STATE.adsKit = {
+        badge: (fd.get("badge") || "").trim(),
+        title: (fd.get("title") || "").trim(),
+        intro: (fd.get("intro") || "").trim(),
+        plans: kit.plans.map((_, i) => ({
+          name: (fd.get("name" + i) || "").trim(),
+          price: Number(fd.get("price" + i)) || 0,
+          unit: (fd.get("unit" + i) || "").trim(),
+          desc: (fd.get("desc" + i) || "").trim(),
+          flag: (fd.get("flag" + i) || "").trim(),
+          featured: i === feat
+        }))
+      };
+      logAction("💰 Receita & Backup", "Atualizou Mídia Kit", STATE.adsKit.plans.map((p) => `${p.name} R$ ${p.price}`).join(" | "));
+      saveState();
+      alert("✓ Planos e preços atualizados no portal!");
+    };
+
+    const planSel = document.querySelector("#cmsSponsorForm select[name=plan]");
+    const amtInp = document.querySelector("#cmsSponsorForm input[name=amount]");
+    if (planSel && amtInp) {
+      const sync = () => {
+        const o = planSel.selectedOptions[0];
+        if (o && o.dataset.price) amtInp.value = o.dataset.price;
+      };
+      planSel.onchange = sync;
+      sync();
+    }
 
     document.getElementById("cmsSponsorForm").onsubmit = (e) => {
       e.preventDefault();

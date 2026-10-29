@@ -307,33 +307,13 @@
     <section id="anuncie-midia" class="section-block">
       <div class="monetization-banner">
         <div>
-          <span class="tag-badge" style="background:var(--brand-gold); color:#181614;">Mídia Kit & Parcerias Locais</span>
-          <h2 style="font-family:var(--font-serif); font-size:clamp(1.5rem, 3vw, 2.2rem); margin:10px 0;">
+          <span class="tag-badge" id="adsKitBadge" style="background:var(--brand-gold); color:#181614;">Mídia Kit & Parcerias Locais</span>
+          <h2 id="adsKitTitle" style="font-family:var(--font-serif); font-size:clamp(1.5rem, 3vw, 2.2rem); margin:10px 0;">
             Coloque Sua Loja ou Serviço no Celular de Todo o Bairro
           </h2>
-          <p style="font-size:0.94rem; opacity:0.92; margin-bottom:16px;">
-            A <strong>Tobias Magazine</strong> é distribuída quinzenalmente nos grupos de WhatsApp dos condomínios, impulsionada por geolocalização no Instagram/Facebook (raio de 2km) e lida via QR Code no balcão das lojas parceiras.
-          </p>
+          <p id="adsKitIntro" style="font-size:0.94rem; opacity:0.92; margin-bottom:16px;"></p>
 
-          <div class="pricing-tiers">
-            <div class="tier-box">
-              <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">Plano Guia & Rodapé</strong>
-              <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ 49 <span style="font-size:0.75rem; font-weight:400;">/ quinzena</span></div>
-              <p style="font-size:0.78rem; opacity:0.85;">Card com botão direto para seu WhatsApp + Cupom na aba de Promoções.</p>
-            </div>
-
-            <div class="tier-box featured">
-              <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">Destaque Página Inteira • Mais escolhido</strong>
-              <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ 120 <span style="font-size:0.75rem; font-weight:400;">/ quinzena</span></div>
-              <p style="font-size:0.78rem; opacity:0.85;">Banner no Flipbook de 10 páginas + Selo Destaque no topo do Guia.</p>
-            </div>
-
-            <div class="tier-box">
-              <strong style="color:var(--brand-gold); font-size:0.78rem; text-transform:uppercase;">Publieditorial + Reels</strong>
-              <div style="font-size:1.35rem; font-weight:800; margin:4px 0;">R$ 220 <span style="font-size:0.75rem; font-weight:400;">/ edição</span></div>
-              <p style="font-size:0.78rem; opacity:0.85;">Matéria contando a história da sua loja + Story em vídeo + Cartaz QR Code.</p>
-            </div>
-          </div>
+          <div class="pricing-tiers" id="adsKitTiers"></div>
 
           <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
             <button type="button" class="btn btn-whatsapp" onclick="window.TobiasApp.contactCommercialWhatsApp()">

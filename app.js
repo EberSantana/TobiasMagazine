@@ -1656,7 +1656,7 @@
           </div>
           <div class="cms-field">
             <label>Senha</label>
-            <input id="loginPassword" type="password" name="password" placeholder="Digite sua senha (padrão: 123)" required />
+            <input id="loginPassword" type="password" name="password" placeholder="Digite sua senha" required />
           </div>
           <div id="loginErrorMsg" style="display:none; color:var(--urgent-text); background:var(--urgent-bg); padding:8px 12px; border-radius:6px; font-size:0.8rem; font-weight:700;"></div>
           <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:0.95rem; margin-top:4px;">

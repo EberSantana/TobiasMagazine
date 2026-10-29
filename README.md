@@ -68,11 +68,14 @@ Portal digital hiperlocal e revista interativa (**Flipbook de 10 páginas**) des
 ### 3. 🔐 Para o Administrador e Equipe (Login, Perfis RBAC & Central de Gestão CMS)
 Clique no botão **`⚙️ Gestão / CMS`** no cabeçalho (ou no ícone **`⚙️ Gestão`** na barra inferior do celular) para abrir a tela de **Autenticação e Controle de Acesso Baseado em Perfis (RBAC)**:
 
-#### 🔑 Credenciais Iniciais de Acesso (Podem ser alteradas pelo Administrador no painel):
-- **Administrador Geral (Acesso Total + Criação de Perfis)**: Usuário `admin` | Senha `123`
-- **Editor de Pauta & Jornalismo**: Usuário `editor` | Senha `123` *(Acessa apenas Capa, Utilidade, Gente do Bairro, Agenda e Flipbook)*
-- **Gestor Comercial & Guia**: Usuário `comercial` | Senha `123` *(Acessa apenas Guia do Comércio, Cupons, Classificados e Receita)*
-- **Colaborador Comunitário**: Usuário `comunidade` | Senha `123` *(Acessa apenas Utilidade Pública, Agenda e Classificados)*
+#### 🔑 Acesso à Gestão
+O acesso é definido pelo administrador do portal. Cada pessoa da equipe recebe um usuário e uma senha própria, com um perfil que libera apenas os módulos necessários:
+- **Administrador Geral:** acesso total e criação de perfis.
+- **Editor de Pauta & Jornalismo:** Capa, Utilidade, Gente do Bairro, Agenda e Flipbook.
+- **Gestor Comercial & Guia:** Guia do Comércio, Cupons, Classificados e Receita.
+- **Colaborador Comunitário:** Utilidade Pública, Agenda e Classificados.
+
+> 🔒 Por segurança, as senhas não ficam neste repositório. Quem administra deve criar e trocar as senhas no painel, em **Gestão → Usuários**.
 
 #### 🛠️ Os 12 Módulos do Painel Administrativo (Filtrados conforme as Atribuições de cada Perfil):
 1. **🗞️ 1. Edição & Capa**: Altere o número da edição quinzenal, o texto do Alerta Vermelho de Utilidade Pública no topo e a foto/texto da Reportagem de Capa.

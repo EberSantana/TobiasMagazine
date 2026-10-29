@@ -317,3 +317,15 @@ Para reportar um problema de acessibilidade, fale com a equipe: **Prof. Eber San
 ## 📄 Licença e Créditos
 
 Desenvolvido com foco em **Jornalismo Hiperlocal, Utilidade Pública e Fortalecimento do Comércio de Bairro**. Código aberto e pronto para publicação gratuita via **GitHub Pages**.
+
+
+## 👨‍🏫 Autor
+
+**Prof. MSc. Eber da Silva de Santana**
+Professor EBTT do Instituto Federal de Sergipe, Campus Tobias Barreto. Pesquisador em tecnologia educacional, gamificação e segurança da informação.
+
+[Lattes](http://lattes.cnpq.br/8888622742399905) · [ORCID](https://orcid.org/0000-0002-1236-6312) · Instagram [@prof.ebersantana](https://www.instagram.com/prof.ebersantana/)
+
+## 📚 Uso dos materiais
+
+Os materiais são de uso educacional. Para reutilizar ou adaptar em outra instituição, entre em contato com o autor.

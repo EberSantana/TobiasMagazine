@@ -1984,7 +1984,7 @@ body.flipbook-active .flipbook-wrapper {
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-around;
-  padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  padding: 8px 4px calc(14px + env(safe-area-inset-bottom, 0px));
   z-index: 100;
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
 }
@@ -2910,3 +2910,12 @@ body.admin-active .admin-wrapper {
   .profile-card { overflow-wrap: anywhere; }
 }
 @media (max-width: 360px) { .main-container { padding-left: 12px; padding-right: 12px; } }
+
+/* Menu inferior do celular: não cobre o conteúdo nem é cortado pela barra do sistema */
+@media (max-width: 959px) {
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .bottom-nav { min-height: 68px; box-sizing: border-box; }
+  .bottom-nav-btn { min-width: 0; flex: 1 1 0; padding: 4px 2px; font-size: 0.72rem; line-height: 1.15; white-space: nowrap; }
+  /* botão do VLibras sobe para não ficar atrás do menu */
+  [vw].enabled [vw-access-button] { bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important; }
+}

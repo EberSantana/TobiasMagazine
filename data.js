@@ -5,7 +5,9 @@
 window.TOBIAS_DATA = {
   // Aumente este número sempre que adicionar itens novos aqui no data.js:
   // assim quem já visitou o site (dados guardados no navegador) também recebe.
-  dataVersion: 6,
+  dataVersion: 7,
+  // ids removidos do conteúdo padrão (limpos também para quem já tinha o site salvo no navegador)
+  removedIds: ["biz-1", "biz-2", "biz-3", "biz-4", "biz-5", "biz-6", "biz-7", "biz-8"],
 
   edition: {
     number: "Edição #14 • Ano I",
@@ -97,114 +99,6 @@ window.TOBIAS_DATA = {
 
   // 1. Guia do Comércio e Serviços
   directory: [
-    {
-      id: "biz-1",
-      name: "Padaria & Confeitaria Seu Tobias",
-      category: "Padarias & Mercados",
-      catSlug: "alimentacao",
-      avatar: "🥐",
-      sponsored: true,
-      description: "Pães artesanais de fermentação natural, bolos caseiros, café colonial e entrega rápida nos condomínios.",
-      address: "Praça Central, 142 (Esquina com Rua das Flores)",
-      // Opcionais: foto da fachada e link próprio do Google Maps (Perfil da Empresa)
-      photo: "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=70",
-      mapsUrl: "",
-      hours: "Seg a Dom • 05h30 às 21h00",
-      phone: "5579999990001",
-      status: "Aberto Agora • Fornada às 17h"
-    },
-    {
-      id: "biz-2",
-      name: "Farmácia Popular Vida & Saúde",
-      category: "Farmácias & Saúde",
-      catSlug: "saude",
-      avatar: "💊",
-      sponsored: true,
-      description: "Plantão 24h, aferição de pressão e glicemia gratuita, convênio Farmácia Popular e entrega em 20 minutos.",
-      address: "Av. Principal, 410",
-      hours: "Todos os dias • 24 Horas",
-      phone: "5579999990002",
-      status: "Plantão 24h • Entrega Grátis"
-    },
-    {
-      id: "biz-3",
-      name: "Mercadinho & Hortifruti Bom Vizinho",
-      category: "Padarias & Mercados",
-      catSlug: "alimentacao",
-      avatar: "🛒",
-      sponsored: false,
-      description: "Frutas e verduras selecionadas diariamente, açougue fresco e pedidos completos pelo WhatsApp.",
-      address: "Rua das Palmeiras, 88",
-      hours: "Seg a Sáb • 07h às 20h | Dom • 07h às 13h",
-      phone: "5579999990003",
-      status: "Quarta Verde em Dobro"
-    },
-    {
-      id: "biz-4",
-      name: "Amigo Fiel Pet Shop & Clínica",
-      category: "Pet Shops",
-      catSlug: "pets",
-      avatar: "🐾",
-      sponsored: false,
-      description: "Banho e tosa com câmera ao vivo, consulta veterinária, vacinas importadas e táxi dog no bairro.",
-      address: "Rua São José, 215",
-      hours: "Seg a Sáb • 08h às 19h",
-      phone: "5579999990004",
-      status: "Táxi Dog Disponível"
-    },
-    {
-      id: "biz-5",
-      name: "Chaveiro Rápido 24h — Mestre Jorge",
-      category: "Chaveiros & Reparos",
-      catSlug: "reparos",
-      avatar: "🔑",
-      sponsored: false,
-      description: "Abertura residencial e automotiva sem danos, chaves codificadas, troca de segredo e fechaduras digitais.",
-      address: "Banca na Praça Central, Box 04",
-      hours: "Atendimento de Emergência 24h",
-      phone: "5579999990005",
-      status: "Chega em 15 min no bairro"
-    },
-    {
-      id: "biz-6",
-      name: "Carlos Silva • Eletricista & Encanador",
-      category: "Profissionais Liberais",
-      catSlug: "profissionais",
-      avatar: "⚡",
-      sponsored: false,
-      description: "Caça-vazamentos, instalação de chuveiros, padrão de energia, quadros disjuntores e reparos de urgência.",
-      address: "Atendimento em domicílio (Morador há 18 anos)",
-      hours: "Seg a Sáb • 07h às 21h",
-      phone: "5579999990006",
-      status: "Orçamento sem taxa de visita"
-    },
-    {
-      id: "biz-7",
-      name: "Espaço Bela Unha — Camila Manicure",
-      category: "Beleza & Bem-Estar",
-      catSlug: "profissionais",
-      avatar: "💅",
-      sponsored: false,
-      description: "Manicure e pedicure tradicional, esmaltação em gel, spa dos pés e biossegurança com autoclave.",
-      address: "Galeria Central, Sala 12 (ou atendimento em casa)",
-      hours: "Ter a Sáb • 08h30 às 19h30",
-      phone: "5579999990007",
-      status: "Agenda aberta para Sexta/Sábado"
-    },
-    {
-      id: "biz-8",
-      name: "Dra. Helena Costa • Advocacia & Mediação",
-      category: "Profissionais Liberais",
-      catSlug: "profissionais",
-      avatar: "⚖️",
-      sponsored: false,
-      description: "Direito de Família, Inventários, Regularização de Imóveis, Contratos de Aluguel e Direito do Consumidor.",
-      address: "Edifício Comercial Tobias, Sala 204",
-      hours: "Seg a Sex • 09h às 18h (Hora marcada)",
-      phone: "5579999990008",
-      status: "1ª Orientação pelo WhatsApp"
-    },
-
     // ----------------------------------------------------------------------
     // HOSPEDAGEM EM TOBIAS BARRETO - SE (dados públicos levantados em 28/10/2026:
     // pousadas.vip, ferias.tur.br, lemeshotel.com.br, Kayak, Booking e perfis

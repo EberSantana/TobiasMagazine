@@ -293,6 +293,12 @@
     const base = window.TOBIAS_DATA || {};
     const target = base.dataVersion || 1;
     if ((saved.dataVersion || 1) >= target) return;
+    const gone = new Set(base.removedIds || []);
+    if (gone.size) {
+      ["directory", "essentialSchedules", "stories", "utilityNews", "peopleStories", "promotions", "events", "classifieds"].forEach((key) => {
+        if (Array.isArray(saved[key])) saved[key] = saved[key].filter((it) => !(it && gone.has(it.id)));
+      });
+    }
     ["directory", "essentialSchedules", "stories", "utilityNews", "peopleStories", "promotions", "events", "classifieds"].forEach((key) => {
       if (!Array.isArray(base[key])) return;
       if (!Array.isArray(saved[key])) saved[key] = [];

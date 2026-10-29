@@ -326,6 +326,116 @@
 
   let STATE = loadState();
   let CURRENT_USER = loadSession();
+
+  // --------------------------------------------------------------------------
+  // SINCRONIZAÇÃO COM O SERVIDOR (Google Apps Script) — opcional
+  // Visitantes leem o conteúdo publicado; o Gestão grava com senha.
+  // --------------------------------------------------------------------------
+  const API_URL = String((window.TOBIAS_CONFIG && window.TOBIAS_CONFIG.apiUrl) || "").trim();
+  const SYNC_PW_KEY = "tobias_sync_pw";
+  const SHARED_KEYS = [
+    "dataVersion", "edition", "stories", "directory", "utilityNews", "essentialSchedules",
+    "peopleStories", "promotions", "events", "classifieds", "flipbookPages", "editionsCatalog",
+    "adsKit", "whatsappConfig", "activeEditionId"
+  ];
+  let lastSynced = "";
+  let pushTimer = null;
+  let pullPromise = Promise.resolve();
+
+  function sharedSlice() {
+    const o = {};
+    SHARED_KEYS.forEach((k) => {
+      if (STATE[k] !== undefined) o[k] = STATE[k];
+    });
+    return o;
+  }
+
+  function syncToast(msg, bad) {
+    let t = document.getElementById("syncToast");
+    if (!t) {
+      t = document.createElement("div");
+      t.id = "syncToast";
+      t.style.cssText =
+        "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99999;padding:10px 18px;border-radius:999px;font:600 0.85rem 'Plus Jakarta Sans',sans-serif;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.25);transition:opacity .3s;";
+      document.body.appendChild(t);
+    }
+    t.style.background = bad ? "#b91c1c" : "#15803d";
+    t.textContent = msg;
+    t.style.opacity = "1";
+    clearTimeout(t._h);
+    t._h = setTimeout(() => (t.style.opacity = "0"), 3500);
+  }
+
+  function pullRemote() {
+    if (!API_URL) return Promise.resolve();
+    pullPromise = fetch(API_URL + (API_URL.includes("?") ? "&" : "?") + "t=" + Date.now())
+      .then((r) => r.json())
+      .then((j) => {
+        if (!j || !j.ok || !j.data) {
+          lastSynced = JSON.stringify(sharedSlice());
+          return;
+        }
+        const remote = j.data;
+        SHARED_KEYS.forEach((k) => {
+          if (remote[k] !== undefined) STATE[k] = remote[k];
+        });
+        STATE.dataVersion = remote.dataVersion || 1;
+        mergeNewDataItems(STATE); // acrescenta itens novos do data.js, se houver
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+        } catch (e) {}
+        lastSynced = JSON.stringify(sharedSlice());
+        renderAll();
+      })
+      .catch((e) => console.warn("Servidor indisponível, usando dados locais:", e));
+    return pullPromise;
+  }
+
+  function schedulePush() {
+    if (!API_URL || !CURRENT_USER) return;
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(pushRemote, 700);
+  }
+
+  async function pushRemote() {
+    await pullPromise;
+    const slice = sharedSlice();
+    const snap = JSON.stringify(slice);
+    if (snap === lastSynced) return;
+    let pw = "";
+    try {
+      pw = sessionStorage.getItem(SYNC_PW_KEY) || "";
+    } catch (e) {}
+    if (!pw) {
+      pw = window.prompt("Senha de gestão do servidor (Google Apps Script) para publicar para todos os visitantes:") || "";
+      if (!pw) {
+        syncToast("Alteração salva só neste navegador (sem senha).", true);
+        return;
+      }
+    }
+    try {
+      const r = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ password: pw, data: slice })
+      });
+      const j = await r.json();
+      if (j && j.ok) {
+        lastSynced = snap;
+        try {
+          sessionStorage.setItem(SYNC_PW_KEY, pw);
+        } catch (e) {}
+        syncToast("✓ Publicado para todos os visitantes");
+      } else {
+        try {
+          sessionStorage.removeItem(SYNC_PW_KEY);
+        } catch (e) {}
+        syncToast("Servidor recusou: " + ((j && j.error) || "erro"), true);
+      }
+    } catch (e) {
+      syncToast("Sem conexão com o servidor — salvo só neste navegador.", true);
+    }
+  }
   let currentCategory = "todos";
   // Guia do Comércio: quantos cards aparecem antes do botão "Ver mais"
   const DIR_PAGE = 12;
@@ -363,6 +473,7 @@
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
     renderAll();
+    schedulePush();
   }
 
   function saveSession(userObj) {
@@ -409,6 +520,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     renderAll();
+    pullRemote();
     setupEventListeners();
     setupHorizontalScrollers();
   });

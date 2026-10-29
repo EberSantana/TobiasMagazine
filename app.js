@@ -975,7 +975,7 @@
             ${hasPlace
               ? `<a href="${mapsHref}" target="_blank" rel="noopener" title="Abrir endereço no Google Maps">📍 <span>${biz.address}</span></a>`
               : `<span>📍 <span>${biz.address}</span></span>`}
-            <span>🕒 <span>${biz.hours}</span></span>
+            ${biz.hours ? `<span>🕒 <span>${biz.hours}</span></span>` : ""}
             ${biz.landline
               ? `<a href="tel:+${String(biz.landline).replace(/\D/g, "")}" title="Ligar">📞 <span>${formatPhoneBR(biz.landline)}</span></a>`
               : ""}

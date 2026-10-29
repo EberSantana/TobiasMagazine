@@ -127,7 +127,7 @@
     "⏱": "clock", "⏳": "hourglass", "→": "arrow-right", "←": "arrow-left", "✓": "check", "✅": "check",
     "✔️": "check", "✔": "check", "✗": "x", "❌": "x", "★": "star", "⭐": "star", "💰": "wallet",
     "📞": "phone", "💾": "save", "📊": "chart", "🗑️": "trash", "🗑": "trash", "📦": "package",
-    "💇": "scissors", "💇‍♀️": "scissors", "✂️": "scissors", "✂": "scissors", "🦷": "tooth", "🏥": "hospital", "🏛️": "landmark", "🏦": "landmark", "🎓": "graduation-cap", "🏫": "graduation-cap", "🛍️": "shopping-bag", "🛍": "shopping-bag", "🚗": "car", "🏍️": "bike", "🏍": "bike", "🔧": "wrench", "🍦": "ice-cream", "🍨": "ice-cream", "🧁": "cake", "🎂": "cake", "🍔": "utensils", "📺": "tv", "🍽️": "utensils", "🍽": "utensils", "🏨": "hotel", "🛏️": "bed", "🛏": "bed",
+    "💇": "scissors", "💈": "scissors", "💇‍♀️": "scissors", "✂️": "scissors", "✂": "scissors", "🦷": "tooth", "🏥": "hospital", "🏛️": "landmark", "🏦": "landmark", "🎓": "graduation-cap", "🏫": "graduation-cap", "🛍️": "shopping-bag", "🛍": "shopping-bag", "🚗": "car", "🏍️": "bike", "🏍": "bike", "🔧": "wrench", "🍦": "ice-cream", "🍨": "ice-cream", "🧁": "cake", "🎂": "cake", "🍔": "utensils", "📺": "tv", "🍽️": "utensils", "🍽": "utensils", "🏨": "hotel", "🛏️": "bed", "🛏": "bed",
     "📂": "folder", "🗂️": "folder", "🗂": "folder", "🌐": "globe", "⬇️": "download", "⬇": "download"
   };
 

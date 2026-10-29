@@ -2898,6 +2898,14 @@
     else inboxGuide(body);
   }
 
+  // Datas vindas da planilha (ISO/UTC) -> horário de Bahia, formato brasileiro
+  function fmtDate(v) {
+    const t = String(v || "");
+    if (!/^\d{4}-\d{2}-\d{2}T/.test(t)) return t;
+    const d = new Date(t);
+    return isNaN(d) ? t : d.toLocaleString("pt-BR", { timeZone: "America/Bahia", dateStyle: "short", timeStyle: "short" });
+  }
+
   const SHEET_ID_PUBLIC = "1XyQGjJkOFTBxoa2PuwttZ-65fDNvfw4bPSCcMKaE91E";
   const statusSelect = (id, current, options, kind) =>
     `<select data-status="${escapeAttr(id)}" data-kind="${kind}" style="padding:6px; border-radius:8px; border:1px solid var(--border-color);">${options
@@ -2923,7 +2931,7 @@
         (r) => `
       <div class="cms-list-item" style="align-items:flex-start;">
         <div>
-          <strong>${escapeHtml(r.Loja)}</strong> <span style="font-size:0.78rem; color:var(--text-muted);">• ${escapeHtml(r.Data)}</span>
+          <strong>${escapeHtml(r.Loja)}</strong> <span style="font-size:0.78rem; color:var(--text-muted);">• ${escapeHtml(fmtDate(r.Data))}</span>
           <div style="font-size:0.82rem;">${escapeHtml(r["Responsável"])} • ${escapeHtml(r.Ramo)} • <strong>${escapeHtml(r.Plano)}</strong></div>
           ${r.Mensagem ? `<div style="font-size:0.8rem; color:var(--text-secondary);">“${escapeHtml(r.Mensagem)}”</div>` : ""}
           <a class="btn btn-whatsapp" style="margin-top:6px; padding:5px 10px; font-size:0.76rem;" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(r.WhatsApp)}">WhatsApp ${escapeHtml(formatPhoneBR(r.WhatsApp))}</a>
@@ -2956,7 +2964,7 @@
       <div class="cms-list-item" style="align-items:flex-start;">
         <div>
           <strong>${r.Tipo === "biz" ? "🏪" : "📌"} ${escapeHtml(r.Titulo)}</strong>
-          <span style="font-size:0.78rem; color:var(--text-muted);">• ${escapeHtml(r.Data)} • ${escapeHtml(r.Status)}</span>
+          <span style="font-size:0.78rem; color:var(--text-muted);">• ${escapeHtml(fmtDate(r.Data))} • ${escapeHtml(r.Status)}</span>
           <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${line}</div>
         </div>
         ${

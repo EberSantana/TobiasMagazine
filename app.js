@@ -2307,6 +2307,7 @@
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">🏪 Gerenciar Guia do Comércio & Profissionais (${STATE.directory.length})</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">Cadastre novas padarias, farmácias, pet shops, chaveiros ou profissionais liberais e destaque patrocinadores.</p>
 
+      <div id="cmsDirEditBanner" style="display:none; padding:10px 14px; margin-bottom:10px; border-radius:10px; background:var(--bg-accent-soft); border:1px solid var(--brand-primary); font-weight:700;"></div>
       <form id="cmsDirForm" class="cms-form-grid two-cols">
         <div class="cms-field">
           <label>Nome do Comércio / Profissional</label>
@@ -2370,20 +2371,26 @@
           <textarea name="description" rows="2" required placeholder="Resumo curto para leitura no celular..."></textarea>
         </div>
         <div class="cms-field full" style="display:flex; justify-content:flex-end;">
-          <button type="submit" class="btn btn-primary">+ Adicionar ao Guia do Bairro</button>
+          <button type="button" id="cmsDirCancel" class="btn btn-outline" style="display:none; margin-right:8px;">Cancelar edição</button>
+          <button type="submit" class="btn btn-primary" id="cmsDirSubmit">+ Adicionar ao Guia do Bairro</button>
         </div>
       </form>
 
-      <div>
+      <div class="cms-field full" style="margin:6px 0 12px;">
+        <label>🔎 Buscar no Guia para editar (nome, categoria, endereço)</label>
+        <input id="cmsDirSearch" placeholder="Digite para filtrar a lista abaixo…" />
+      </div>
+      <div id="cmsDirList">
         ${STATE.directory
           .map(
             (b) => `
-          <div class="cms-list-item">
+          <div class="cms-list-item" data-q="${escapeAttr(foldText([b.name, b.category, b.address].join(" ")))}">
             <div>
-              <strong>${b.avatar} ${b.name}</strong> ${b.sponsored ? '<span class="tag-badge" style="font-size:0.65rem;">★ Patrocinado</span>' : ""}
-              <div style="font-size:0.78rem; color:var(--text-muted);">${b.category} • 📍 ${b.address} • 📞 ${b.phone}</div>
+              <strong>${b.avatar} ${escapeHtml(b.name)}</strong> ${b.sponsored ? '<span class="tag-badge" style="font-size:0.65rem;">★ Patrocinado</span>' : ""}
+              <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(b.category)} • 📍 ${escapeHtml(b.address || "—")} • 📞 ${escapeHtml(b.phone || b.landline || "sem telefone")}${b.hours ? "" : " • ⚠️ sem horário"}</div>
             </div>
-            <div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+              <button class="btn btn-primary" style="padding:5px 10px; font-size:0.75rem;" onclick="window.TobiasApp.editBiz('${escapeAttr(b.id)}')">✏️ Editar</button>
               <button class="btn btn-outline" style="padding:5px 10px; font-size:0.75rem;" onclick="window.TobiasApp.toggleBizSponsored('${b.id}')">
                 ${b.sponsored ? "Remover Destaque" : "★ Destacar"}
               </button>
@@ -2406,10 +2413,68 @@
       hospedagem: "Hospedagem"
     };
 
-    document.getElementById("cmsDirForm").onsubmit = (e) => {
+    // ---- modo edição: preenche o formulário com o comércio escolhido ----
+    const dirForm = document.getElementById("cmsDirForm");
+    const editing = editingBizId ? STATE.directory.find((b) => b.id === editingBizId) : null;
+    if (editing) {
+      ["name", "catSlug", "avatar", "phone", "landline", "address", "hours", "status", "photo", "instagram", "website", "mapsUrl", "description"].forEach((k) => {
+        if (dirForm.elements[k]) dirForm.elements[k].value = editing[k] == null ? "" : editing[k];
+      });
+      dirForm.elements.sponsored.value = editing.sponsored ? "true" : "false";
+      dirForm.querySelectorAll("[required]").forEach((el) => {
+        if (el.name !== "name") el.removeAttribute("required"); // na edição, só o nome é obrigatório
+      });
+      const bn = document.getElementById("cmsDirEditBanner");
+      bn.style.display = "block";
+      bn.textContent = "✏️ Editando: " + editing.name;
+      document.getElementById("cmsDirSubmit").textContent = "💾 Salvar alterações";
+      document.getElementById("cmsDirCancel").style.display = "inline-flex";
+      document.getElementById("cmsDirCancel").onclick = () => {
+        editingBizId = null;
+        renderAdminDirectoryTab(container);
+      };
+      setTimeout(() => bn.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
+    }
+
+    // busca na lista (filtra sem recarregar, para não perder o que foi digitado)
+    const qInput = document.getElementById("cmsDirSearch");
+    qInput.oninput = () => {
+      const q = foldText(qInput.value);
+      document.querySelectorAll("#cmsDirList .cms-list-item").forEach((row) => {
+        row.style.display = !q || row.getAttribute("data-q").includes(q) ? "" : "none";
+      });
+    };
+
+    dirForm.onsubmit = (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
       const slug = fd.get("catSlug");
+      if (editingBizId) {
+        const b = STATE.directory.find((x) => x.id === editingBizId);
+        if (b) {
+          Object.assign(b, {
+            name: (fd.get("name") || "").trim(),
+            catSlug: slug,
+            category: categoryLabel(slug),
+            avatar: fd.get("avatar") || b.avatar || "🏪",
+            sponsored: fd.get("sponsored") === "true",
+            description: fd.get("description") || "",
+            address: fd.get("address") || "",
+            hours: fd.get("hours") || "",
+            phone: (fd.get("phone") || "").replace(/\D/g, ""),
+            landline: (fd.get("landline") || "").replace(/\D/g, ""),
+            status: fd.get("status") || "",
+            photo: (fd.get("photo") || "").trim(),
+            mapsUrl: (fd.get("mapsUrl") || "").trim(),
+            instagram: (fd.get("instagram") || "").trim().replace(/^@/, ""),
+            website: (fd.get("website") || "").trim()
+          });
+          logAction("🏪 Guia do Comércio", "Editou Comércio/Profissional", b.name);
+        }
+        editingBizId = null;
+        saveState();
+        return;
+      }
       STATE.directory.unshift({
         id: "biz-" + Date.now(),
         name: fd.get("name"),
@@ -2864,6 +2929,8 @@
 
   // 13. Caixa de Entrada & Métricas (dados vindos da planilha via servidor)
   let inboxSub = "leads";
+  let editingBizId = null;
+  const foldText = (t) => String(t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   function renderAdminInboxTab(container) {
     const subs = [
       ["leads", "🚀 Pedidos de anúncio"],
@@ -3315,6 +3382,12 @@
 
   window.TobiasApp = {
     toggleTheme,
+
+    editBiz(id) {
+      editingBizId = id;
+      currentAdminTab = "directory";
+      renderAdminView();
+    },
 
     switchMode(mode) {
       scheduleShelfFit();

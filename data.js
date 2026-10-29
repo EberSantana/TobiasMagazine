@@ -1820,7 +1820,7 @@ window.TOBIAS_DATA = {
     {
       id: "cl-3",
       category: "Doação Responsável Pet",
-      badgeColor: "#d94e1f",
+      badgeColor: "#c2410c",
       title: "Doam-se 3 Filhotes de Porte Pequeno/Médio (Já Vermifugados)",
       price: "Adoção Gratuita ❤️",
       details: "Resgatados pela protetora Dona Sônia. Muito dóceis com crianças. Entregamos na sua casa no bairro.",

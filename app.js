@@ -29,7 +29,7 @@
       {
         id: "role-admin",
         name: "Administrador Geral",
-        badgeColor: "#d94e1f",
+        badgeColor: "#c2410c",
         description: "Acesso total a todos os módulos, WhatsApp, logs de auditoria, financeiro e criação de perfis.",
         permissions: ALL_MODULES.map((m) => m.id),
         isSystem: true
@@ -243,6 +243,17 @@
     { slug: "reparos", label: "Chaveiros & Reparos", icon: "🔑" },
     { slug: "profissionais", label: "Profissionais Liberais", icon: "⚡" }
   ];
+  // Cor de texto legível (contraste AA) sobre um fundo hexadecimal
+  function readableOn(hex) {
+    const h = String(hex || "").replace("#", "");
+    if (!/^[0-9a-f]{6}$/i.test(h)) return "#fff";
+    const lum = [0, 2, 4].map((i) => {
+      const v = parseInt(h.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    const L = 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+    return 1.05 / (L + 0.05) >= 4.5 ? "#fff" : "#1c1917";
+  }
   const categoryLabel = (slug) => (CATEGORY_META.find((c) => c.slug === slug) || {}).label || "Comércio Local";
   const categoryOptionsHtml = (withIcons) =>
     CATEGORY_META.map((c) => `<option value="${c.slug}">${withIcons ? c.icon + " " : ""}${c.label}</option>`).join("");
@@ -1051,7 +1062,7 @@
     const total = STATE.directory.length;
     const tile = (slug, icon, label, n) => {
       const on = currentCategory === slug;
-      return `<button class="cat-tile ${on ? "active" : ""}" role="tab" aria-selected="${on}"
+      return `<button class="cat-tile ${on ? "active" : ""}" aria-pressed="${on}"
                  onclick="window.TobiasApp.filterCategory('${slug}')">
           <span class="cat-tile-icon">${icon}</span>
           <span class="cat-tile-name">${label}</span>
@@ -1383,7 +1394,7 @@
         (cl) => `
       <article class="classified-card">
         <div>
-          <span style="display:inline-block; background:${cl.badgeColor || "#1f3a60"}; color:#fff; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-bottom:8px;">
+          <span style="display:inline-block; background:${cl.badgeColor || "#1f3a60"}; color:${readableOn(cl.badgeColor || "#1f3a60")}; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-bottom:8px;">
             ${cl.category}
           </span>
           <h3 style="font-family:var(--font-serif); font-size:1.05rem; font-weight:800; margin-bottom:6px;">${cl.title}</h3>
@@ -1500,7 +1511,7 @@
           .map(
             (u) => `
           <div style="padding:10px; border:1px solid var(--border-color); border-radius:8px; margin-bottom:8px; font-size:0.83rem;">
-            <strong style="color:var(--brand-primary);">${u.badge} (${u.date})</strong>
+            <strong style="color:var(--brand-text);">${u.badge} (${u.date})</strong>
             <div style="font-weight:700; margin:2px 0;">${u.title}</div>
             <div style="color:var(--text-secondary);">${u.summary}</div>
           </div>
@@ -1544,7 +1555,7 @@
           .map(
             (p) => `
           <div style="padding:9px; background:var(--bg-subtle); border-radius:8px; margin-bottom:8px; font-size:0.82rem;">
-            <span style="color:var(--brand-primary); font-weight:800; font-size:0.7rem; text-transform:uppercase;">${p.type}</span>
+            <span style="color:var(--brand-text); font-weight:800; font-size:0.7rem; text-transform:uppercase;">${p.type}</span>
             <div style="font-weight:800;">${p.name}</div>
             <div style="font-style:italic; color:var(--text-secondary);">${p.quote}</div>
           </div>
@@ -1571,7 +1582,7 @@
             (c) => `
           <div style="padding:8px 10px; border:1.5px dashed var(--brand-primary); border-radius:8px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:0.82rem;">
             <div>
-              <strong style="color:var(--brand-primary);">[${c.discount}] ${c.store}</strong>
+              <strong style="color:var(--brand-text);">[${c.discount}] ${c.store}</strong>
               <div style="font-size:0.76rem;">Código: <strong>${c.code}</strong></div>
             </div>
             <button class="btn btn-outline" style="padding:4px 8px; font-size:0.72rem;" onclick="window.TobiasApp.copyCoupon('${c.code}', this)">Copiar</button>
@@ -1731,7 +1742,7 @@
     }
 
     if (userBadge) {
-      userBadge.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> • <span style="background:${role.badgeColor || "#d94e1f"}; padding:2px 8px; border-radius:99px; font-size:0.72rem;">${role.name}</span>`;
+      userBadge.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> • <span style="background:${role.badgeColor || "#c2410c"}; color:${readableOn(role.badgeColor || "#c2410c")}; padding:2px 8px; border-radius:99px; font-size:0.72rem;">${role.name}</span>`;
     }
     if (permsLabel) {
       permsLabel.textContent = `${role.description} (${allowedModules.length} de ${ALL_MODULES.length} módulos liberados)`;
@@ -1778,7 +1789,7 @@
     sidebarContainer.innerHTML = allowedModules
       .map(
         (m) => `
-      <button class="admin-tab-btn ${m.id === currentAdminTab ? "active" : ""}"
+      <button class="admin-tab-btn ${m.id === currentAdminTab ? "active" : ""}" ${m.id === currentAdminTab ? 'aria-current="page"' : ""}
               onclick="window.TobiasApp.switchAdminTab('${m.id}')">
         <span>${m.label}</span>
         <span>→</span>
@@ -1865,7 +1876,7 @@
         </div>
 
         <div class="cms-field full" style="border-top:1px dashed var(--border-color); padding-top:12px; margin-top:4px;">
-          <strong style="font-size:0.9rem; color:var(--brand-primary);">🖨️ Personalização do Cartaz QR Code de Vitrine (Impressão A4)</strong>
+          <strong style="font-size:0.9rem; color:var(--brand-text);">🖨️ Personalização do Cartaz QR Code de Vitrine (Impressão A4)</strong>
         </div>
         <div class="cms-field">
           <label>Título Principal do Cartaz A4</label>
@@ -1994,7 +2005,7 @@
                 <td><strong>${l.fullName}</strong> <br/><span style="font-size:0.72rem; color:var(--text-muted);">@${l.username}</span></td>
                 <td><span class="tag-badge" style="font-size:0.65rem; background:var(--brand-navy);">${l.roleName}</span></td>
                 <td style="font-weight:700; white-space:nowrap;">${l.module}</td>
-                <td><strong style="color:var(--brand-primary);">${l.action}</strong></td>
+                <td><strong style="color:var(--brand-text);">${l.action}</strong></td>
                 <td style="color:var(--text-secondary);">${l.details}</td>
               </tr>
             `
@@ -2036,7 +2047,7 @@
               <option value="#1f3a60">🔵 Azul Institucional</option>
               <option value="#d99b1f">🟡 Dourado Comercial</option>
               <option value="#7c3aed">🟣 Roxo Criativo</option>
-              <option value="#d94e1f">🟠 Terracota Principal</option>
+              <option value="#c2410c">🟠 Terracota Principal</option>
             </select>
           </div>
           <div class="cms-field full">
@@ -2069,7 +2080,7 @@
             <div class="cms-list-item" style="align-items:flex-start; flex-direction:column;">
               <div style="display:flex; justify-content:space-between; width:100%; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
-                  <span style="background:${r.badgeColor || "#1f3a60"}; color:#fff; font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:99px;">
+                  <span style="background:${r.badgeColor || "#1f3a60"}; color:${readableOn(r.badgeColor || "#1f3a60")}; font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:99px;">
                     ${r.name}
                   </span>
                   <span style="font-size:0.82rem; color:var(--text-secondary); margin-left:8px;">${r.description}</span>
@@ -2139,7 +2150,7 @@
                 <div>
                   <strong>👤 ${u.fullName}</strong> (Login: <code>${u.username}</code> • Senha: <code>${u.password}</code>)
                   <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">
-                    Perfil: <strong style="color:var(--brand-primary);">${r ? r.name : "Sem perfil"}</strong>
+                    Perfil: <strong style="color:var(--brand-text);">${r ? r.name : "Sem perfil"}</strong>
                   </div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
@@ -2932,7 +2943,7 @@
             (p, idx) => `
           <form onsubmit="window.TobiasApp.saveFlipPage(event, ${idx})" style="background:var(--bg-subtle); padding:14px; border-radius:10px; border:1px solid var(--border-color);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <strong style="color:var(--brand-primary); font-family:var(--font-mono);">PÁGINA ${p.pageNumber} — ${p.section}</strong>
+              <strong style="color:var(--brand-text); font-family:var(--font-mono);">PÁGINA ${p.pageNumber} — ${p.section}</strong>
               <button type="submit" class="btn btn-primary" style="padding:5px 12px; font-size:0.76rem;">Salvar Página ${p.pageNumber}</button>
             </div>
             <div class="cms-form-grid two-cols" style="margin-bottom:0; padding:0; border:none;">
@@ -2972,7 +2983,7 @@
     container.innerHTML = `
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">📥 Caixa de Entrada & Métricas</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Tudo que chega pelo site vai para a sua planilha do Google. Aqui você acompanha, aprova e mede.
-        <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID_PUBLIC}/edit" target="_blank" rel="noopener" style="color:var(--brand-primary); font-weight:700;">Abrir planilha ↗</a></p>
+        <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID_PUBLIC}/edit" target="_blank" rel="noopener" style="color:var(--brand-text); font-weight:700;">Abrir planilha ↗</a></p>
       ${
         API_URL
           ? ""
@@ -3109,7 +3120,7 @@
           STATE.classifieds.unshift({
             id: "cl-" + Date.now(),
             category: d.category,
-            badgeColor: "#d94e1f",
+            badgeColor: "#c2410c",
             title: d.title,
             price: d.price,
             details: d.details,
@@ -3931,7 +3942,7 @@
           STATE.classifieds.unshift({
             id: "cl-" + Date.now(),
             category: fd.get("category"),
-            badgeColor: "#d94e1f",
+            badgeColor: "#c2410c",
             title: fd.get("title"),
             price: fd.get("price"),
             details: fd.get("details"),

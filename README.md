@@ -276,6 +276,44 @@ A cidade/região usada na busca do Maps fica em `edition.mapsRegion` (CMS → Ed
 
 ---
 
+## ♿ Acessibilidade e Legislação
+
+O Tobias Magazine foi projetado para ser usado por todas as pessoas, incluindo quem tem deficiência visual, auditiva, motora ou cognitiva.
+
+### Base legal e normativa
+- **Lei nº 10.098/2000** — estabelece normas gerais e critérios básicos para a promoção da acessibilidade das pessoas com deficiência ou mobilidade reduzida (https://www.planalto.gov.br/ccivil_03/leis/l10098.htm).
+- **Lei nº 13.146/2015 (Lei Brasileira de Inclusão — LBI)** — Art. 63 obriga a acessibilidade nos sítios da internet.
+- **eMAG** (Modelo de Acessibilidade em Governo Eletrônico) e **WCAG 2.1 nível AA** — referências técnicas adotadas.
+
+### O que foi implementado
+| Recurso | Detalhe |
+|---|---|
+| Contraste | Texto com contraste mínimo 4,5:1 (AA) nos temas claro e escuro, com tokens `--brand-primary` (fundos) e `--brand-text` (textos) |
+| Teclado | Link "Pular para o conteúdo", foco visível de 3px, ordem lógica de tabulação |
+| Leitores de tela | Idioma `pt-BR`, landmarks (`header`, `nav`, `main`, `footer`), títulos em hierarquia, botões com estado (`aria-pressed`, `aria-current`) |
+| Formulários | Todos os campos com nome acessível (`a11y.js` rotula automaticamente os que não têm `<label>`) |
+| Janelas (modais) | `role="dialog"`, foco preso dentro, fecha com `Esc`, foco retorna ao elemento de origem |
+| Movimento | Respeita `prefers-reduced-motion` |
+| Telas pequenas | Sem rolagem horizontal a partir de 320px |
+| Libras | Widget **VLibras** (governo federal) no canto da tela |
+| Tema | Alternância entre modo claro e escuro |
+
+### Como foi verificado
+- **axe-core 4.10** (regras WCAG 2.0/2.1/2.2 AA + boas práticas): 0 violações no portal (claro e escuro), flipbook, Gestão, modal de cadastro e celular (390px).
+- **Ferramentas recomendadas para nova verificação:** [WAVE](https://wave.webaim.org/), [AccessMonitor](https://accessmonitor.acessibilidade.gov.pt/), [ASES](https://asesweb.governoeletronico.gov.br/), [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/), leitor de tela [NVDA](https://www.nvaccess.org/download/) e [VLibras](https://vlibras.gov.br/).
+
+### Limitações conhecidas
+- WAVE, NVDA, ASES e AccessMonitor ainda não foram executados formalmente; o teste com leitor de tela real deve ser feito pela equipe.
+- Alguns botões e links têm menos de 24px (critério AAA/2.2, não reprova o nível AA).
+- Conteúdo inserido pela equipe (imagens, textos) deve ter descrição alternativa e linguagem simples.
+
+### Dica para quem edita o conteúdo
+Ao cadastrar notícias e comércios: escreva textos curtos, descreva as fotos, evite texto só em imagem e não use apenas a cor para transmitir informação.
+
+Para reportar um problema de acessibilidade, fale com a equipe: **Prof. Eber Santana — @prof.ebersantana**.
+
+---
+
 ## 📄 Licença e Créditos
 
 Desenvolvido com foco em **Jornalismo Hiperlocal, Utilidade Pública e Fortalecimento do Comércio de Bairro**. Código aberto e pronto para publicação gratuita via **GitHub Pages**.

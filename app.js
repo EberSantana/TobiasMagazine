@@ -19,7 +19,8 @@
     { id: "monetization", label: "💰 9. Anuncie: Planos, Receita & Backup", desc: "Preços dos planos, contratos publicitários, backup e data.js" },
     { id: "whatsapp_config", label: "📲 10. Config. WhatsApp", desc: "Números oficiais, grupos, templates e QR Code" },
     { id: "audit_logs", label: "📋 11. Logs & Auditoria", desc: "Histórico de acessos e ações de todos os perfis" },
-    { id: "users_rbac", label: "🔐 12. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" }
+    { id: "users_rbac", label: "🔐 12. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" },
+    { id: "inbox", label: "📥 13. Caixa de Entrada & Métricas", desc: "Pedidos de anúncio, sugestões dos moradores, métricas e Guia na planilha" }
   ];
 
   // Perfis padrão pré-configurados (O Administrador pode criar novos perfis personalizados)
@@ -172,6 +173,8 @@
     set("adsKitBadge", escapeHtml(kit.badge));
     set("adsKitTitle", escapeHtml(kit.title));
     set("adsKitIntro", kit.intro);
+    const lb = document.getElementById("adsLeadBtn");
+    if (lb) lb.style.display = API_URL ? "inline-flex" : "none";
     set(
       "adsKitTiers",
       (kit.plans || [])
@@ -397,45 +400,135 @@
     pushTimer = setTimeout(pushRemote, 700);
   }
 
-  async function pushRemote() {
-    await pullPromise;
-    const slice = sharedSlice();
-    const snap = JSON.stringify(slice);
-    if (snap === lastSynced) return;
+  function getSyncPw() {
     let pw = "";
     try {
       pw = sessionStorage.getItem(SYNC_PW_KEY) || "";
     } catch (e) {}
-    if (!pw) {
-      pw = window.prompt("Senha de gestão do servidor (Google Apps Script) para publicar para todos os visitantes:") || "";
-      if (!pw) {
-        syncToast("Alteração salva só neste navegador (sem senha).", true);
-        return;
-      }
+    if (!pw) pw = window.prompt("Senha de gestão do servidor (Google Apps Script):") || "";
+    return pw;
+  }
+
+  // Chamada ao servidor. opts.auth => envia a senha de gestão (pede uma vez por sessão).
+  async function api(action, payload, opts) {
+    opts = opts || {};
+    if (!API_URL) return { ok: false, error: "Servidor não configurado" };
+    const body = Object.assign({ action }, payload || {});
+    if (opts.auth) {
+      const pw = getSyncPw();
+      if (!pw) return { ok: false, error: "Sem senha" };
+      body.password = pw;
     }
     try {
       const r = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ password: pw, data: slice })
+        body: JSON.stringify(body),
+        keepalive: !!opts.keepalive
       });
       const j = await r.json();
-      if (j && j.ok) {
-        lastSynced = snap;
+      if (opts.auth) {
         try {
-          sessionStorage.setItem(SYNC_PW_KEY, pw);
+          if (j && j.ok) sessionStorage.setItem(SYNC_PW_KEY, body.password);
+          else if (j && /senha/i.test(j.error || "")) sessionStorage.removeItem(SYNC_PW_KEY);
         } catch (e) {}
-        syncToast("✓ Publicado para todos os visitantes");
-      } else {
-        try {
-          sessionStorage.removeItem(SYNC_PW_KEY);
-        } catch (e) {}
-        syncToast("Servidor recusou: " + ((j && j.error) || "erro"), true);
       }
+      return j || { ok: false, error: "Resposta vazia" };
     } catch (e) {
-      syncToast("Sem conexão com o servidor — salvo só neste navegador.", true);
+      return { ok: false, error: "Sem conexão com o servidor" };
     }
   }
+
+  async function pushRemote() {
+    await pullPromise;
+    const slice = sharedSlice();
+    const snap = JSON.stringify(slice);
+    if (snap !== lastSynced) {
+      const j = await api("saveContent", { data: slice }, { auth: true });
+      if (j && j.ok) {
+        lastSynced = snap;
+        syncToast("✓ Publicado para todos os visitantes");
+      } else {
+        syncToast("Servidor recusou: " + ((j && j.error) || "erro") + " — salvo só neste navegador.", true);
+      }
+    }
+    await pushSponsors();
+  }
+
+  // Contratos publicitários: privados, ficam na aba "Contratos" da planilha (nunca no JSON público)
+  let sponsorsLoaded = false;
+  let sponsorsLoading = false;
+  let lastSponsors = "";
+  async function pushSponsors() {
+    if (!sponsorsLoaded) return;
+    const snap = JSON.stringify(STATE.sponsors || []);
+    if (snap === lastSponsors) return;
+    const j = await api("saveSponsors", { rows: STATE.sponsors || [] }, { auth: true });
+    if (j && j.ok) {
+      lastSponsors = snap;
+      syncToast("✓ Contratos salvos na planilha");
+    } else syncToast("Contratos não salvos: " + ((j && j.error) || "erro"), true);
+  }
+  async function loadSponsorsFromSheet() {
+    const j = await api("getSponsors", {}, { auth: true });
+    if (!j || !j.ok) {
+      syncToast("Não foi possível ler os contratos: " + ((j && j.error) || "erro"), true);
+      return false;
+    }
+    if (j.rows.length) {
+      STATE.sponsors = j.rows.map((r) => ({
+        id: r.ID,
+        client: r.Lojista,
+        plan: r.Plano,
+        amount: Number(r.Valor) || 0,
+        status: r.Status,
+        contact: r.WhatsApp
+      }));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+      } catch (e) {}
+    }
+    sponsorsLoaded = true;
+    lastSponsors = JSON.stringify(STATE.sponsors || []);
+    if (!j.rows.length && (STATE.sponsors || []).length) {
+      lastSponsors = ""; // planilha vazia: envia o que existe localmente na próxima gravação
+      await pushSponsors();
+    }
+    return true;
+  }
+
+  // Métricas de uso (anônimas): contagem de cliques por comércio, enviada em lotes
+  let metricQueue = [];
+  function track(e, id, n) {
+    if (!API_URL || CURRENT_USER) return; // não conta cliques da equipe
+    metricQueue.push({ e, id: id || "site", n: n || "" });
+    if (metricQueue.length >= 25) flushMetrics();
+  }
+  function flushMetrics(useBeacon) {
+    if (!API_URL || !metricQueue.length) return;
+    const events = metricQueue.splice(0, 60);
+    const payload = JSON.stringify({ action: "track", events });
+    if (useBeacon && navigator.sendBeacon) {
+      navigator.sendBeacon(API_URL, new Blob([payload], { type: "text/plain;charset=utf-8" }));
+    } else {
+      api("track", { events }, { keepalive: true });
+    }
+  }
+  setInterval(() => flushMetrics(false), 20000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushMetrics(true);
+  });
+  document.addEventListener("click", (ev) => {
+    const el = ev.target.closest && ev.target.closest("[data-track]");
+    if (el) track(el.getAttribute("data-track"), el.getAttribute("data-id"), el.getAttribute("data-name"));
+  });
+  try {
+    if (!sessionStorage.getItem("tobias_visit")) {
+      sessionStorage.setItem("tobias_visit", "1");
+      setTimeout(() => track("visit", "site", "Visitas ao site"), 1500);
+    }
+  } catch (e) {}
+
   let currentCategory = "todos";
   // Guia do Comércio: quantos cards aparecem antes do botão "Ver mais"
   const DIR_PAGE = 12;
@@ -892,6 +985,7 @@
           <div class="biz-actions" style="${(hasPlace ? 1 : 0) + (biz.phone || biz.landline ? 1 : 0) < 2 ? "grid-template-columns:1fr;" : ""}">
             ${hasPlace
               ? `<a class="btn btn-outline" href="${mapsHref}" target="_blank" rel="noopener"
+               data-track="maps" data-id="${escapeAttr(biz.id)}" data-name="${escapeAttr(biz.name)}"
                aria-label="Como chegar até ${escapeAttr(biz.name)} pelo Google Maps">
               ${window.TMIcons ? TMIcons.svg("navigation") : "📍"} Como chegar
             </a>`
@@ -899,11 +993,13 @@
             ${biz.phone
               ? `<a class="btn btn-whatsapp"
                href="https://wa.me/${biz.phone}?text=${encodeURIComponent(msg)}"
+               data-track="whatsapp" data-id="${escapeAttr(biz.id)}" data-name="${escapeAttr(biz.name)}"
                target="_blank" rel="noopener">
               ${window.TMIcons ? TMIcons.svg("whatsapp") : "💬"} WhatsApp
             </a>`
               : biz.landline
               ? `<a class="btn btn-primary" href="tel:+${String(biz.landline).replace(/\D/g, "")}"
+                 data-track="call" data-id="${escapeAttr(biz.id)}" data-name="${escapeAttr(biz.name)}"
                  aria-label="Ligar para ${escapeAttr(biz.name)}">
               ${window.TMIcons ? TMIcons.svg("phone") : "📞"} Ligar
             </a>`
@@ -1714,6 +1810,8 @@
       renderAdminAuditLogsTab(panelContainer);
     } else if (currentAdminTab === "users_rbac") {
       renderAdminRbacTab(panelContainer);
+    } else if (currentAdminTab === "inbox") {
+      renderAdminInboxTab(panelContainer);
     }
   }
 
@@ -2757,11 +2855,277 @@
     `;
   }
 
+
+  // 13. Caixa de Entrada & Métricas (dados vindos da planilha via servidor)
+  let inboxSub = "leads";
+  function renderAdminInboxTab(container) {
+    const subs = [
+      ["leads", "🚀 Pedidos de anúncio"],
+      ["sugestoes", "📝 Sugestões dos moradores"],
+      ["metricas", "📊 Métricas"],
+      ["guia", "🏪 Guia na planilha"]
+    ];
+    container.innerHTML = `
+      <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">📥 Caixa de Entrada & Métricas</h3>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Tudo que chega pelo site vai para a sua planilha do Google. Aqui você acompanha, aprova e mede.
+        <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID_PUBLIC}/edit" target="_blank" rel="noopener" style="color:var(--brand-primary); font-weight:700;">Abrir planilha ↗</a></p>
+      ${
+        API_URL
+          ? ""
+          : `<p style="padding:12px; background:var(--bg-accent-soft); border-radius:10px;">Servidor não configurado (<code>config.js</code>).</p>`
+      }
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        ${subs
+          .map(
+            ([id, label]) =>
+              `<button class="btn ${id === inboxSub ? "btn-primary" : "btn-outline"}" data-sub="${id}">${label}</button>`
+          )
+          .join("")}
+      </div>
+      <div id="inboxBody"><p style="color:var(--text-secondary);">Carregando…</p></div>
+    `;
+    container.querySelectorAll("[data-sub]").forEach((b) => {
+      b.onclick = () => {
+        inboxSub = b.getAttribute("data-sub");
+        renderAdminInboxTab(container);
+      };
+    });
+    if (!API_URL) return;
+    const body = document.getElementById("inboxBody");
+    if (inboxSub === "leads") inboxLeads(body);
+    else if (inboxSub === "sugestoes") inboxSuggestions(body);
+    else if (inboxSub === "metricas") inboxMetrics(body);
+    else inboxGuide(body);
+  }
+
+  const SHEET_ID_PUBLIC = "1XyQGjJkOFTBxoa2PuwttZ-65fDNvfw4bPSCcMKaE91E";
+  const statusSelect = (id, current, options, kind) =>
+    `<select data-status="${escapeAttr(id)}" data-kind="${kind}" style="padding:6px; border-radius:8px; border:1px solid var(--border-color);">${options
+      .map((o) => `<option ${o === current ? "selected" : ""}>${o}</option>`)
+      .join("")}</select>`;
+
+  function bindStatusSelects(root) {
+    root.querySelectorAll("select[data-status]").forEach((sel) => {
+      sel.onchange = async () => {
+        const j = await api("setStatus", { sheet: sel.dataset.kind, id: sel.dataset.status, status: sel.value }, { auth: true });
+        syncToast(j && j.ok ? "✓ Status atualizado" : "Erro: " + ((j && j.error) || ""), !(j && j.ok));
+      };
+    });
+  }
+
+  async function inboxLeads(body) {
+    const j = await api("list", { sheet: "leads" }, { auth: true });
+    if (!j.ok) return (body.innerHTML = `<p>Não foi possível carregar: ${escapeHtml(j.error)}</p>`);
+    const rows = j.rows.slice().reverse();
+    if (!rows.length) return (body.innerHTML = "<p>Nenhum pedido de anúncio ainda. Quando alguém enviar o formulário \"Quero Anunciar\", aparece aqui.</p>");
+    body.innerHTML = rows
+      .map(
+        (r) => `
+      <div class="cms-list-item" style="align-items:flex-start;">
+        <div>
+          <strong>${escapeHtml(r.Loja)}</strong> <span style="font-size:0.78rem; color:var(--text-muted);">• ${escapeHtml(r.Data)}</span>
+          <div style="font-size:0.82rem;">${escapeHtml(r["Responsável"])} • ${escapeHtml(r.Ramo)} • <strong>${escapeHtml(r.Plano)}</strong></div>
+          ${r.Mensagem ? `<div style="font-size:0.8rem; color:var(--text-secondary);">“${escapeHtml(r.Mensagem)}”</div>` : ""}
+          <a class="btn btn-whatsapp" style="margin-top:6px; padding:5px 10px; font-size:0.76rem;" target="_blank" rel="noopener" href="https://wa.me/${encodeURIComponent(r.WhatsApp)}">WhatsApp ${escapeHtml(formatPhoneBR(r.WhatsApp))}</a>
+        </div>
+        ${statusSelect(r.ID, r.Status, ["Novo", "Contatado", "Negociando", "Fechado", "Descartado"], "leads")}
+      </div>`
+      )
+      .join("");
+    bindStatusSelects(body);
+  }
+
+  async function inboxSuggestions(body) {
+    const j = await api("list", { sheet: "sugestoes" }, { auth: true });
+    if (!j.ok) return (body.innerHTML = `<p>Não foi possível carregar: ${escapeHtml(j.error)}</p>`);
+    const rows = j.rows.slice().reverse();
+    const pend = rows.filter((r) => r.Status === "Pendente").length;
+    if (!rows.length) return (body.innerHTML = "<p>Nenhuma sugestão ainda. Cadastros de negócio e classificados enviados por moradores caem aqui para você aprovar.</p>");
+    body.innerHTML =
+      `<p style="margin-bottom:10px;"><strong>${pend}</strong> aguardando aprovação.</p>` +
+      rows
+        .map((r) => {
+          let d = {};
+          try {
+            d = JSON.parse(r.Dados);
+          } catch (e) {}
+          const line = Object.keys(d)
+            .map((k) => `${escapeHtml(k)}: ${escapeHtml(d[k])}`)
+            .join(" • ");
+          return `
+      <div class="cms-list-item" style="align-items:flex-start;">
+        <div>
+          <strong>${r.Tipo === "biz" ? "🏪" : "📌"} ${escapeHtml(r.Titulo)}</strong>
+          <span style="font-size:0.78rem; color:var(--text-muted);">• ${escapeHtml(r.Data)} • ${escapeHtml(r.Status)}</span>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${line}</div>
+        </div>
+        ${
+          r.Status === "Pendente"
+            ? `<div style="display:flex; gap:6px;">
+                 <button class="btn btn-primary" data-ap="${escapeAttr(r.ID)}" style="padding:6px 12px;">Aprovar</button>
+                 <button class="btn-danger" data-rj="${escapeAttr(r.ID)}">Recusar</button>
+               </div>`
+            : ""
+        }
+      </div>`;
+        })
+        .join("");
+    const byId = {};
+    rows.forEach((r) => (byId[r.ID] = r));
+    body.querySelectorAll("[data-ap]").forEach((b) => {
+      b.onclick = async () => {
+        const r = byId[b.dataset.ap];
+        let d = {};
+        try {
+          d = JSON.parse(r.Dados);
+        } catch (e) {}
+        if (r.Tipo === "biz") {
+          STATE.directory.unshift({
+            id: "biz-" + Date.now(),
+            name: d.name,
+            catSlug: d.catSlug,
+            category: categoryLabel(d.catSlug),
+            avatar: "⭐",
+            sponsored: false,
+            description: d.description,
+            address: d.address,
+            hours: d.hours,
+            phone: String(d.phone || "").replace(/\D/g, ""),
+            status: "Novo no Bairro"
+          });
+        } else {
+          STATE.classifieds.unshift({
+            id: "cl-" + Date.now(),
+            category: d.category,
+            badgeColor: "#d94e1f",
+            title: d.title,
+            price: d.price,
+            details: d.details,
+            phone: String(d.phone || "").replace(/\D/g, "")
+          });
+        }
+        logAction("📥 Caixa de Entrada", "Aprovou sugestão", r.Titulo);
+        const j2 = await api("setStatus", { sheet: "sugestoes", id: r.ID, status: "Aprovado" }, { auth: true });
+        saveState(); // publica o conteúdo novo para todos
+        if (j2 && j2.ok && currentAdminTab === "inbox") renderAdminInboxTab(document.getElementById("adminContentPanel"));
+      };
+    });
+    body.querySelectorAll("[data-rj]").forEach((b) => {
+      b.onclick = async () => {
+        await api("setStatus", { sheet: "sugestoes", id: b.dataset.rj, status: "Recusado" }, { auth: true });
+        renderAdminInboxTab(document.getElementById("adminContentPanel"));
+      };
+    });
+  }
+
+  async function inboxMetrics(body) {
+    const j = await api("list", { sheet: "metricas" }, { auth: true });
+    if (!j.ok) return (body.innerHTML = `<p>Não foi possível carregar: ${escapeHtml(j.error)}</p>`);
+    const rows = j.rows.map((r) => ({ e: r.Evento, id: r.ID, n: r.Item, t: Number(r.Total) || 0 }));
+    if (!rows.length) return (body.innerHTML = "<p>Ainda sem dados. As contagens aparecem conforme os moradores usam o site.</p>");
+    const sum = (e) => rows.filter((r) => r.e === e).reduce((a, r) => a + r.t, 0);
+    const kpi = (n, l) => `<div class="kpi-card"><span class="kpi-num">${n}</span><span class="kpi-label">${l}</span></div>`;
+    const block = (e, title) => {
+      const list = rows.filter((r) => r.e === e).sort((a, b) => b.t - a.t).slice(0, 15);
+      if (!list.length) return "";
+      return `<h4 style="font-family:var(--font-serif); margin:18px 0 8px;">${title}</h4>` +
+        list.map((r) => `<div class="cms-list-item"><span>${escapeHtml(r.n || r.id)}</span><strong>${r.t}</strong></div>`).join("");
+    };
+    body.innerHTML = `
+      <div class="admin-kpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px;">
+        ${kpi(sum("visit"), "👀 Visitas")}
+        ${kpi(sum("whatsapp"), "💬 Cliques no WhatsApp")}
+        ${kpi(sum("maps"), "📍 Cliques em Como chegar")}
+        ${kpi(sum("call"), "📞 Cliques em Ligar")}
+        ${kpi(sum("comercial") + sum("anuncie"), "🚀 Interesse em anunciar")}
+      </div>
+      ${block("whatsapp", "Comércios mais chamados no WhatsApp")}
+      ${block("maps", "Comércios mais buscados no mapa")}
+      ${block("call", "Comércios mais ligados")}
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-top:14px;">Contagens anônimas (sem dados pessoais). Cliques da equipe logada não são contados. Mostre estes números ao lojista para justificar o plano.</p>`;
+  }
+
+  function inboxGuide(body) {
+    body.innerHTML = `
+      <p style="font-size:0.88rem; margin-bottom:12px;">Edite o Guia inteiro como uma tabela: telefone, horário, endereço, foto. A planilha tem uma linha por comércio (aba <strong>Guia</strong>).</p>
+      <ol style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 14px 18px; line-height:1.7;">
+        <li>Clique em <strong>Enviar Guia para a planilha</strong>.</li>
+        <li>Abra a planilha, edite as células (coloque <code>NÃO</code> na coluna <em>ativo</em> para remover um comércio; uma linha nova sem <em>id</em> cria um comércio).</li>
+        <li>Volte aqui e clique em <strong>Trazer da planilha para o site</strong>: o Guia é atualizado para todos.</li>
+      </ol>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-outline" id="guideUp">⬆️ Enviar Guia para a planilha</button>
+        <button class="btn btn-primary" id="guideDown">⬇️ Trazer da planilha para o site</button>
+      </div>`;
+    const FIELDS = ["name", "catSlug", "avatar", "description", "address", "mapsUrl", "hours", "phone", "landline", "instagram", "website", "photo", "status", "sponsored", "priority"];
+    document.getElementById("guideUp").onclick = async () => {
+      if (!confirm("Isto substitui o conteúdo da aba Guia da planilha pelo Guia atual do site. Continuar?")) return;
+      const rows = STATE.directory.map((b) => {
+        const o = { id: b.id };
+        FIELDS.forEach((k) => (o[k] = b[k] == null ? "" : b[k]));
+        return o;
+      });
+      const j = await api("saveDirectory", { rows }, { auth: true });
+      syncToast(j && j.ok ? `✓ ${j.count} comércios enviados à planilha` : "Erro: " + ((j && j.error) || ""), !(j && j.ok));
+    };
+    document.getElementById("guideDown").onclick = async () => {
+      const j = await api("getDirectory", {}, { auth: true });
+      if (!j || !j.ok) return syncToast("Erro: " + ((j && j.error) || ""), true);
+      if (!j.rows.length) return alert("A aba Guia está vazia. Envie o Guia para a planilha primeiro.");
+      if (!confirm(`Atualizar o site com ${j.rows.length} linhas da planilha?`)) return;
+      const byId = new Map(STATE.directory.map((b) => [b.id, b]));
+      const next = [];
+      let add = 0, upd = 0, del = 0;
+      j.rows.forEach((r) => {
+        const off = String(r.ativo || "").trim().toUpperCase().startsWith("N");
+        const old = r.id ? byId.get(r.id) : null;
+        if (off) {
+          if (old) del++;
+          return;
+        }
+        if (!String(r.name || "").trim()) return;
+        const b = old ? Object.assign({}, old) : { id: r.id || "biz-" + Date.now() + "-" + next.length, avatar: "🏪", sponsored: false };
+        FIELDS.forEach((k) => {
+          if (k === "sponsored") b.sponsored = String(r[k]).toLowerCase() === "true";
+          else if (k === "priority") {
+            if (String(r[k]).trim() !== "") b.priority = Number(r[k]) || 0;
+            else delete b.priority;
+          } else if (String(r[k] || "") !== "") b[k] = r[k];
+          else if (old && old[k] === undefined) {
+            /* mantém ausente */
+          } else b[k] = "";
+        });
+        b.phone = String(b.phone || "").replace(/\D/g, "");
+        b.landline = String(b.landline || "").replace(/\D/g, "");
+        b.category = categoryLabel(b.catSlug);
+        old ? upd++ : add++;
+        next.push(b);
+      });
+      STATE.directory = next;
+      logAction("📥 Caixa de Entrada", "Importou Guia da planilha", `${add} novos, ${upd} atualizados, ${del} removidos`);
+      saveState();
+      syncToast(`✓ Guia atualizado: ${add} novos, ${upd} atualizados, ${del} removidos`);
+    };
+  }
+
   // 9. Aba Receita & Backup
   function renderAdminMonetizationTab(container, totalRevenue) {
     const sponsors = STATE.sponsors || [];
     const kit = STATE.adsKit || getDefaultAdsKit();
+    if (API_URL && !sponsorsLoaded && !sponsorsLoading) {
+      sponsorsLoading = true;
+      loadSponsorsFromSheet().then((ok) => {
+        sponsorsLoading = false;
+        if (ok && currentAdminTab === "monetization") renderAdminView();
+      });
+    }
+    const sheetNote = !API_URL
+      ? ""
+      : sponsorsLoaded
+      ? `<div style="font-size:0.8rem; color:#15803d; margin-bottom:12px;">✓ Contratos sincronizados com a planilha (aba "Contratos"). Cada alteração é salva lá automaticamente.</div>`
+      : `<div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:12px;">⏳ Carregando contratos da planilha… (se pedir a senha, é a do servidor)</div>`;
     container.innerHTML = `
+      ${sheetNote}
       <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">💰 Controle de Anunciantes, Receita & Exportação para GitHub</h3>
       <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">
         Gerencie os pagamentos dos lojistas parceiros da quinzena (Total atual: <strong style="color:var(--brand-secondary);">R$ ${totalRevenue},00</strong>) e exporte o banco de dados pronto para publicar no GitHub.
@@ -3299,6 +3663,7 @@
     },
 
     openSubmitModal(type) {
+      const hpInput = '<input name="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true" />';
       const modal = document.getElementById("genericModal");
       const content = document.getElementById("genericModalContent");
       if (!modal || !content) return;
@@ -3306,8 +3671,9 @@
       if (type === "biz") {
         content.innerHTML = `
           <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:6px;">🏪 Cadastrar Meu Negócio no Guia do Bairro</h3>
-          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Preencha os dados abaixo para aparecer imediatamente no Guia da Vizinhança.</p>
-          <form id="publicBizForm" style="display:flex; flex-direction:column; gap:10px;">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">${API_URL ? "Preencha os dados abaixo. Nossa equipe confere e publica no Guia da Vizinhança." : "Preencha os dados abaixo para aparecer imediatamente no Guia da Vizinhança."}</p>
+          <form id="publicBizForm" style="display:flex; flex-direction:column; gap:10px; position:relative;">
+            <input name="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true" />
             <input required name="name" placeholder="Nome da Loja ou Profissional" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);" />
             <select name="catSlug" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);">
             ${categoryOptionsHtml(true)}
@@ -3318,13 +3684,32 @@
             <textarea required name="description" rows="2" placeholder="O que você oferece para os vizinhos?" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);"></textarea>
             <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
               <button type="button" class="btn btn-outline" onclick="window.TobiasApp.closeModal()">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Publicar no Guia</button>
+              <button type="submit" class="btn btn-primary">${API_URL ? "Enviar para aprovação" : "Publicar no Guia"}</button>
             </div>
           </form>
         `;
-        document.getElementById("publicBizForm").onsubmit = (e) => {
+        document.getElementById("publicBizForm").onsubmit = async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
+          if (API_URL) {
+            const btn = e.target.querySelector("button[type=submit]");
+            btn.disabled = true;
+            const j = await api("suggest", {
+              type: "biz",
+              hp: fd.get("hp"),
+              fields: {
+                name: fd.get("name"), catSlug: fd.get("catSlug"), address: fd.get("address"),
+                hours: fd.get("hours"), phone: fd.get("phone"), description: fd.get("description")
+              }
+            });
+            if (j && j.ok) {
+              content.innerHTML = `<div style="text-align:center; padding:18px 6px;"><h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:8px;">✓ Recebemos seu cadastro!</h3><p style="color:var(--text-secondary); margin-bottom:16px;">Vamos conferir os dados e publicar no Guia em breve.</p><button class="btn btn-primary" onclick="window.TobiasApp.closeModal()">Fechar</button></div>`;
+            } else {
+              btn.disabled = false;
+              alert("Não foi possível enviar agora: " + ((j && j.error) || "erro") + ". Tente novamente.");
+            }
+            return;
+          }
           STATE.directory.unshift({
             id: "biz-" + Date.now(),
             name: fd.get("name"),
@@ -3342,11 +3727,54 @@
           saveState();
           window.TobiasApp.closeModal();
         };
+      } else if (type === "lead") {
+        const plans = ((STATE.adsKit || getDefaultAdsKit()).plans || [])
+          .map((p) => `<option value="${escapeAttr(planLabel(p))}">${escapeHtml(planLabel(p))}</option>`)
+          .join("");
+        const inp = 'style="padding:10px; border-radius:8px; border:1px solid var(--border-color);"';
+        content.innerHTML = `
+          <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:6px;">🚀 Quero Anunciar na Tobias Magazine</h3>
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Conte um pouco sobre seu negócio e entramos em contato pelo WhatsApp.</p>
+          <form id="publicLeadForm" style="display:flex; flex-direction:column; gap:10px; position:relative;">
+            ${hpInput}
+            <input required name="loja" placeholder="Nome da loja ou serviço" ${inp} />
+            <input name="responsavel" placeholder="Seu nome" ${inp} />
+            <input required name="whatsapp" placeholder="Seu WhatsApp com DDD" inputmode="tel" ${inp} />
+            <input name="ramo" placeholder="Ramo (ex.: padaria, salão, farmácia)" ${inp} />
+            <select name="plano" ${inp}>${plans}</select>
+            <textarea name="mensagem" rows="2" placeholder="Algo que queira nos contar? (opcional)" ${inp}></textarea>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
+              <button type="button" class="btn btn-outline" onclick="window.TobiasApp.closeModal()">Cancelar</button>
+              <button type="submit" class="btn btn-primary">Enviar pedido</button>
+            </div>
+          </form>
+        `;
+        document.getElementById("publicLeadForm").onsubmit = async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.target);
+          const btn = e.target.querySelector("button[type=submit]");
+          btn.disabled = true;
+          const j = await api("lead", {
+            hp: fd.get("hp"),
+            fields: {
+              loja: fd.get("loja"), responsavel: fd.get("responsavel"), whatsapp: fd.get("whatsapp"),
+              ramo: fd.get("ramo"), plano: fd.get("plano"), mensagem: fd.get("mensagem")
+            }
+          });
+          if (j && j.ok) {
+            track("anuncie", "lead", "Pedidos de anúncio enviados");
+            content.innerHTML = `<div style="text-align:center; padding:18px 6px;"><h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:8px;">✓ Pedido recebido!</h3><p style="color:var(--text-secondary); margin-bottom:16px;">Em breve entraremos em contato pelo WhatsApp.</p><button class="btn btn-primary" onclick="window.TobiasApp.closeModal()">Fechar</button></div>`;
+          } else {
+            btn.disabled = false;
+            alert("Não foi possível enviar agora: " + ((j && j.error) || "erro") + ". Tente o botão do WhatsApp.");
+          }
+        };
       } else {
         content.innerHTML = `
           <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:6px;">📌 Publicar Classificado do Morador</h3>
-          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Divulgue imóvel, venda, vaga ou adoção pet gratuitamente no mural do bairro.</p>
-          <form id="publicClassifiedForm" style="display:flex; flex-direction:column; gap:10px;">
+          <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Divulgue imóvel, venda, vaga ou adoção pet gratuitamente no mural do bairro.${API_URL ? " Nossa equipe confere antes de publicar." : ""}</p>
+          <form id="publicClassifiedForm" style="display:flex; flex-direction:column; gap:10px; position:relative;">
+            <input name="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" aria-hidden="true" />
             <select name="category" style="padding:10px; border-radius:8px; border:1px solid var(--border-color);">
               <option value="Compra & Venda">Compra & Venda</option>
               <option value="Imóveis • Aluguel/Venda">Imóveis • Aluguel/Venda</option>
@@ -3359,13 +3787,29 @@
             <textarea required name="details" rows="2" placeholder="Detalhes..." style="padding:10px; border-radius:8px; border:1px solid var(--border-color);"></textarea>
             <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px;">
               <button type="button" class="btn btn-outline" onclick="window.TobiasApp.closeModal()">Cancelar</button>
-              <button type="submit" class="btn btn-primary">Publicar Anúncio</button>
+              <button type="submit" class="btn btn-primary">${API_URL ? "Enviar para aprovação" : "Publicar Anúncio"}</button>
             </div>
           </form>
         `;
-        document.getElementById("publicClassifiedForm").onsubmit = (e) => {
+        document.getElementById("publicClassifiedForm").onsubmit = async (e) => {
           e.preventDefault();
           const fd = new FormData(e.target);
+          if (API_URL) {
+            const btn = e.target.querySelector("button[type=submit]");
+            btn.disabled = true;
+            const j = await api("suggest", {
+              type: "classified",
+              hp: fd.get("hp"),
+              fields: { category: fd.get("category"), title: fd.get("title"), price: fd.get("price"), phone: fd.get("phone"), details: fd.get("details") }
+            });
+            if (j && j.ok) {
+              content.innerHTML = `<div style="text-align:center; padding:18px 6px;"><h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:8px;">✓ Recebemos seu anúncio!</h3><p style="color:var(--text-secondary); margin-bottom:16px;">Vamos conferir e publicar no mural em breve.</p><button class="btn btn-primary" onclick="window.TobiasApp.closeModal()">Fechar</button></div>`;
+            } else {
+              btn.disabled = false;
+              alert("Não foi possível enviar agora: " + ((j && j.error) || "erro") + ". Tente novamente.");
+            }
+            return;
+          }
           STATE.classifieds.unshift({
             id: "cl-" + Date.now(),
             category: fd.get("category"),
@@ -3399,6 +3843,7 @@
     },
 
     contactCommercialWhatsApp() {
+      track("comercial", "comercial", "Falar com Comercial (WhatsApp)");
       const w = STATE.whatsappConfig || getDefaultWhatsappConfig();
       const phone = w.comercialPhone || "5579999990000";
       const msg = w.commercialTemplate || "Olá! Quero anunciar meu comércio na Tobias Magazine!";

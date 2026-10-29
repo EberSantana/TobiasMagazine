@@ -1,9 +1,6 @@
-# Servidor de dados (Google Apps Script)
+# Servidor de dados (Google Apps Script) — versão 2
 
 1. Abra o projeto em script.google.com, apague o conteúdo de `Code.gs` e cole o de `apps-script/Code.gs`.
-2. Troque `TROQUE-ESTA-SENHA` por uma senha só sua.
-3. Implantar → Nova implantação → tipo **App da Web** → Executar como: **Eu** → Quem tem acesso: **Qualquer pessoa** → Implantar. Autorize o acesso ao Drive.
-4. Copie o link terminado em `/exec` e cole em `config.js` (`apiUrl`).
-5. No Gestão, ao salvar algo, o site pede a senha uma vez por sessão e publica para todos.
-
-Ao alterar o `Code.gs` depois, use Implantar → Gerenciar implantações → Editar → Nova versão (o link continua o mesmo).
+2. Na linha `SENHA_GESTAO`, coloque a sua senha. O `SHEET_ID` já aponta para a planilha do Tobias Magazine.
+3. Salve. Implantar → Gerenciar implantações → lápis → Versão: **Nova versão** → Implantar (o link /exec continua o mesmo). Autorize o acesso à planilha quando pedir.
+4. As abas Leads, Sugestoes, Metricas, Contratos e Guia são criadas sozinhas na planilha.

@@ -2319,9 +2319,10 @@
             ${categoryOptionsHtml(true)}
           </select>
         </div>
-        <div class="cms-field">
-          <label>Ícone (Emoji) & Selo</label>
-          <input name="avatar" value="🏪" required />
+        <div class="cms-field full">
+          <label>Ícone do Comércio (aparece no card do Guia)</label>
+          <input type="hidden" name="avatar" value="🏪" />
+          <div id="iconPicker" class="icon-picker" role="listbox" aria-label="Escolha o ícone"></div>
         </div>
         <div class="cms-field">
           <label>WhatsApp com DDD (Somente números)</label>
@@ -2413,14 +2414,44 @@
       hospedagem: "Hospedagem"
     };
 
-    // ---- modo edição: preenche o formulário com o comércio escolhido ----
     const dirForm = document.getElementById("cmsDirForm");
+    // ---- seletor visual de ícones (salva o emoji equivalente; o portal desenha o ícone vetorial) ----
+    const pickerEl = document.getElementById("iconPicker");
+    const avatarInput = dirForm.elements.avatar;
+    const paintPicker = () => {
+      const cur = avatarInput.value;
+      const opts = (window.TMIcons && TMIcons.picker) || [];
+      // emoji exato; se não houver, o primeiro que desenha o mesmo ícone (ex.: 💈 = tesoura)
+      let sel = opts.find(([e]) => e === cur);
+      if (!sel && cur) sel = opts.find(([e]) => TMIcons.nameOf(e) && TMIcons.nameOf(e) === TMIcons.nameOf(cur));
+      const selEmoji = sel ? sel[0] : cur;
+      const extra = !sel && cur ? [[cur, "Atual"]] : [];
+      pickerEl.innerHTML = extra
+        .concat(opts)
+        .map(([e, label]) => {
+          const nm = window.TMIcons && TMIcons.nameOf(e);
+          const ic = nm ? TMIcons.svg(nm) : `<span>${escapeHtml(e)}</span>`;
+          return `<button type="button" class="icon-opt ${e === selEmoji ? "active" : ""}" role="option" aria-selected="${e === selEmoji}" data-emoji="${escapeAttr(e)}" title="${escapeAttr(label)}">${ic}<small>${escapeHtml(label)}</small></button>`;
+        })
+        .join("");
+      pickerEl.querySelectorAll(".icon-opt").forEach((btn) => {
+        btn.onclick = () => {
+          avatarInput.value = btn.getAttribute("data-emoji");
+          paintPicker();
+        };
+      });
+    };
+    paintPicker();
+
+    // ---- modo edição: preenche o formulário com o comércio escolhido ----
     const editing = editingBizId ? STATE.directory.find((b) => b.id === editingBizId) : null;
     if (editing) {
       ["name", "catSlug", "avatar", "phone", "landline", "address", "hours", "status", "photo", "instagram", "website", "mapsUrl", "description"].forEach((k) => {
         if (dirForm.elements[k]) dirForm.elements[k].value = editing[k] == null ? "" : editing[k];
       });
       dirForm.elements.sponsored.value = editing.sponsored ? "true" : "false";
+      if (!avatarInput.value) avatarInput.value = "🏪";
+      paintPicker();
       dirForm.querySelectorAll("[required]").forEach((el) => {
         if (el.name !== "name") el.removeAttribute("required"); // na edição, só o nome é obrigatório
       });

@@ -11,6 +11,13 @@
 
 (function () {
   const P = {
+    coffee: '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>',
+    shirt: '<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>',
+    fuel: '<path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0v-6.998a2 2 0 0 0-.59-1.42L18 5"/><path d="M14 21V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v16"/><path d="M2 21h13"/><path d="M3 9h11"/>',
+    laptop: '<path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/>',
+    building: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+    camera: '<path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/>',
+    glasses: '<circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M2.5 13 5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13 19 7c-.7-1.3-1.5-2-3-2"/>',
     store: '<path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M10 20v-5h4v5"/>',
     wheat: '<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/>',
     pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
@@ -128,8 +135,29 @@
     "✔️": "check", "✔": "check", "✗": "x", "❌": "x", "★": "star", "⭐": "star", "💰": "wallet",
     "📞": "phone", "💾": "save", "📊": "chart", "🗑️": "trash", "🗑": "trash", "📦": "package",
     "💇": "scissors", "💈": "scissors", "💇‍♀️": "scissors", "✂️": "scissors", "✂": "scissors", "🦷": "tooth", "🏥": "hospital", "🏛️": "landmark", "🏦": "landmark", "🎓": "graduation-cap", "🏫": "graduation-cap", "🛍️": "shopping-bag", "🛍": "shopping-bag", "🚗": "car", "🏍️": "bike", "🏍": "bike", "🔧": "wrench", "🍦": "ice-cream", "🍨": "ice-cream", "🧁": "cake", "🎂": "cake", "🍔": "utensils", "📺": "tv", "🍽️": "utensils", "🍽": "utensils", "🏨": "hotel", "🛏️": "bed", "🛏": "bed",
+    "☕": "coffee", "👕": "shirt", "⛽": "fuel", "💻": "laptop", "🏢": "building", "📷": "camera", "👓": "glasses",
     "📂": "folder", "🗂️": "folder", "🗂": "folder", "🌐": "globe", "⬇️": "download", "⬇": "download"
   };
+
+
+  // Opções do seletor de ícones do painel de gestão: [emoji salvo, rótulo]
+  const PICKER = [
+    ["🏪", "Loja / Comércio"], ["🥖", "Padaria"], ["🛒", "Mercado"], ["🥬", "Hortifruti"],
+    ["🍽️", "Restaurante"], ["🍕", "Pizzaria"], ["🍔", "Lanchonete"], ["🍦", "Sorveteria / Açaí"],
+    ["🧁", "Confeitaria"], ["☕", "Café"], ["💊", "Farmácia"], ["🏥", "Clínica / Hospital"],
+    ["🩺", "Médico"], ["🦷", "Dentista"], ["💇", "Salão / Barbearia"], ["💅", "Manicure / Estética"],
+    ["🐾", "Pet shop"], ["🔑", "Chaveiro"], ["🔧", "Oficina / Reparos"], ["⚡", "Eletricista"],
+    ["🚰", "Encanador"], ["🚗", "Carros"], ["🏍️", "Motos"], ["⛽", "Posto"],
+    ["🏨", "Hotel / Pousada"], ["🛏️", "Hospedagem"], ["🎓", "Escola / Cursos"], ["📚", "Livraria / Papelaria"],
+    ["⚖️", "Advocacia"], ["🏦", "Banco"], ["💼", "Escritório / Serviços"], ["🛍️", "Variedades"],
+    ["👕", "Roupas / Moda"], ["👓", "Ótica"], ["📺", "Eletrônicos"], ["💻", "Informática"],
+    ["📷", "Fotografia"], ["🏢", "Imobiliária"], ["🎁", "Presentes"], ["🚛", "Frete / Transporte"],
+    ["🏠", "Casa / Construção"], ["🎸", "Música / Eventos"], ["🏃", "Academia / Esporte"], ["⭐", "Destaque"]
+  ];
+  function nameOf(ch) {
+    const base = String(ch || "").replace(/\uFE0F/g, "");
+    return MAP[ch] || MAP[base] || null;
+  }
 
   function svg(name, extraClass) {
     const inner = P[name];
@@ -201,7 +229,7 @@
     new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
 
-  window.TMIcons = { svg, fromEmoji, replaceIn, names: Object.keys(P) };
+  window.TMIcons = { svg, fromEmoji, replaceIn, nameOf, picker: PICKER, names: Object.keys(P) };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", start);

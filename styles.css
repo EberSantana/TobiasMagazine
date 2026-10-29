@@ -2799,3 +2799,52 @@ body.admin-active .admin-wrapper {
   background: var(--bg-subtle);
   color: var(--text-main);
 }
+
+
+/* Seletor visual de ícones do Gestão */
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.icon-opt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  color: var(--text-main);
+  cursor: pointer;
+  font: inherit;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+.icon-opt .tm-ic {
+  width: 24px;
+  height: 24px;
+  color: var(--brand-primary);
+}
+.icon-opt small {
+  font-size: 0.68rem;
+  line-height: 1.15;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.icon-opt:hover {
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+.icon-opt.active {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+  box-shadow: 0 0 0 2px var(--brand-primary);
+}
+.icon-opt.active small {
+  color: var(--brand-primary-hover);
+  font-weight: 700;
+}

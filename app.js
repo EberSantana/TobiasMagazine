@@ -20,7 +20,8 @@
     { id: "whatsapp_config", label: "📲 10. Config. WhatsApp", desc: "Números oficiais, grupos, templates e QR Code" },
     { id: "audit_logs", label: "📋 11. Logs & Auditoria", desc: "Histórico de acessos e ações de todos os perfis" },
     { id: "users_rbac", label: "🔐 12. Perfis & Acessos", desc: "Criar perfis, atribuições e usuários (Exclusivo Admin)" },
-    { id: "inbox", label: "📥 13. Caixa de Entrada & Métricas", desc: "Pedidos de anúncio, sugestões dos moradores, métricas e Guia na planilha" }
+    { id: "inbox", label: "📥 13. Caixa de Entrada & Métricas", desc: "Pedidos de anúncio, sugestões dos moradores, métricas e Guia na planilha" },
+    { id: "highlights", label: "✨ 14. Pop-up de Destaques", desc: "Ativar ou desativar o pop-up da semana e cadastrar os informes" }
   ];
 
   // Perfis padrão pré-configurados (O Administrador pode criar novos perfis personalizados)
@@ -258,6 +259,11 @@
   const categoryOptionsHtml = (withIcons) =>
     CATEGORY_META.map((c) => `<option value="${c.slug}">${withIcons ? c.icon + " " : ""}${c.label}</option>`).join("");
 
+  // Pop-up "Destaques da semana": começa DESATIVADO e sem itens; a Gestão liga e preenche.
+  function getDefaultHighlights() {
+    return { enabled: false, items: [] };
+  }
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -270,6 +276,7 @@
           if (!parsed.users) parsed.users = getDefaultUsers();
           if (!parsed.whatsappConfig) parsed.whatsappConfig = getDefaultWhatsappConfig();
           if (!parsed.auditLogs) parsed.auditLogs = getDefaultAuditLogs();
+          if (!parsed.highlights) parsed.highlights = getDefaultHighlights();
           // Garante que os novos módulos estejam presentes no perfil Admin
           const adminRole = parsed.roles.find((r) => r.id === "role-admin");
           if (adminRole) {
@@ -293,6 +300,7 @@
     clone.users = getDefaultUsers();
     clone.whatsappConfig = getDefaultWhatsappConfig();
     clone.auditLogs = getDefaultAuditLogs();
+    clone.highlights = getDefaultHighlights();
     clone.activeEditionId = "ed-14";
     return clone;
   }
@@ -356,7 +364,7 @@
   const SHARED_KEYS = [
     "dataVersion", "edition", "stories", "directory", "utilityNews", "essentialSchedules",
     "peopleStories", "promotions", "events", "classifieds", "flipbookPages", "editionsCatalog",
-    "adsKit", "whatsappConfig", "activeEditionId"
+    "adsKit", "whatsappConfig", "activeEditionId", "highlights"
   ];
   let lastSynced = "";
   let pushTimer = null;
@@ -400,6 +408,7 @@
           if (remote[k] !== undefined) STATE[k] = remote[k];
         });
         STATE.dataVersion = remote.dataVersion || 1;
+        if (!STATE.highlights) STATE.highlights = getDefaultHighlights();
         mergeNewDataItems(STATE); // acrescenta itens novos do data.js, se houver
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
@@ -630,7 +639,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     renderAll();
-    pullRemote();
+    Promise.resolve(pullRemote()).then(() => setTimeout(maybeAutoOpenHighlights, 900));
     setupEventListeners();
     setupHorizontalScrollers();
   });
@@ -1829,6 +1838,8 @@
       renderAdminRbacTab(panelContainer);
     } else if (currentAdminTab === "inbox") {
       renderAdminInboxTab(panelContainer);
+    } else if (currentAdminTab === "highlights") {
+      renderAdminHighlightsTab(panelContainer);
     }
   }
 
@@ -2775,6 +2786,346 @@
     };
   }
 
+  // --------------------------------------------------------------------------
+  // POP-UP "DESTAQUES DA SEMANA"
+  // --------------------------------------------------------------------------
+  const HL_SEEN_KEY = "tobias_destaques_visto";
+  const HL_MAX = 5;
+  const HL_TYPES = {
+    cupom: { label: "Cupom", cls: "dst-c1" },
+    promocao: { label: "Promoção", cls: "dst-c2" },
+    aviso: { label: "Utilidade pública", cls: "dst-c3" },
+    evento: { label: "Evento", cls: "dst-c4" },
+    revista: { label: "Revista", cls: "dst-c1" },
+    informe: { label: "Informe", cls: "dst-c2" }
+  };
+  const HL_TARGETS = [
+    { v: "", l: "Sem botão" },
+    { v: "#guia-comercio", l: "Guia do Comércio" },
+    { v: "#achados-promocoes", l: "Cupons e Promoções" },
+    { v: "#utilidade-publica", l: "Utilidade Pública" },
+    { v: "#agenda-eventos", l: "Agenda e Eventos" },
+    { v: "#gente-do-bairro", l: "Gente do Bairro" },
+    { v: "#classificados", l: "Classificados" },
+    { v: "flipbook", l: "Folhear a revista" }
+  ];
+
+  function getHighlights() {
+    if (!STATE.highlights) STATE.highlights = getDefaultHighlights();
+    if (!Array.isArray(STATE.highlights.items)) STATE.highlights.items = [];
+    return STATE.highlights;
+  }
+  function todayLocalStr() {
+    const d = new Date();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${d.getFullYear()}-${m}-${day}`;
+  }
+  function activeHighlightItems() {
+    const today = todayLocalStr();
+    return getHighlights().items.filter((i) => i && i.title && i.until >= today).slice(0, HL_MAX);
+  }
+  function attrEsc(v) {
+    return escapeHtml(v).replace(/"/g, "&quot;");
+  }
+  function formatBR(iso) {
+    const p = String(iso || "").split("-");
+    return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
+  }
+
+  function renderAdminHighlightsTab(container) {
+    const h = getHighlights();
+    const today = todayLocalStr();
+    const valid = h.items.filter((i) => i.until >= today).length;
+    const expired = h.items.length - valid;
+    const full = valid >= HL_MAX;
+    let status;
+    if (!h.enabled) status = "O pop-up está desligado. Os leitores não veem nada.";
+    else if (valid === 0) status = "Está ligado, mas não há informe dentro da validade. Por isso o pop-up não aparece.";
+    else status = `Ligado. Os leitores veem ${valid} informe(s) ao abrir o portal ou o app, uma vez por dia.`;
+
+    container.innerHTML = `
+      <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">✨ Pop-up de Destaques da Semana</h3>
+      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">Janela que aparece quando o leitor abre o portal ou o app, com promoções, eventos e avisos importantes. Sem promoção na semana? É só desligar.</p>
+
+      <div class="hl-status ${h.enabled ? "on" : "off"}">
+        <div>
+          <strong id="hlSwitchLabel">Pop-up ${h.enabled ? "ATIVADO" : "DESATIVADO"}</strong>
+          <div id="hlStatusText" style="font-size:0.85rem;">${status}</div>
+        </div>
+        <button type="button" id="hlSwitch" role="switch" aria-checked="${h.enabled}" aria-labelledby="hlSwitchLabel" aria-describedby="hlStatusText" class="hl-switch" onclick="window.TobiasApp.toggleHighlights()">
+          <span class="hl-knob" aria-hidden="true"></span>
+          <span class="hl-switch-text">${h.enabled ? "Desativar" : "Ativar"}</span>
+        </button>
+      </div>
+
+      <h4 style="margin:18px 0 8px; font-size:1rem;">Novo informe (${valid} de ${HL_MAX} em uso)</h4>
+      ${full ? `<p class="hl-full">Limite de ${HL_MAX} informes dentro da validade. Exclua ou espere vencer algum para cadastrar outro.</p>` : ""}
+      <form id="cmsHlForm" class="cms-form-grid two-cols" ${full ? 'style="opacity:.55;"' : ""}>
+        <div class="cms-field">
+          <label for="hlType">Tipo</label>
+          <select id="hlType" name="type">
+            ${Object.keys(HL_TYPES).map((k) => `<option value="${k}">${HL_TYPES[k].label}</option>`).join("")}
+          </select>
+        </div>
+        <div class="cms-field">
+          <label for="hlUntil">Mostrar até (último dia)</label>
+          <input id="hlUntil" name="until" type="date" min="${today}" required />
+        </div>
+        <div class="cms-field full">
+          <label for="hlTitle">Título</label>
+          <input id="hlTitle" name="title" maxlength="70" placeholder="15% de desconto no pão francês" required />
+        </div>
+        <div class="cms-field full">
+          <label for="hlText">Texto curto</label>
+          <input id="hlText" name="text" maxlength="120" placeholder="Padaria Seu Tobias, apresentando este cupom no balcão." />
+        </div>
+        <div class="cms-field">
+          <label for="hlValid">Validade que aparece para o leitor</label>
+          <input id="hlValid" name="valid" maxlength="40" placeholder="Válido até domingo" />
+        </div>
+        <div class="cms-field">
+          <label for="hlTarget">Botão leva para</label>
+          <select id="hlTarget" name="target">
+            ${HL_TARGETS.map((t) => `<option value="${t.v}">${t.l}</option>`).join("")}
+          </select>
+        </div>
+        <div class="cms-field full">
+          <label for="hlCta">Texto do botão</label>
+          <input id="hlCta" name="cta" maxlength="24" placeholder="Ver cupom" />
+        </div>
+        <div class="cms-field full" style="display:flex; justify-content:flex-end;">
+          <button type="submit" class="btn btn-primary" ${full ? "disabled" : ""}>+ Adicionar ao pop-up</button>
+        </div>
+      </form>
+
+      <div class="hl-actions">
+        <button type="button" id="hlPreviewBtn" class="btn btn-primary" onclick="window.TobiasApp.previewHighlights()" ${valid ? "" : "disabled"}>👁️ Pré-visualizar pop-up</button>
+        ${expired ? `<button type="button" class="btn btn-glass hl-clean" onclick="window.TobiasApp.clearExpiredHighlights()">Limpar ${expired} vencido(s)</button>` : ""}
+      </div>
+
+      <div>
+        ${
+          h.items.length === 0
+            ? `<p style="color:var(--text-secondary);">Nenhum informe cadastrado. Preencha o formulário acima e depois ative o pop-up.</p>`
+            : h.items
+                .map((it) => {
+                  const ok = it.until >= today;
+                  return `
+          <div class="cms-list-item">
+            <div>
+              <strong>[${HL_TYPES[it.type] ? HL_TYPES[it.type].label : "Informe"}] ${escapeHtml(it.title)}</strong>
+              <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(it.text || "")} • Até ${formatBR(it.until)} • <b>${ok ? "Dentro da validade" : "Vencido (não aparece)"}</b></div>
+            </div>
+            <button class="btn-danger" onclick="window.TobiasApp.deleteHighlight('${it.id}')">Excluir</button>
+          </div>`;
+                })
+                .join("")
+        }
+      </div>
+    `;
+
+    const form = document.getElementById("cmsHlForm");
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const cur = getHighlights();
+      if (activeHighlightItems().length >= HL_MAX) return;
+      const fd = new FormData(e.target);
+      const target = String(fd.get("target") || "");
+      cur.items.push({
+        id: "hl-" + Date.now(),
+        type: String(fd.get("type") || "informe"),
+        title: String(fd.get("title") || "").trim(),
+        text: String(fd.get("text") || "").trim(),
+        valid: String(fd.get("valid") || "").trim(),
+        until: String(fd.get("until") || ""),
+        target,
+        cta: target ? String(fd.get("cta") || "").trim() || "Ver mais" : ""
+      });
+      logAction("✨ Pop-up de Destaques", "Adicionou informe", `"${fd.get("title")}" até ${formatBR(fd.get("until"))}`);
+      saveState();
+    };
+  }
+
+  let hlLastFocus = null;
+  let hlInerted = [];
+  let hlKeyHandler = null;
+
+  function closeHighlights(remember) {
+    const ov = document.getElementById("dstOverlay");
+    if (ov) ov.remove();
+    hlInerted.forEach((el) => el.removeAttribute("inert"));
+    hlInerted = [];
+    document.body.classList.remove("dst-open");
+    if (hlKeyHandler) document.removeEventListener("keydown", hlKeyHandler, true);
+    hlKeyHandler = null;
+    if (remember) {
+      try {
+        localStorage.setItem(HL_SEEN_KEY, todayLocalStr() + "|" + activeHighlightItems().map((i) => i.id).join(","));
+      } catch (e) {}
+    }
+    const back = hlLastFocus && document.contains(hlLastFocus) ? hlLastFocus : document.getElementById("hlPreviewBtn") || document.getElementById("skipLink");
+    if (back && back.focus) back.focus();
+  }
+
+  function openHighlights(force) {
+    const items = activeHighlightItems();
+    if (!items.length || document.getElementById("dstOverlay")) return;
+    hlLastFocus = document.activeElement;
+    const ov = document.createElement("div");
+    ov.className = "dst-overlay";
+    ov.id = "dstOverlay";
+    const n = items.length;
+    ov.innerHTML = `
+      <div class="dst-dialog" role="dialog" aria-modal="true" aria-labelledby="dstTitle" aria-describedby="dstDesc">
+        <div class="dst-head">
+          <div>
+            <h2 id="dstTitle">Destaques da semana</h2>
+            <p id="dstDesc">${n === 1 ? "1 novidade do bairro." : n + " novidades do bairro. Use as setas para ver todas."}</p>
+          </div>
+          <button type="button" class="dst-close" id="dstX" aria-label="Fechar destaques">×</button>
+        </div>
+        <section aria-roledescription="carrossel" aria-label="Destaques da semana">
+          <div class="dst-viewport"><div class="dst-track" id="dstTrack">
+            ${items
+              .map((it, k) => {
+                const t = HL_TYPES[it.type] || HL_TYPES.informe;
+                return `<div class="dst-slide ${t.cls}" role="group" aria-roledescription="slide" aria-label="${k + 1} de ${n}">
+                  <span class="dst-tag">${t.label}</span>
+                  <h3>${escapeHtml(it.title)}</h3>
+                  ${it.text ? `<p>${escapeHtml(it.text)}</p>` : ""}
+                  <span class="dst-valid">${escapeHtml(it.valid || "Até " + formatBR(it.until))}</span>
+                  ${it.target ? `<button type="button" class="dst-go" data-target="${attrEsc(it.target)}">${escapeHtml(it.cta || "Ver mais")}</button>` : ""}
+                </div>`;
+              })
+              .join("")}
+          </div></div>
+          ${
+            n > 1
+              ? `<div class="dst-nav">
+            <button type="button" class="dst-arrow" id="dstPrev" aria-label="Destaque anterior">‹</button>
+            <div class="dst-dots" id="dstDots"></div>
+            <button type="button" class="dst-arrow" id="dstNext" aria-label="Próximo destaque">›</button>
+          </div>`
+              : ""
+          }
+          <div class="sr-only" aria-live="polite" id="dstLive"></div>
+        </section>
+        <div class="dst-foot">
+          <button type="button" class="dst-link" id="dstToday">Não mostrar de novo hoje</button>
+          <button type="button" class="dst-primary" id="dstClose">Fechar</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    document.body.classList.add("dst-open");
+    hlInerted = [];
+    Array.from(document.body.children).forEach((el) => {
+      if (el === ov || el.tagName === "SCRIPT" || el.hasAttribute("inert")) return;
+      el.setAttribute("inert", "");
+      hlInerted.push(el);
+    });
+
+    const dialog = ov.querySelector(".dst-dialog");
+    const track = ov.querySelector("#dstTrack");
+    const slides = Array.from(track.children);
+    const prev = ov.querySelector("#dstPrev");
+    const next = ov.querySelector("#dstNext");
+    const dotsBox = ov.querySelector("#dstDots");
+    const live = ov.querySelector("#dstLive");
+    let idx = 0;
+    const dots = [];
+    if (dotsBox) {
+      slides.forEach((s, k) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "dst-dot";
+        b.setAttribute("aria-label", `Ir para o destaque ${k + 1} de ${n}`);
+        b.addEventListener("click", () => go(k, false));
+        dotsBox.appendChild(b);
+        dots.push(b);
+      });
+    }
+    function go(k, silent) {
+      idx = Math.max(0, Math.min(n - 1, k));
+      track.style.transform = `translateX(-${idx * 100}%)`;
+      slides.forEach((s, j) => {
+        if (j === idx) s.removeAttribute("inert");
+        else s.setAttribute("inert", "");
+      });
+      dots.forEach((d, j) => d.setAttribute("aria-current", j === idx ? "true" : "false"));
+      if (prev) prev.disabled = idx === 0;
+      if (next) next.disabled = idx === n - 1;
+      if (!silent) live.textContent = `Destaque ${idx + 1} de ${n}: ${items[idx].title}`;
+    }
+    go(0, true);
+    if (prev) prev.addEventListener("click", () => go(idx - 1));
+    if (next) next.addEventListener("click", () => go(idx + 1));
+    const remember = !force;
+    ov.querySelector("#dstX").addEventListener("click", () => closeHighlights(remember));
+    ov.querySelector("#dstClose").addEventListener("click", () => closeHighlights(remember));
+    ov.querySelector("#dstToday").addEventListener("click", () => closeHighlights(true));
+    ov.addEventListener("click", (e) => {
+      if (e.target === ov) closeHighlights(remember);
+    });
+    ov.querySelectorAll(".dst-go").forEach((b) =>
+      b.addEventListener("click", () => {
+        const t = b.getAttribute("data-target");
+        closeHighlights(remember);
+        if (t === "flipbook") window.TobiasApp.switchMode("flipbook");
+        else if (t) {
+          window.TobiasApp.switchMode("portal");
+          setTimeout(() => {
+            const el = document.querySelector(t);
+            if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            try { history.replaceState(null, "", t); } catch (e) {}
+          }, 60);
+        }
+      })
+    );
+    let sx = null;
+    track.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener("touchend", (e) => {
+      if (sx === null) return;
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 40) go(idx + (dx < 0 ? 1 : -1), false);
+      sx = null;
+    });
+    hlKeyHandler = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        closeHighlights(remember);
+        return;
+      }
+      if (e.key === "Tab") {
+        const f = Array.from(dialog.querySelectorAll("button:not([disabled])")).filter((x) => !x.closest("[inert]"));
+        if (!f.length) return;
+        const a = f[0], z = f[f.length - 1];
+        if (e.shiftKey && (document.activeElement === a || !dialog.contains(document.activeElement))) { e.preventDefault(); z.focus(); }
+        else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+      }
+    };
+    document.addEventListener("keydown", hlKeyHandler, true);
+    ov.querySelector("#dstX").focus();
+  }
+
+  function maybeAutoOpenHighlights() {
+    try {
+      const h = getHighlights();
+      if (!h.enabled || CURRENT_USER) return;
+      if (document.body.classList.contains("flipbook-active") || document.body.classList.contains("admin-active")) return;
+      if (location.hash && location.hash !== "#") return; // veio por link direto
+      const items = activeHighlightItems();
+      if (!items.length) return;
+      const sig = todayLocalStr() + "|" + items.map((i) => i.id).join(",");
+      let seen = "";
+      try { seen = localStorage.getItem(HL_SEEN_KEY) || ""; } catch (e) {}
+      if (seen === sig) return;
+      openHighlights(false);
+    } catch (e) {
+      console.warn("Pop-up de destaques:", e);
+    }
+  }
+
   // 6. Aba Agenda
   function renderAdminEventsTab(container) {
     container.innerHTML = `
@@ -3424,6 +3775,36 @@
 
   window.TobiasApp = {
     toggleTheme,
+
+    toggleHighlights() {
+      const h = getHighlights();
+      h.enabled = !h.enabled;
+      logAction("✨ Pop-up de Destaques", h.enabled ? "Ativou o pop-up" : "Desativou o pop-up", h.enabled ? "Leitores passam a ver os destaques ao abrir" : "Pop-up não aparece mais para os leitores");
+      saveState();
+      const b = document.getElementById("hlSwitch");
+      if (b) b.focus();
+    },
+
+    deleteHighlight(id) {
+      const h = getHighlights();
+      const it = h.items.find((i) => i.id === id);
+      h.items = h.items.filter((i) => i.id !== id);
+      logAction("✨ Pop-up de Destaques", "Excluiu informe", `Removeu "${it ? it.title : id}"`);
+      saveState();
+    },
+
+    clearExpiredHighlights() {
+      const h = getHighlights();
+      const today = todayLocalStr();
+      const before = h.items.length;
+      h.items = h.items.filter((i) => i.until >= today);
+      logAction("✨ Pop-up de Destaques", "Limpou informes vencidos", `${before - h.items.length} removido(s)`);
+      saveState();
+    },
+
+    previewHighlights() {
+      openHighlights(true);
+    },
 
     editBiz(id) {
       editingBizId = id;

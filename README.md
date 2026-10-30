@@ -334,3 +334,13 @@ Professor EBTT do Instituto Federal de Sergipe, Campus Tobias Barreto. Pesquisad
 ## 📚 Uso dos materiais
 
 Os materiais são de uso educacional. Para reutilizar ou adaptar em outra instituição, entre em contato com o autor.
+
+## Pop-up de Destaques da Semana
+
+Janela com carrossel (até 5 informes) que aparece quando o leitor abre o portal ou o app. É controlada na Gestão, módulo **14. Pop-up de Destaques**:
+
+- Botão **Ativar / Desativar**: sem promoção na semana, é só desligar. Começa desativado.
+- Cada informe tem tipo, título, texto, validade, "mostrar até" e botão opcional. Informe vencido sai sozinho.
+- Aparece uma vez por dia (ou de novo quando os informes mudam), não abre em link direto nem para quem está logado na Gestão.
+- Acessível: diálogo com foco preso, Esc, controles de 44 px, sem rotação automática, respeita "reduzir movimento". Axe: 0 violações (claro, escuro e Gestão).
+- O conteúdo é sincronizado com os demais dados da edição (chave `highlights`).

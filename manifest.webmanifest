@@ -1,0 +1,20 @@
+{
+  "name": "Tobias Magazine",
+  "short_name": "Tobias",
+  "description": "A revista digital do bairro: comércio, serviços, notícias e cupons de Tobias Barreto.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./?utm_source=pwa",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf6f0",
+  "theme_color": "#c2410c",
+  "categories": ["news", "lifestyle", "shopping"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

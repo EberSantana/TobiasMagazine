@@ -340,7 +340,7 @@ Os materiais são de uso educacional. Para reutilizar ou adaptar em outra instit
 Janela com carrossel (até 5 informes) que aparece quando o leitor abre o portal ou o app. É controlada na Gestão, módulo **14. Pop-up de Destaques**:
 
 - Botão **Ativar / Desativar**: sem promoção na semana, é só desligar. Começa desativado.
-- Cada informe tem tipo, título, texto, validade, "mostrar até" e botão opcional. Informe vencido sai sozinho.
+- Cada informe tem tipo, título, texto, validade, "mostrar até" e botão opcional. Dá para **editar**, reordenar e excluir, com **prévia ao vivo** do pop-up enquanto digita. Informe vencido sai sozinho.
 - Aparece uma vez por dia (ou de novo quando os informes mudam), não abre em link direto nem para quem está logado na Gestão.
 - Acessível: diálogo com foco preso, Esc, controles de 44 px, sem rotação automática, respeita "reduzir movimento". Axe: 0 violações (claro, escuro e Gestão).
 - O conteúdo é sincronizado com os demais dados da edição (chave `highlights`).

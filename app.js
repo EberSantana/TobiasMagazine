@@ -2833,25 +2833,57 @@
     return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
   }
 
+  let editingHlId = null;
+
+  // HTML de um slide: o mesmo desenho vale para o pop-up real e para a prévia da Gestão
+  function hlSlideHtml(it, k, n, preview) {
+    const t = HL_TYPES[it.type] || HL_TYPES.informe;
+    const title = escapeHtml(it.title || "Título do informe");
+    const valid = escapeHtml(it.valid || (it.until ? "Até " + formatBR(it.until) : "Validade"));
+    const cta = it.target || preview ? escapeHtml(it.cta || "Ver mais") : "";
+    const btn = it.target
+      ? preview
+        ? `<span class="dst-go">${cta}</span>`
+        : `<button type="button" class="dst-go" data-target="${attrEsc(it.target)}">${cta}</button>`
+      : "";
+    const aria = preview ? "" : ` role="group" aria-roledescription="slide" aria-label="${k + 1} de ${n}"`;
+    return `<div class="dst-slide ${t.cls}"${aria}>
+      <span class="dst-tag">${t.label}</span>
+      <h3>${title}</h3>
+      ${it.text ? `<p>${escapeHtml(it.text)}</p>` : ""}
+      <span class="dst-valid">${valid}</span>
+      ${btn}
+    </div>`;
+  }
+
   function renderAdminHighlightsTab(container) {
     const h = getHighlights();
     const today = todayLocalStr();
     const valid = h.items.filter((i) => i.until >= today).length;
     const expired = h.items.length - valid;
-    const full = valid >= HL_MAX;
+    const editing = editingHlId ? h.items.find((i) => i.id === editingHlId) : null;
+    if (editingHlId && !editing) editingHlId = null;
+    const full = !editing && valid >= HL_MAX;
+    const v = editing || { type: "cupom", title: "", text: "", valid: "", until: "", target: "", cta: "" };
     let status;
-    if (!h.enabled) status = "O pop-up está desligado. Os leitores não veem nada.";
-    else if (valid === 0) status = "Está ligado, mas não há informe dentro da validade. Por isso o pop-up não aparece.";
-    else status = `Ligado. Os leitores veem ${valid} informe(s) ao abrir o portal ou o app, uma vez por dia.`;
+    if (!h.enabled) status = "Desligado: os leitores não veem nada. Use quando não houver promoção ou aviso na semana.";
+    else if (valid === 0) status = "Ligado, mas sem informe dentro da validade. Por isso o pop-up não aparece.";
+    else status = `Ligado: os leitores veem ${valid} informe(s) ao abrir o portal ou o app, uma vez por dia.`;
 
     container.innerHTML = `
-      <h3 style="font-family:var(--font-serif); font-size:1.4rem; margin-bottom:4px;">✨ Pop-up de Destaques da Semana</h3>
-      <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:16px;">Janela que aparece quando o leitor abre o portal ou o app, com promoções, eventos e avisos importantes. Sem promoção na semana? É só desligar.</p>
+      <div class="hl-head">
+        <div>
+          <h3 class="hl-title">✨ Pop-up de Destaques da Semana</h3>
+          <p class="hl-sub">Janela que aparece quando o leitor abre o portal ou o app, com promoções, eventos e avisos importantes.</p>
+        </div>
+        <button type="button" id="hlPreviewBtn" class="hl-test" onclick="window.TobiasApp.previewHighlights()" ${valid ? "" : "disabled"}>▶ Testar como o leitor vê</button>
+      </div>
 
       <div class="hl-status ${h.enabled ? "on" : "off"}">
-        <div>
-          <strong id="hlSwitchLabel">Pop-up ${h.enabled ? "ATIVADO" : "DESATIVADO"}</strong>
-          <div id="hlStatusText" style="font-size:0.85rem;">${status}</div>
+        <div class="hl-status-txt">
+          <span class="hl-state-pill">${h.enabled ? "ATIVADO" : "DESATIVADO"}</span>
+          <strong id="hlSwitchLabel">Exibição do pop-up</strong>
+          <div id="hlStatusText">${status}</div>
         </div>
         <button type="button" id="hlSwitch" role="switch" aria-checked="${h.enabled}" aria-labelledby="hlSwitchLabel" aria-describedby="hlStatusText" class="hl-switch" onclick="window.TobiasApp.toggleHighlights()">
           <span class="hl-knob" aria-hidden="true"></span>
@@ -2859,81 +2891,122 @@
         </button>
       </div>
 
-      <h4 style="margin:18px 0 8px; font-size:1rem;">Novo informe (${valid} de ${HL_MAX} em uso)</h4>
-      ${full ? `<p class="hl-full">Limite de ${HL_MAX} informes dentro da validade. Exclua ou espere vencer algum para cadastrar outro.</p>` : ""}
-      <form id="cmsHlForm" class="cms-form-grid two-cols" ${full ? 'style="opacity:.55;"' : ""}>
-        <div class="cms-field">
-          <label for="hlType">Tipo</label>
-          <select id="hlType" name="type">
-            ${Object.keys(HL_TYPES).map((k) => `<option value="${k}">${HL_TYPES[k].label}</option>`).join("")}
-          </select>
-        </div>
-        <div class="cms-field">
-          <label for="hlUntil">Mostrar até (último dia)</label>
-          <input id="hlUntil" name="until" type="date" min="${today}" required />
-        </div>
-        <div class="cms-field full">
-          <label for="hlTitle">Título</label>
-          <input id="hlTitle" name="title" maxlength="70" placeholder="15% de desconto no pão francês" required />
-        </div>
-        <div class="cms-field full">
-          <label for="hlText">Texto curto</label>
-          <input id="hlText" name="text" maxlength="120" placeholder="Padaria Seu Tobias, apresentando este cupom no balcão." />
-        </div>
-        <div class="cms-field">
-          <label for="hlValid">Validade que aparece para o leitor</label>
-          <input id="hlValid" name="valid" maxlength="40" placeholder="Válido até domingo" />
-        </div>
-        <div class="cms-field">
-          <label for="hlTarget">Botão leva para</label>
-          <select id="hlTarget" name="target">
-            ${HL_TARGETS.map((t) => `<option value="${t.v}">${t.l}</option>`).join("")}
-          </select>
-        </div>
-        <div class="cms-field full">
-          <label for="hlCta">Texto do botão</label>
-          <input id="hlCta" name="cta" maxlength="24" placeholder="Ver cupom" />
-        </div>
-        <div class="cms-field full" style="display:flex; justify-content:flex-end;">
-          <button type="submit" class="btn btn-primary" ${full ? "disabled" : ""}>+ Adicionar ao pop-up</button>
-        </div>
-      </form>
+      <div class="hl-grid">
+        <section class="hl-card" aria-labelledby="hlFormTitle">
+          <h4 id="hlFormTitle" class="hl-card-title">${editing ? "Editando informe" : "Novo informe"} <span class="hl-count">${valid} de ${HL_MAX} em uso</span></h4>
+          ${full ? `<p class="hl-full">Limite de ${HL_MAX} informes dentro da validade. Exclua ou espere vencer algum para cadastrar outro.</p>` : ""}
+          <form id="cmsHlForm" class="hl-form" novalidate>
+            <fieldset class="hl-fs" ${full ? "disabled" : ""}>
+              <legend>1. Conteúdo</legend>
+              <div class="cms-field">
+                <label for="hlType">Tipo de informe</label>
+                <select id="hlType" name="type">
+                  ${Object.keys(HL_TYPES).map((k) => `<option value="${k}" ${v.type === k ? "selected" : ""}>${HL_TYPES[k].label}</option>`).join("")}
+                </select>
+              </div>
+              <div class="cms-field">
+                <label for="hlTitle">Título <span class="hl-ctr" id="hlTitleCtr"></span></label>
+                <input id="hlTitle" name="title" maxlength="70" value="${attrEsc(v.title)}" placeholder="Ex.: 15% de desconto no pão francês" required aria-required="true" />
+              </div>
+              <div class="cms-field">
+                <label for="hlText">Texto de apoio (opcional) <span class="hl-ctr" id="hlTextCtr"></span></label>
+                <input id="hlText" name="text" maxlength="120" value="${attrEsc(v.text)}" placeholder="Ex.: Apresente este cupom no balcão da padaria." />
+              </div>
+            </fieldset>
 
-      <div class="hl-actions">
-        <button type="button" id="hlPreviewBtn" class="btn btn-primary" onclick="window.TobiasApp.previewHighlights()" ${valid ? "" : "disabled"}>👁️ Pré-visualizar pop-up</button>
-        ${expired ? `<button type="button" class="btn btn-glass hl-clean" onclick="window.TobiasApp.clearExpiredHighlights()">Limpar ${expired} vencido(s)</button>` : ""}
+            <fieldset class="hl-fs" ${full ? "disabled" : ""}>
+              <legend>2. Validade</legend>
+              <div class="hl-two">
+                <div class="cms-field">
+                  <label for="hlUntil">Mostrar até (último dia)</label>
+                  <input id="hlUntil" name="until" type="date" ${editing ? "" : `min="${today}"`} value="${attrEsc(v.until)}" required aria-required="true" />
+                </div>
+                <div class="cms-field">
+                  <label for="hlValid">Texto de validade (opcional)</label>
+                  <input id="hlValid" name="valid" maxlength="40" value="${attrEsc(v.valid)}" placeholder="Ex.: Válido até domingo" />
+                </div>
+              </div>
+              <p class="hl-hint">No dia seguinte ao último dia, o informe sai do pop-up sozinho.</p>
+            </fieldset>
+
+            <fieldset class="hl-fs" ${full ? "disabled" : ""}>
+              <legend>3. Botão (opcional)</legend>
+              <div class="hl-two">
+                <div class="cms-field">
+                  <label for="hlTarget">Levar o leitor para</label>
+                  <select id="hlTarget" name="target">
+                    ${HL_TARGETS.map((t) => `<option value="${t.v}" ${v.target === t.v ? "selected" : ""}>${t.l}</option>`).join("")}
+                  </select>
+                </div>
+                <div class="cms-field">
+                  <label for="hlCta">Texto do botão</label>
+                  <input id="hlCta" name="cta" maxlength="24" value="${attrEsc(v.cta)}" placeholder="Ex.: Ver cupom" />
+                </div>
+              </div>
+            </fieldset>
+
+            <div id="hlFormMsg" class="hl-msg" role="alert"></div>
+            <div class="hl-form-actions">
+              ${editing ? `<button type="button" class="hl-btn-ghost" onclick="window.TobiasApp.cancelEditHighlight()">Cancelar edição</button>` : ""}
+              <button type="submit" class="hl-btn-main" ${full ? "disabled" : ""}>${editing ? "Salvar alterações" : "+ Adicionar ao pop-up"}</button>
+            </div>
+          </form>
+        </section>
+
+        <aside class="hl-card hl-prev-card" aria-labelledby="hlPrevTitle">
+          <h4 id="hlPrevTitle" class="hl-card-title">Prévia ao vivo</h4>
+          <p class="hl-hint" style="margin-top:0;">É assim que este informe aparece no celular do leitor. Muda enquanto você digita.</p>
+          <div class="hl-phone" aria-hidden="true">
+            <div class="hl-phone-scrim">
+              <div class="hl-phone-dlg">
+                <div class="hl-phone-head"><b>Destaques da semana</b><span class="hl-phone-x">×</span></div>
+                <div class="dst-viewport" id="hlPrevSlide"></div>
+                <div class="hl-phone-nav"><span class="hl-pdot on"></span><span class="hl-pdot"></span><span class="hl-pdot"></span></div>
+                <div class="hl-phone-foot"><u>Não mostrar de novo hoje</u><span class="hl-phone-close">Fechar</span></div>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
 
-      <div>
+      <section class="hl-card" aria-labelledby="hlListTitle" style="margin-top:20px;">
+        <div class="hl-list-head">
+          <h4 id="hlListTitle" class="hl-card-title" style="margin:0;">Informes cadastrados (${h.items.length})</h4>
+          ${expired ? `<button type="button" class="hl-btn-ghost" onclick="window.TobiasApp.clearExpiredHighlights()">Limpar ${expired} vencido(s)</button>` : ""}
+        </div>
         ${
           h.items.length === 0
-            ? `<p style="color:var(--text-secondary);">Nenhum informe cadastrado. Preencha o formulário acima e depois ative o pop-up.</p>`
-            : h.items
-                .map((it) => {
+            ? `<p class="hl-empty">Nenhum informe cadastrado ainda. Preencha o formulário acima e depois clique em Ativar.</p>`
+            : `<ul class="hl-list">${h.items
+                .map((it, i) => {
                   const ok = it.until >= today;
-                  return `
-          <div class="cms-list-item">
-            <div>
-              <strong>[${HL_TYPES[it.type] ? HL_TYPES[it.type].label : "Informe"}] ${escapeHtml(it.title)}</strong>
-              <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(it.text || "")} • Até ${formatBR(it.until)} • <b>${ok ? "Dentro da validade" : "Vencido (não aparece)"}</b></div>
-            </div>
-            <button class="btn-danger" onclick="window.TobiasApp.deleteHighlight('${it.id}')">Excluir</button>
-          </div>`;
+                  const t = HL_TYPES[it.type] || HL_TYPES.informe;
+                  return `<li class="hl-item ${editingHlId === it.id ? "editing" : ""}">
+                    <span class="hl-chip ${t.cls}">${t.label}</span>
+                    <div class="hl-item-body">
+                      <strong>${escapeHtml(it.title)}</strong>
+                      <span class="hl-item-meta">${escapeHtml(it.text || "Sem texto de apoio")} • Até ${formatBR(it.until)}</span>
+                    </div>
+                    <span class="hl-state ${ok ? "ok" : "old"}">${ok ? "Dentro da validade" : "Vencido"}</span>
+                    <div class="hl-item-actions">
+                      <button type="button" class="hl-mini" aria-label="Subir informe: ${attrEsc(it.title)}" onclick="window.TobiasApp.moveHighlight('${it.id}',-1)" data-hlmove="${it.id}:-1" ${i === 0 ? "disabled" : ""}>↑</button>
+                      <button type="button" class="hl-mini" aria-label="Descer informe: ${attrEsc(it.title)}" onclick="window.TobiasApp.moveHighlight('${it.id}',1)" data-hlmove="${it.id}:1" ${i === h.items.length - 1 ? "disabled" : ""}>↓</button>
+                      <button type="button" class="hl-btn-ghost" aria-label="Editar informe: ${attrEsc(it.title)}" onclick="window.TobiasApp.editHighlight('${it.id}')">Editar</button>
+                      <button type="button" class="hl-btn-del" aria-label="Excluir informe: ${attrEsc(it.title)}" onclick="window.TobiasApp.deleteHighlight('${it.id}')">Excluir</button>
+                    </div>
+                  </li>`;
                 })
-                .join("")
+                .join("")}</ul>`
         }
-      </div>
+      </section>
     `;
 
     const form = document.getElementById("cmsHlForm");
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const cur = getHighlights();
-      if (activeHighlightItems().length >= HL_MAX) return;
-      const fd = new FormData(e.target);
+    const prev = document.getElementById("hlPrevSlide");
+    const readItem = () => {
+      const fd = new FormData(form);
       const target = String(fd.get("target") || "");
-      cur.items.push({
-        id: "hl-" + Date.now(),
+      return {
         type: String(fd.get("type") || "informe"),
         title: String(fd.get("title") || "").trim(),
         text: String(fd.get("text") || "").trim(),
@@ -2941,9 +3014,38 @@
         until: String(fd.get("until") || ""),
         target,
         cta: target ? String(fd.get("cta") || "").trim() || "Ver mais" : ""
-      });
-      logAction("✨ Pop-up de Destaques", "Adicionou informe", `"${fd.get("title")}" até ${formatBR(fd.get("until"))}`);
+      };
+    };
+    const refresh = () => {
+      const it = readItem();
+      prev.innerHTML = hlSlideHtml(it, 0, 1, true);
+      document.getElementById("hlTitleCtr").textContent = `${it.title.length}/70`;
+      document.getElementById("hlTextCtr").textContent = `${it.text.length}/120`;
+    };
+    form.addEventListener("input", refresh);
+    form.addEventListener("change", refresh);
+    refresh();
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const msg = document.getElementById("hlFormMsg");
+      const it = readItem();
+      if (!it.title) { msg.textContent = "Escreva o título do informe."; document.getElementById("hlTitle").focus(); return; }
+      if (!it.until) { msg.textContent = "Escolha o último dia de exibição."; document.getElementById("hlUntil").focus(); return; }
+      const cur = getHighlights();
+      if (editingHlId) {
+        const old = cur.items.find((x) => x.id === editingHlId);
+        if (old) Object.assign(old, it);
+        logAction("✨ Pop-up de Destaques", "Editou informe", `"${it.title}" até ${formatBR(it.until)}`);
+        editingHlId = null;
+      } else {
+        if (activeHighlightItems().length >= HL_MAX) return;
+        cur.items.push(Object.assign({ id: "hl-" + Date.now() }, it));
+        logAction("✨ Pop-up de Destaques", "Adicionou informe", `"${it.title}" até ${formatBR(it.until)}`);
+      }
       saveState();
+      const t = document.getElementById("hlListTitle");
+      if (t) { t.setAttribute("tabindex", "-1"); t.focus(); }
     };
   }
 
@@ -2987,18 +3089,7 @@
         </div>
         <section aria-roledescription="carrossel" aria-label="Destaques da semana">
           <div class="dst-viewport"><div class="dst-track" id="dstTrack">
-            ${items
-              .map((it, k) => {
-                const t = HL_TYPES[it.type] || HL_TYPES.informe;
-                return `<div class="dst-slide ${t.cls}" role="group" aria-roledescription="slide" aria-label="${k + 1} de ${n}">
-                  <span class="dst-tag">${t.label}</span>
-                  <h3>${escapeHtml(it.title)}</h3>
-                  ${it.text ? `<p>${escapeHtml(it.text)}</p>` : ""}
-                  <span class="dst-valid">${escapeHtml(it.valid || "Até " + formatBR(it.until))}</span>
-                  ${it.target ? `<button type="button" class="dst-go" data-target="${attrEsc(it.target)}">${escapeHtml(it.cta || "Ver mais")}</button>` : ""}
-                </div>`;
-              })
-              .join("")}
+            ${items.map((it, k) => hlSlideHtml(it, k, n, false)).join("")}
           </div></div>
           ${
             n > 1
@@ -3804,6 +3895,32 @@
 
     previewHighlights() {
       openHighlights(true);
+    },
+
+    editHighlight(id) {
+      editingHlId = id;
+      renderAdminView();
+      const f = document.getElementById("hlFormTitle");
+      if (f) { f.setAttribute("tabindex", "-1"); f.scrollIntoView({ behavior: "smooth", block: "start" }); f.focus(); }
+    },
+
+    cancelEditHighlight() {
+      editingHlId = null;
+      renderAdminView();
+      const f = document.getElementById("hlFormTitle");
+      if (f) { f.setAttribute("tabindex", "-1"); f.focus(); }
+    },
+
+    moveHighlight(id, dir) {
+      const h = getHighlights();
+      const i = h.items.findIndex((x) => x.id === id);
+      const j = i + dir;
+      if (i < 0 || j < 0 || j >= h.items.length) return;
+      const tmp = h.items[i]; h.items[i] = h.items[j]; h.items[j] = tmp;
+      logAction("✨ Pop-up de Destaques", "Reordenou informes", `"${tmp.title}" movido`);
+      saveState();
+      const btn = document.querySelector(`[data-hlmove="${id}:${dir}"]`) || document.querySelector(`[data-hlmove="${id}:${-dir}"]`);
+      if (btn) btn.focus();
     },
 
     editBiz(id) {

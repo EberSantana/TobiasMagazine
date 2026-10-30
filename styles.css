@@ -160,15 +160,17 @@ textarea {
 
 .utility-ticker-content {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  gap: 6px 10px;
+  overflow: visible;
+  white-space: normal;
   max-width: 1280px;
   margin: 0 auto;
   width: 100%;
 }
+
+#urgentTickerText { flex: 1 1 220px; min-width: 0; line-height: 1.4; }
 
 .badge-live {
   background: var(--brand-primary);
@@ -1416,6 +1418,14 @@ textarea {
 .biz-meta a {
   color: inherit;
   text-decoration: none;
+}
+/* Alvos de toque: mínimo 28px com mouse e 44px no toque (WCAG 2.5.8 / 2.5.5) */
+.biz-meta > a {
+  align-items: center;
+  min-height: 28px;
+}
+@media (pointer: coarse) {
+  .biz-meta > a { min-height: 44px; }
 }
 .biz-meta a:hover {
   color: var(--brand-text);
@@ -2948,3 +2958,7 @@ body.admin-active .admin-wrapper {
 .pwa-instalar{background:var(--brand-primary,#03326f);color:#fff;border:0}
 .pwa-fechar{background:transparent;color:var(--brand-text,#03326f);border:1px solid currentColor}
 @media (min-width:960px){.pwa-aviso{bottom:20px}}
+
+/* Reflow em 320px e com espaçamento de texto ampliado (WCAG 1.4.10 / 1.4.12) */
+.cat-tile-name { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+.btn { max-width: 100%; white-space: normal; text-align: center; overflow-wrap: anywhere; }

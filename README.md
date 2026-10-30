@@ -317,6 +317,8 @@ Para reportar um problema de acessibilidade, fale com a equipe: **Prof. Eber San
 
 ---
 
+**Verificações já feitas (axe-core, WCAG 2.1/2.2 AA):** 0 violações em 7 telas (portal claro e escuro, folhear, gestão, cadastro, celular); sem rolagem horizontal em 320 px (zoom de 400%) nem com espaçamento de texto ampliado (WCAG 1.4.12); nenhum alvo de toque abaixo de 24 px; foco visível com contraste mínimo de 3:1; primeiro `Tab` leva ao link "Pular para o conteúdo". Ainda recomendado: teste com leitor de tela (NVDA), WAVE e ASES.
+
 ## 📄 Licença e Créditos
 
 Desenvolvido com foco em **Jornalismo Hiperlocal, Utilidade Pública e Fortalecimento do Comércio de Bairro**. Código aberto e pronto para publicação gratuita via **GitHub Pages**.

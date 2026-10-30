@@ -1400,7 +1400,7 @@
           <h3 style="font-family:var(--font-serif); font-size:1.05rem; font-weight:800; margin-bottom:6px;">${cl.title}</h3>
           <p style="font-size:0.84rem; color:var(--text-secondary);">${cl.details}</p>
         </div>
-        <div style="display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--border-color); padding-top:10px; margin-top:6px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; border-top:1px solid var(--border-color); padding-top:10px; margin-top:6px;">
           <span class="classified-price">${cl.price}</span>
           <a class="btn btn-outline" style="padding:6px 11px; font-size:0.76rem;"
              href="https://wa.me/${cl.phone}?text=${encodeURIComponent(`Olá! Vi seu anúncio "${cl.title}" nos Classificados da Tobias Magazine.`)}"

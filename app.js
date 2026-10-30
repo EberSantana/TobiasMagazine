@@ -2959,7 +2959,7 @@
           <div class="hl-phone" aria-hidden="true">
             <div class="hl-phone-scrim">
               <div class="hl-phone-dlg">
-                <div class="hl-phone-head"><b>Destaques da semana</b><span class="hl-phone-x">×</span></div>
+                <div class="hl-phone-head"><b>Destaques da semana</b><span class="hl-phone-x">${window.TMIcons ? TMIcons.svg("x") || "×" : "×"}</span></div>
                 <div class="dst-viewport" id="hlPrevSlide"></div>
                 <div class="hl-phone-nav"><span class="hl-pdot on"></span><span class="hl-pdot"></span><span class="hl-pdot"></span></div>
                 <div class="hl-phone-foot"><u>Não mostrar de novo hoje</u><span class="hl-phone-close">Fechar</span></div>
@@ -3085,7 +3085,7 @@
             <h2 id="dstTitle">Destaques da semana</h2>
             <p id="dstDesc">${n === 1 ? "1 novidade do bairro." : n + " novidades do bairro. Use as setas para ver todas."}</p>
           </div>
-          <button type="button" class="dst-close" id="dstX" aria-label="Fechar destaques">×</button>
+          <button type="button" class="dst-close" id="dstX" aria-label="Fechar destaques">${window.TMIcons ? TMIcons.svg("x") || "×" : "×"}</button>
         </div>
         <section aria-roledescription="carrossel" aria-label="Destaques da semana">
           <div class="dst-viewport"><div class="dst-track" id="dstTrack">
@@ -3094,9 +3094,9 @@
           ${
             n > 1
               ? `<div class="dst-nav">
-            <button type="button" class="dst-arrow" id="dstPrev" aria-label="Destaque anterior">‹</button>
+            <button type="button" class="dst-arrow" id="dstPrev" aria-label="Destaque anterior">${window.TMIcons ? TMIcons.svg("chevron-left") || "‹" : "‹"}</button>
             <div class="dst-dots" id="dstDots"></div>
-            <button type="button" class="dst-arrow" id="dstNext" aria-label="Próximo destaque">›</button>
+            <button type="button" class="dst-arrow" id="dstNext" aria-label="Próximo destaque">${window.TMIcons ? TMIcons.svg("chevron-right") || "›" : "›"}</button>
           </div>`
               : ""
           }

@@ -258,10 +258,10 @@ O arquivo [`index.html`](index.html) implementa o cabeçalho editorial, o palco 
 
 ---
 
-## 🎨 Identidade Visual 2.0 (Paleta Terracota + Ícones SVG)
+## 🎨 Identidade Visual 3.0 (cores e logo da marca)
 
-- **Paleta Terracota Editorial**: primária `#C2410C`, escura `#1C1917`, destaque `#FB923C`, suave `#FBE9DC`, fundo `#FAF7F2`. Todas as cores ficam em variáveis no topo do `styles.css` (tema claro e escuro).
-- **Tipografia**: Fraunces (serifa de revista) no logo, manchetes e títulos; Plus Jakarta Sans no texto, menus e botões; JetBrains Mono só nos códigos de cupom.
+- **Paleta da logo**: azul-marinho `#03326F` (texto, títulos, botões), amarelo `#FEB202` e laranja `#FF9C0D` (sempre como fundo, com texto azul), azul médio `#0B4C9E` e fundo `#F6F7F9`. No tema escuro o texto de destaque vira amarelo `#FFC933`. Todas as cores ficam em variáveis no topo do `styles.css`; os contrastes seguem WCAG 2.1 AA.
+- **Tipografia**: Fraunces (serifa de revista) nas manchetes e títulos (a logo é uma imagem); Plus Jakarta Sans no texto, menus e botões; JetBrains Mono só nos códigos de cupom.
 - **Ícones**: o arquivo `icons.js` converte automaticamente os emojis do conteúdo (data.js, CMS e templates) em ícones SVG de traço fino. O conteúdo continua salvo como emoji, então backups antigos seguem compatíveis. Para usar um ícone direto em código: `TMIcons.svg("map-pin")`.
 
 ## 📍 Foto do Estabelecimento & "Como chegar" (Google Maps)

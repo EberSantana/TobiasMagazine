@@ -3,26 +3,26 @@
    ========================================================================== */
 
 :root {
-  /* Paleta "Terracota Editorial" — clara */
-  --bg-page: #faf7f2;
+  /* Paleta da logo (azul-marinho + amarelo) — clara */
+  --bg-page: #f6f7f9;
   --bg-surface: #ffffff;
-  --bg-subtle: #f4eee6;
-  --bg-accent-soft: #fbe9dc;
-  --text-main: #1c1917;
-  --text-secondary: #4a443d;
-  --text-muted: #625b52;
-  --border-color: #e8e1d7;
-  --border-strong: #d9cfc1;
+  --bg-subtle: #eef1f6;
+  --bg-accent-soft: #fff3d1;
+  --text-main: #0b1b33;
+  --text-secondary: #3a4557;
+  --text-muted: #505b6d;
+  --border-color: #dfe3ea;
+  --border-strong: #c4ccd8;
 
   /* Brand Colors */
-  --brand-primary: #c2410c;     /* Terracota / Laranja da marca (fundos com texto branco) */
-  --brand-text: #a73a0b;        /* Laranja para TEXTO sobre fundos claros (contraste AA) */
-  --brand-primary-hover: #9a3412;
-  --brand-primary-soft: #fbe9dc;
-  --brand-ink: #1c1917;         /* Faixas escuras (ticker, mídia kit) */
-  --brand-secondary: #9a3412;   /* Terracota escuro (categorias, preços) */
-  --brand-gold: #fb923c;        /* Destaque / selos */
-  --brand-navy: #c2410c;        /* Mantido por compatibilidade (agenda) */
+  --brand-primary: #03326f;     /* Azul-marinho da logo (fundos com texto branco 12,4:1) */
+  --brand-text: #03326f;        /* Azul para TEXTO e foco sobre fundos claros */
+  --brand-primary-hover: #012551;
+  --brand-primary-soft: #fff3d1;
+  --brand-ink: #012551;         /* Faixas escuras (ticker, mídia kit) */
+  --brand-secondary: #0b4c9e;   /* Azul médio (categorias, preços): 8,3:1 sobre branco */
+  --brand-gold: #feb202;        /* Amarelo da logo: sempre FUNDO, com texto azul/escuro */
+  --brand-navy: #03326f;        /* Mantido por compatibilidade (agenda) */
   --whatsapp: #25D366;
   --whatsapp-dark: #128C7E;
 
@@ -51,22 +51,22 @@
 }
 
 [data-theme="dark"] {
-  --bg-page: #141210;
-  --bg-surface: #1e1b18;
-  --bg-subtle: #29241f;
-  --bg-accent-soft: #3a2216;
-  --text-main: #f5efe7;
-  --text-secondary: #cfc6bb;
-  --text-muted: #b8afa4;
-  --border-color: #35302a;
-  --border-strong: #4a423a;
+  --bg-page: #09111f;
+  --bg-surface: #101b2e;
+  --bg-subtle: #16253d;
+  --bg-accent-soft: #2b2410;
+  --text-main: #eef2f8;
+  --text-secondary: #c7d0de;
+  --text-muted: #a9b5c7;
+  --border-color: #24344f;
+  --border-strong: #34486a;
 
-  --brand-primary: #c2410c;     /* fundo de botões/selos (texto branco 5,2:1) */
-  --brand-text: #f58a52;        /* laranja para TEXTO sobre fundos escuros (AA) */
-  --brand-primary-hover: #a8380c;
-  --brand-primary-soft: #3a2216;
-  --brand-ink: #0c0a09;
-  --brand-secondary: #fb923c;
+  --brand-primary: #1f63c9;     /* fundo de botões/selos (texto branco 5,7:1) */
+  --brand-text: #ffc933;        /* amarelo para TEXTO e foco sobre fundos escuros (10:1) */
+  --brand-primary-hover: #1a56b0;
+  --brand-primary-soft: #2b2410;
+  --brand-ink: #050b16;
+  --brand-secondary: #ffc933;
   --urgent-bg: #311515;
   --urgent-text: #fca5a5;
   --urgent-border: #5c2323;
@@ -270,6 +270,22 @@ textarea {
 .brand-text {
   display: flex;
   flex-direction: column;
+}
+
+.brand-img {
+  height: 56px;
+  width: auto;
+  display: block;
+}
+[data-theme="dark"] .brand-img {
+  background: #fff;
+  border-radius: 12px;
+  padding: 3px 10px;
+}
+.brand-subtitle-desk { display: none; }
+@media (min-width: 1100px) {
+  .brand-subtitle-desk { display: block; max-width: 170px; line-height: 1.3; }
+  .brand-img { height: 62px; }
 }
 
 .brand-title {
@@ -615,6 +631,11 @@ textarea {
   pointer-events: none;
 }
 
+.story-card.story-light { color: #0b1b33; }
+.story-card.story-light::after { display: none; }
+.story-card.story-light .story-card-icon { background: rgba(3, 50, 111, 0.12); box-shadow: 0 0 0 2px rgba(3, 50, 111, 0.55); }
+.story-card.story-light .story-card-dur { background: rgba(3, 50, 111, 0.16); }
+
 .story-card.has-photo::after {
   background: linear-gradient(to top, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.15) 70%);
 }
@@ -679,11 +700,11 @@ textarea {
 }
 
 .story-card-kicker {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  opacity: 0.88;
+  opacity: 1;
 }
 
 .story-card-title {
@@ -2541,7 +2562,7 @@ body.admin-active .admin-wrapper {
 
 .edition-cover-card.active-edition {
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(194, 65, 12, 0.18);
+  box-shadow: 0 0 0 3px rgba(3, 50, 111, 0.18);
 }
 
 .edition-cover-thumb {
@@ -2758,7 +2779,7 @@ body.admin-active .admin-wrapper {
   background: var(--brand-primary);
   border-color: var(--brand-primary);
   color: #fff;
-  box-shadow: 0 10px 24px -12px rgba(194, 65, 12, 0.7);
+  box-shadow: 0 10px 24px -12px rgba(3, 50, 111, 0.7);
 }
 
 .cat-tile.active .cat-tile-icon {
@@ -2924,6 +2945,6 @@ body.admin-active .admin-wrapper {
 .pwa-aviso{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:900;max-width:480px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;padding:14px 16px;background:var(--bg-surface,#fff);color:var(--text-main,#1c1917);border:1px solid var(--border-color,#e8e1d7);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.22)}
 .pwa-aviso p{flex:1 1 100%;margin:0;font-size:.95rem;line-height:1.4}
 .pwa-aviso button{min-height:44px;padding:0 18px;border-radius:999px;font:inherit;font-weight:700;cursor:pointer}
-.pwa-instalar{background:var(--brand-primary,#c2410c);color:#fff;border:0}
-.pwa-fechar{background:transparent;color:var(--brand-text,#a73a0b);border:1px solid currentColor}
+.pwa-instalar{background:var(--brand-primary,#03326f);color:#fff;border:0}
+.pwa-fechar{background:transparent;color:var(--brand-text,#03326f);border:1px solid currentColor}
 @media (min-width:960px){.pwa-aviso{bottom:20px}}

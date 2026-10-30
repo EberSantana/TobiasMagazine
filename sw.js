@@ -2,9 +2,9 @@
    Estratégia: rede primeiro (conteúdo sempre atual) e, sem internet, usa a cópia guardada.
    Os dados do servidor (Google Apps Script) nunca são guardados aqui: o app já mantém
    sua própria cópia local. Mude VERSAO para forçar a limpeza do cache antigo. */
-const VERSAO = "tm-v2";
+const VERSAO = "tm-v3";
 const BASICOS = ["./", "index.html", "styles.css", "app.js", "data.js", "icons.js", "config.js", "a11y.js", "pwa.js", "privacidade.html",
-  "favicon.svg", "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "manifest.webmanifest"];
+  "favicon-32.png", "apple-touch-icon.png", "icon-192.png", "icon-512.png", "logo-horizontal.png", "manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSAO).then((c) => Promise.all(BASICOS.map((u) => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));

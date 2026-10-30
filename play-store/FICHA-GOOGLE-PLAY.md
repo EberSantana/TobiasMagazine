@@ -88,4 +88,4 @@ Primeira versão do aplicativo: guia do comércio, revista em formato de folhear
 
 1. **Troque o conteúdo de exemplo por conteúdo real.** O portal ainda tem itens fictícios (padaria "Seu Tobias", cupons, notícia da Ótica). O Google reprova apps com informação enganosa, e as capturas de tela devem mostrar o que o app realmente tem.
 2. **Troque as senhas padrão** da Gestão.
-3. **Padronize a identidade visual.** A logo é azul-marinho e amarelo, e o portal é terracota. Decida qual das duas vale, para a loja e o app combinarem.
+3. **Identidade visual:** o portal já usa as cores e a logo da marca, igual ao ícone e às imagens desta pasta.

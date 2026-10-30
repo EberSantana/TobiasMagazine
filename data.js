@@ -1802,7 +1802,7 @@ window.TOBIAS_DATA = {
     {
       id: "cl-1",
       category: "Imóveis • Aluguel Direto",
-      badgeColor: "#1f3a60",
+      badgeColor: "#03326f",
       title: "Aluga-se Casa Térrea 2 Quartos com Quintal e Garagem",
       price: "R$ 1.150 / mês",
       details: "Rua tranquila a 200m da padaria. Sem taxa de condomínio, aceita pet. Direto com o proprietário (Sr. Roberto).",
@@ -1820,7 +1820,7 @@ window.TOBIAS_DATA = {
     {
       id: "cl-3",
       category: "Doação Responsável Pet",
-      badgeColor: "#c2410c",
+      badgeColor: "#ff9c0d",
       title: "Doam-se 3 Filhotes de Porte Pequeno/Médio (Já Vermifugados)",
       price: "Adoção Gratuita ❤️",
       details: "Resgatados pela protetora Dona Sônia. Muito dóceis com crianças. Entregamos na sua casa no bairro.",
@@ -1829,7 +1829,7 @@ window.TOBIAS_DATA = {
     {
       id: "cl-4",
       category: "Compra & Venda",
-      badgeColor: "#d99b1f",
+      badgeColor: "#feb202",
       title: "Bicicleta Aro 29 Alumínio 21 Marchas Seminova + Capacete",
       price: "R$ 680 (Aceita Pix)",
       details: "Pouco uso, pneus novos, revisada na bicicletaria da avenida. Retirada no Condomínio Jardim das Flores.",
@@ -1847,7 +1847,7 @@ window.TOBIAS_DATA = {
     {
       id: "cl-6",
       category: "Imóveis • Venda",
-      badgeColor: "#1f3a60",
+      badgeColor: "#03326f",
       title: "Apartamento 3/4 Nascente no Condomínio Solar do Bairro",
       price: "R$ 235.000 (Financia)",
       details: "2º andar, varanda ventilada, área de lazer com piscina e portaria 24h. Documentação 100% pronta.",

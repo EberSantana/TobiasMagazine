@@ -29,7 +29,7 @@
       {
         id: "role-admin",
         name: "Administrador Geral",
-        badgeColor: "#c2410c",
+        badgeColor: "#ff9c0d",
         description: "Acesso total a todos os módulos, WhatsApp, logs de auditoria, financeiro e criação de perfis.",
         permissions: ALL_MODULES.map((m) => m.id),
         isSystem: true
@@ -45,7 +45,7 @@
       {
         id: "role-comercial",
         name: "Gestor Comercial & Guia",
-        badgeColor: "#d99b1f",
+        badgeColor: "#feb202",
         description: "Gerencia Guia do Comércio, Cupons, Classificados, Receita, Config. WhatsApp e Logs.",
         permissions: ["directory", "promotions", "classifieds", "monetization", "whatsapp_config", "audit_logs"],
         isSystem: false
@@ -53,7 +53,7 @@
       {
         id: "role-colab",
         name: "Colaborador Comunitário",
-        badgeColor: "#1f3a60",
+        badgeColor: "#03326f",
         description: "Apoia na atualização de Utilidade Pública, Agenda da Praça, Classificados e Logs.",
         permissions: ["utility", "events", "classifieds", "audit_logs"],
         isSystem: false
@@ -880,7 +880,7 @@
 
     // Cores de fundo dos cards (texto branco com contraste AA). Cada story pode
     // definir a sua em "color" ou uma foto em "image" no data.js.
-    const TONES = ["#9a3412", "#1f4e5f", "#3f6212", "#c2410c", "#6b3f2a", "#1c1917"];
+    const TONES = ["#03326f", "#0b4c9e", "#feb202", "#ff9c0d", "#012551", "#0b4c9e"];
 
     container.innerHTML = STATE.stories
       .map((st, i) => {
@@ -888,7 +888,7 @@
           ? `background-color:${TONES[i % TONES.length]}; background-image:url('${escapeAttr(st.image)}');`
           : `background-color:${escapeAttr(st.color || TONES[i % TONES.length])};`;
         return `
-      <button class="story-card ${st.image ? "has-photo" : ""}" style="${bg}"
+      <button class="story-card ${st.image ? "has-photo" : ""} ${!st.image && readableOn(st.color || TONES[i % TONES.length]) !== "#fff" ? "story-light" : ""}" style="${bg}"
               onclick="window.TobiasApp.openStory('${st.id}')"
               aria-label="${escapeAttr(st.label + ": " + (st.title || ""))}">
         <span class="story-card-art" aria-hidden="true">${st.icon}</span>
@@ -1394,7 +1394,7 @@
         (cl) => `
       <article class="classified-card">
         <div>
-          <span style="display:inline-block; background:${cl.badgeColor || "#1f3a60"}; color:${readableOn(cl.badgeColor || "#1f3a60")}; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-bottom:8px;">
+          <span style="display:inline-block; background:${cl.badgeColor || "#03326f"}; color:${readableOn(cl.badgeColor || "#03326f")}; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:4px; text-transform:uppercase; margin-bottom:8px;">
             ${cl.category}
           </span>
           <h3 style="font-family:var(--font-serif); font-size:1.05rem; font-weight:800; margin-bottom:6px;">${cl.title}</h3>
@@ -1742,7 +1742,7 @@
     }
 
     if (userBadge) {
-      userBadge.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> • <span style="background:${role.badgeColor || "#c2410c"}; color:${readableOn(role.badgeColor || "#c2410c")}; padding:2px 8px; border-radius:99px; font-size:0.72rem;">${role.name}</span>`;
+      userBadge.innerHTML = `👤 <strong>${CURRENT_USER.fullName}</strong> • <span style="background:${role.badgeColor || "#ff9c0d"}; color:${readableOn(role.badgeColor || "#ff9c0d")}; padding:2px 8px; border-radius:99px; font-size:0.72rem;">${role.name}</span>`;
     }
     if (permsLabel) {
       permsLabel.textContent = `${role.description} (${allowedModules.length} de ${ALL_MODULES.length} módulos liberados)`;
@@ -2044,10 +2044,10 @@
             <label>Cor do Selo do Perfil</label>
             <select name="badgeColor">
               <option value="#1b6b53">🟢 Verde Editorial</option>
-              <option value="#1f3a60">🔵 Azul Institucional</option>
-              <option value="#d99b1f">🟡 Dourado Comercial</option>
+              <option value="#03326f">🔵 Azul Institucional</option>
+              <option value="#feb202">🟡 Amarelo da Logo</option>
               <option value="#7c3aed">🟣 Roxo Criativo</option>
-              <option value="#c2410c">🟠 Terracota Principal</option>
+              <option value="#ff9c0d">🟠 Laranja da Logo</option>
             </select>
           </div>
           <div class="cms-field full">
@@ -2080,7 +2080,7 @@
             <div class="cms-list-item" style="align-items:flex-start; flex-direction:column;">
               <div style="display:flex; justify-content:space-between; width:100%; align-items:center; flex-wrap:wrap; gap:8px;">
                 <div>
-                  <span style="background:${r.badgeColor || "#1f3a60"}; color:${readableOn(r.badgeColor || "#1f3a60")}; font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:99px;">
+                  <span style="background:${r.badgeColor || "#03326f"}; color:${readableOn(r.badgeColor || "#03326f")}; font-size:0.72rem; font-weight:800; padding:3px 9px; border-radius:99px;">
                     ${r.name}
                   </span>
                   <span style="font-size:0.82rem; color:var(--text-secondary); margin-left:8px;">${r.description}</span>
@@ -2916,7 +2916,7 @@
       STATE.classifieds.unshift({
         id: "cl-" + Date.now(),
         category: fd.get("category"),
-        badgeColor: "#1f3a60",
+        badgeColor: "#03326f",
         title: fd.get("title"),
         price: fd.get("price"),
         details: fd.get("details"),
@@ -3120,7 +3120,7 @@
           STATE.classifieds.unshift({
             id: "cl-" + Date.now(),
             category: d.category,
-            badgeColor: "#c2410c",
+            badgeColor: "#ff9c0d",
             title: d.title,
             price: d.price,
             details: d.details,
@@ -3942,7 +3942,7 @@
           STATE.classifieds.unshift({
             id: "cl-" + Date.now(),
             category: fd.get("category"),
-            badgeColor: "#c2410c",
+            badgeColor: "#ff9c0d",
             title: fd.get("title"),
             price: fd.get("price"),
             details: fd.get("details"),
@@ -4008,14 +4008,14 @@
             LOJA PARCEIRA OFICIAL • ${STATE.edition.number}
           </div>
 
-          <h1 style="font-family:Georgia, serif; font-size:36px; font-weight:900; margin:16px 0 6px; letter-spacing:-0.02em; color:#d94e1f;">
+          <h1 style="font-family:Georgia, serif; font-size:36px; font-weight:900; margin:16px 0 6px; letter-spacing:-0.02em; color:#03326f;">
             TOBIAS MAGAZINE
           </h1>
           <div style="font-size:14px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#524d47; margin-bottom:20px;">
             O Jornal & Revista Digital do Nosso Bairro
           </div>
 
-          <div style="background:#faf8f5; border:2px dashed #d94e1f; border-radius:14px; padding:18px; margin-bottom:22px;">
+          <div style="background:#f6f7f9; border:2px dashed #03326f; border-radius:14px; padding:18px; margin-bottom:22px;">
             <h2 style="font-family:Georgia, serif; font-size:24px; font-weight:900; color:#181614; margin-bottom:8px;">
               ${w.qrPosterTitle}
             </h2>
@@ -4071,7 +4071,7 @@
           <div style="border-bottom:3px solid #181614; padding-bottom:10px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:flex-end;">
             <div>
               <h1 style="font-family:Georgia, serif; font-size:30px; font-weight:900; margin:0; color:#181614;">
-                TOBIAS <span style="color:#d94e1f; font-style:italic;">Magazine</span>
+                TOBIAS <span style="color:#03326f; font-style:italic;">Magazine</span>
               </h1>
               <div style="font-size:12px; font-weight:700; color:#524d47;">
                 JORNAL & GUIA COMUNITÁRIO DO BAIRRO • VERSÃO IMPRESSA PARA MURAL E CONDOMÍNIOS
@@ -4088,7 +4088,7 @@
           </div>
 
           <div class="print-sheet-block">
-            <div style="font-size:11px; font-weight:800; color:#d94e1f; text-transform:uppercase;">${c.kicker}</div>
+            <div style="font-size:11px; font-weight:800; color:#03326f; text-transform:uppercase;">${c.kicker}</div>
             <h2 style="font-family:Georgia, serif; font-size:20px; font-weight:900; margin:4px 0 6px;">${c.title}</h2>
             <p style="font-size:13px; color:#333; margin-bottom:8px;"><strong>${c.lead}</strong></p>
             <div style="font-size:12.5px; color:#222; line-height:1.5;">${c.fullText}</div>
@@ -4115,13 +4115,13 @@
 
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;" class="print-sheet-block">
             <div>
-              <h3 style="font-family:Georgia, serif; font-size:15px; margin-bottom:6px; color:#d94e1f;">
+              <h3 style="font-family:Georgia, serif; font-size:15px; margin-bottom:6px; color:#03326f;">
                 🏷️ Cupons de Desconto da Quinzena
               </h3>
               ${STATE.promotions
                 .map(
                   (p) => `
-                <div style="font-size:11.5px; margin-bottom:6px; padding:6px; border:1px dashed #d94e1f; border-radius:4px;">
+                <div style="font-size:11.5px; margin-bottom:6px; padding:6px; border:1px dashed #03326f; border-radius:4px;">
                   <strong>[${p.discount}] ${p.store}</strong> — Código: <strong>${p.code}</strong><br/>
                   <span>${p.title}</span>
                 </div>
@@ -4130,7 +4130,7 @@
                 .join("")}
             </div>
             <div>
-              <h3 style="font-family:Georgia, serif; font-size:15px; margin-bottom:6px; color:#1f3a60;">
+              <h3 style="font-family:Georgia, serif; font-size:15px; margin-bottom:6px; color:#03326f;">
                 📅 Agenda Cultural & Horários Úteis
               </h3>
               ${STATE.events

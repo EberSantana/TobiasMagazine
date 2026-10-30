@@ -35,5 +35,52 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "prefer_related_applications": false,
+  "screenshots": [
+    {
+      "src": "screenshots/capa.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Capa com os destaques da quinzena"
+    },
+    {
+      "src": "screenshots/guia.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Guia do Comércio do bairro"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Guia do Comércio",
+      "short_name": "Comércio",
+      "url": "./#guia-comercio",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Cupons e Promoções",
+      "short_name": "Cupons",
+      "url": "./#achados-promocoes",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

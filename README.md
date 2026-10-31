@@ -337,7 +337,7 @@ Os materiais são de uso educacional. Para reutilizar ou adaptar em outra instit
 
 ## Pop-up de Destaques da Semana
 
-Janela com carrossel (até 5 informes) que aparece quando o leitor abre o portal ou o app. É controlada na Gestão, módulo **14. Pop-up de Destaques**:
+Janela com carrossel (de 1 a 8 informes, padrão 5, configurável na Gestão) que aparece quando o leitor abre o portal ou o app. É controlada na Gestão, módulo **14. Pop-up de Destaques**:
 
 - Botão **Ativar / Desativar**: sem promoção na semana, é só desligar. Começa desativado.
 - Cada informe tem tipo, título, texto, validade, "mostrar até" e botão opcional. Dá para **editar**, reordenar e excluir, com **prévia ao vivo** do pop-up enquanto digita. Informe vencido sai sozinho.

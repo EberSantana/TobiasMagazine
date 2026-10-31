@@ -261,7 +261,7 @@
 
   // Pop-up "Destaques da semana": começa DESATIVADO e sem itens; a Gestão liga e preenche.
   function getDefaultHighlights() {
-    return { enabled: false, items: [] };
+    return { enabled: false, max: 5, items: [] };
   }
 
   function loadState() {
@@ -383,8 +383,10 @@
     if (!t) {
       t = document.createElement("div");
       t.id = "syncToast";
+      t.setAttribute("role", "status");
+      t.setAttribute("aria-live", "polite");
       t.style.cssText =
-        "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99999;padding:10px 18px;border-radius:999px;font:600 0.85rem 'Plus Jakarta Sans',sans-serif;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.25);transition:opacity .3s;";
+        "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:99999;padding:10px 18px;border-radius:999px;font:600 0.85rem 'Plus Jakarta Sans',sans-serif;color:#fff;box-shadow:0 6px 24px rgba(0,0,0,.25);transition:opacity .3s;pointer-events:none;";
       document.body.appendChild(t);
     }
     t.style.background = bad ? "#b91c1c" : "#15803d";
@@ -2790,7 +2792,8 @@
   // POP-UP "DESTAQUES DA SEMANA"
   // --------------------------------------------------------------------------
   const HL_SEEN_KEY = "tobias_destaques_visto";
-  const HL_MAX = 5;
+  const HL_MAX_DEFAULT = 5;
+  const HL_MAX_CAP = 8;
   const HL_TYPES = {
     cupom: { label: "Cupom", cls: "dst-c1" },
     promocao: { label: "Promoção", cls: "dst-c2" },
@@ -2821,9 +2824,13 @@
     const day = String(d.getDate()).padStart(2, "0");
     return `${d.getFullYear()}-${m}-${day}`;
   }
+  function hlMax() {
+    const n = parseInt(getHighlights().max, 10);
+    return n >= 1 && n <= HL_MAX_CAP ? n : HL_MAX_DEFAULT;
+  }
   function activeHighlightItems() {
     const today = todayLocalStr();
-    return getHighlights().items.filter((i) => i && i.title && i.until >= today).slice(0, HL_MAX);
+    return getHighlights().items.filter((i) => i && i.title && i.until >= today).slice(0, hlMax());
   }
   function attrEsc(v) {
     return escapeHtml(v).replace(/"/g, "&quot;");
@@ -2863,7 +2870,9 @@
     const expired = h.items.length - valid;
     const editing = editingHlId ? h.items.find((i) => i.id === editingHlId) : null;
     if (editingHlId && !editing) editingHlId = null;
-    const full = !editing && valid >= HL_MAX;
+    const max = hlMax();
+    const full = !editing && valid >= max;
+    const overflow = Math.max(0, valid - max);
     const v = editing || { type: "cupom", title: "", text: "", valid: "", until: "", target: "", cta: "" };
     let status;
     if (!h.enabled) status = "Desligado: os leitores não veem nada. Use quando não houver promoção ou aviso na semana.";
@@ -2891,10 +2900,21 @@
         </button>
       </div>
 
+      <div class="hl-limit">
+        <div class="cms-field">
+          <label for="hlMax">Máximo de informes no pop-up</label>
+          <select id="hlMax" onchange="window.TobiasApp.setHighlightsMax(this.value)">
+            ${Array.from({ length: HL_MAX_CAP }, (_, i) => i + 1).map((n) => `<option value="${n}" ${n === max ? "selected" : ""}>${n} ${n === 1 ? "informe" : "informes"}${n === HL_MAX_DEFAULT ? " (padrão)" : ""}</option>`).join("")}
+          </select>
+        </div>
+        <p id="hlMaxHint" class="hl-hint">Mais de 5 slides cansam o leitor. Use o limite maior só em semanas de campanha.</p>
+      </div>
+      ${overflow ? `<p class="hl-full" role="status">${overflow} informe(s) ficam fora do pop-up por causa do limite de ${max}. Reordene com ↑ ↓ ou aumente o limite.</p>` : ""}
+
       <div class="hl-grid">
         <section class="hl-card" aria-labelledby="hlFormTitle">
-          <h4 id="hlFormTitle" class="hl-card-title">${editing ? "Editando informe" : "Novo informe"} <span class="hl-count">${valid} de ${HL_MAX} em uso</span></h4>
-          ${full ? `<p class="hl-full">Limite de ${HL_MAX} informes dentro da validade. Exclua ou espere vencer algum para cadastrar outro.</p>` : ""}
+          <h4 id="hlFormTitle" class="hl-card-title">${editing ? "Editando informe" : "Novo informe"} <span class="hl-count">${valid} de ${max} em uso</span></h4>
+          ${full ? `<p class="hl-full">Limite de ${max} informes dentro da validade. Exclua ou espere vencer algum, ou aumente o limite acima.</p>` : ""}
           <form id="cmsHlForm" class="hl-form" novalidate>
             <fieldset class="hl-fs" ${full ? "disabled" : ""}>
               <legend>1. Conteúdo</legend>
@@ -2980,6 +3000,8 @@
             : `<ul class="hl-list">${h.items
                 .map((it, i) => {
                   const ok = it.until >= today;
+                  const pos = h.items.slice(0, i).filter((x) => x.until >= today).length;
+                  const out = ok && pos >= max;
                   const t = HL_TYPES[it.type] || HL_TYPES.informe;
                   return `<li class="hl-item ${editingHlId === it.id ? "editing" : ""}">
                     <span class="hl-chip ${t.cls}">${t.label}</span>
@@ -2987,7 +3009,7 @@
                       <strong>${escapeHtml(it.title)}</strong>
                       <span class="hl-item-meta">${escapeHtml(it.text || "Sem texto de apoio")} • Até ${formatBR(it.until)}</span>
                     </div>
-                    <span class="hl-state ${ok ? "ok" : "old"}">${ok ? "Dentro da validade" : "Vencido"}</span>
+                    <span class="hl-state ${out ? "old" : ok ? "ok" : "old"}">${out ? "Fora do pop-up (limite)" : ok ? "Dentro da validade" : "Vencido"}</span>
                     <div class="hl-item-actions">
                       <button type="button" class="hl-mini" aria-label="Subir informe: ${attrEsc(it.title)}" onclick="window.TobiasApp.moveHighlight('${it.id}',-1)" data-hlmove="${it.id}:-1" ${i === 0 ? "disabled" : ""}>↑</button>
                       <button type="button" class="hl-mini" aria-label="Descer informe: ${attrEsc(it.title)}" onclick="window.TobiasApp.moveHighlight('${it.id}',1)" data-hlmove="${it.id}:1" ${i === h.items.length - 1 ? "disabled" : ""}>↓</button>
@@ -3039,7 +3061,7 @@
         logAction("✨ Pop-up de Destaques", "Editou informe", `"${it.title}" até ${formatBR(it.until)}`);
         editingHlId = null;
       } else {
-        if (activeHighlightItems().length >= HL_MAX) return;
+        if (!editingHlId && cur.items.filter((x) => x.until >= todayLocalStr()).length >= hlMax()) return;
         cur.items.push(Object.assign({ id: "hl-" + Date.now() }, it));
         logAction("✨ Pop-up de Destaques", "Adicionou informe", `"${it.title}" até ${formatBR(it.until)}`);
       }
@@ -3891,6 +3913,16 @@
       h.items = h.items.filter((i) => i.until >= today);
       logAction("✨ Pop-up de Destaques", "Limpou informes vencidos", `${before - h.items.length} removido(s)`);
       saveState();
+    },
+
+    setHighlightsMax(v) {
+      const h = getHighlights();
+      const n = Math.max(1, Math.min(HL_MAX_CAP, parseInt(v, 10) || HL_MAX_DEFAULT));
+      h.max = n;
+      logAction("✨ Pop-up de Destaques", "Alterou o limite", `Máximo de ${n} informe(s) no pop-up`);
+      saveState();
+      const sel = document.getElementById("hlMax");
+      if (sel) sel.focus();
     },
 
     previewHighlights() {
